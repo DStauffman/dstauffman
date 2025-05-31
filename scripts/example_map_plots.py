@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     time_jd = space.numpy_to_jd(time)
     I2F = space.quat_eci_2_ecf(time_jd)
-    pos_ecf = space.quat_times_vector(I2F, pos_eci)  # type: ignore[arg-type]
+    pos_ecf = space.quat_times_vector(I2F, pos_eci)
 
     lat, lon, alt = space.ecf2geod(pos_ecf, output="split")
 

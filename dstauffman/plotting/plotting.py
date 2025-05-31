@@ -313,7 +313,7 @@ class Opts(Frozen):
         use_datetime = False
         for key, value in kwargs.items():
             if key == "use_datetime":
-                use_datetime = value
+                use_datetime = value  # type: ignore[assignment]
             elif hasattr(self, key):
                 setattr(self, key, value)
             else:

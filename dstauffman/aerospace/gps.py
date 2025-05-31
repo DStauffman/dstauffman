@@ -620,7 +620,7 @@ def gps_to_utc_datetime(
                 start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * w))
                 frac_sec   = t + off
                 whole_sec  = int(frac_sec)
-                micros     = round(1e6 * (frac_sec - whole_sec))  # type: ignore[call-overload]
+                micros     = round(1e6 * (frac_sec - whole_sec))
                 date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
         # fmt: on
     elif form == "numpy":

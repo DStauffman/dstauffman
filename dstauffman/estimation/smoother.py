@@ -216,11 +216,11 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: _N | None = None, LAMBDA_bar: _
         LAMBDA_bar = stm.T @ LAMBDA_hat @ stm
         # %Compute smoothed state update from forward filtered state and backward
         # propagated information vector
-        x_delta[:, i] = -P @ lambda_bar  # type: ignore[operator]
+        x_delta[:, i] = -P @ lambda_bar
         # Update information
         (lambda_hat, LAMBDA_hat) = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
 
-    return (x_delta, lambda_bar, LAMBDA_bar)  # type: ignore[return-value]
+    return (x_delta, lambda_bar, LAMBDA_bar)
 
 
 # %% Unit test

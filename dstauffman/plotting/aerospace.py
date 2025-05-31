@@ -1465,9 +1465,9 @@ def plot_innovations(  # noqa: C901
                     this_number = getattr(kf2, quad)
                     break
             if this_number is not None:
-                num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}
+                num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}  # type: ignore[operator]
                 figs += make_categories_plot(  # type: ignore[misc]
-                    full_description + " by " + quad_name,
+                    full_description + " by " + quad_name,  # type: ignore[operator]
                     kf2.time,
                     field_two,
                     this_number,
