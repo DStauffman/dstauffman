@@ -769,7 +769,7 @@ def make_generic_plot(  # noqa: C901
                         # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
                         # won't mess up the color scheme by skipping colors
                         this_cat_ix = np.argmax(cat == cat_keys)
-                        this_color = cm.get_color(this_cat_ix + ix_data * len(cat_keys))  # type: ignore[arg-type]
+                        this_color = cm.get_color(this_cat_ix + ix_data * len(cat_keys))
                         if use_datashader and np.count_nonzero(this_cats) > datashader_pts:
                             temp = np.flatnonzero(this_cats)
                             ix_spot = temp[np.round(np.linspace(0, temp.size - 1, datashader_pts)).astype(int)]

@@ -51,7 +51,8 @@ def run_docstrings(files: list[Path], verbose: bool = False) -> int:
 
     Examples
     --------
-    >>> from dstauffman import get_root_dir, list_python_files, run_docstrings
+    >>> from dstauffman import get_root_dir, run_docstrings
+    >>> from slog import list_python_files
     >>> files = list_python_files(get_root_dir())
     >>> return_code = run_docstrings(files)  # doctest: +SKIP
 

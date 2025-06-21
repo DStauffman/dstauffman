@@ -9,8 +9,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import contextlib
-import time
 from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
@@ -26,98 +24,6 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _N = NDArray[np.floating]
-
-
-# %% setup_dir
-@patch("dstauffman.utils_log.logger")
-class Test_setup_dir(unittest.TestCase):
-    r"""
-    Tests the setup_dir function with the following cases:
-        null case
-        create a new folder
-        create a new nested folder
-        delete the contents of an existing folder
-        fail to create a folder due to permissions
-        fail to delete the contents of an existing folder due to permissions
-        fail to create a folder due to a bad name
-        delete the contents of an existing folder recursively
-    """
-
-    def setUp(self) -> None:
-        self.folder = dcs.get_tests_dir() / "temp_dir"
-        self.subdir = dcs.get_tests_dir().joinpath("temp_dir", "temp_dir2")
-        self.filename = self.folder / "temp_file.txt"
-        self.subfile = self.subdir / "temp_file.txt"
-        self.text = "Hello, World!\n"
-
-    def test_empty_string(self, mock_logger: Mock) -> None:
-        dcs.setup_dir("")
-        mock_logger.log.assert_not_called()
-
-    def test_create_folder(self, mock_logger: Mock) -> None:
-        dcs.setup_dir(self.folder)
-        mock_logger.log.assert_called_once()
-        mock_logger.log.assert_called_with(LogLevel.L1, 'Created directory: "%s"', self.folder)
-
-    def test_nested_folder(self, mock_logger: Mock) -> None:
-        dcs.setup_dir(self.subdir)
-        mock_logger.log.assert_called_once()
-        mock_logger.log.assert_called_with(LogLevel.L1, 'Created directory: "%s"', self.subdir)
-
-    def test_clean_up_folder(self, mock_logger: Mock) -> None:
-        dcs.setup_dir(self.folder)
-        dcs.write_text_file(self.filename, self.text)
-        with patch("dstauffman.utils_log.logger") as mock_logger2:
-            dcs.setup_dir(self.folder)
-            mock_logger2.log.assert_called_once()
-            mock_logger2.log.assert_called_with(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
-        mock_logger.log.assert_called_once()
-
-    def test_clean_up_partial(self, mock_logger: Mock) -> None:
-        dcs.setup_dir(self.folder)
-        dcs.write_text_file(self.filename, "")
-        dcs.setup_dir(self.subdir)
-        dcs.write_text_file(self.subfile, "")
-        with patch("dstauffman.utils_log.logger") as mock_logger2:
-            dcs.setup_dir(self.folder, recursive=False)
-            mock_logger2.log.assert_called_once()
-            mock_logger2.log.assert_called_with(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
-        self.assertEqual(mock_logger.log.call_count, 2)
-
-    def test_fail_to_create_folder(self, mock_logger: Mock) -> None:
-        pass  # TODO: write this test
-
-    def test_fail_to_clean_folder(self, mock_logger: Mock) -> None:
-        pass  # TODO: write this test
-
-    def test_bad_name_file_ext(self, mock_logger: Mock) -> None:
-        pass  # TODO: write this test
-
-    def test_clean_up_recursively(self, mock_logger: Mock) -> None:
-        dcs.setup_dir(self.subdir)
-        dcs.write_text_file(self.subfile, self.text)
-        with patch("dstauffman.utils_log.logger") as mock_logger2:
-            dcs.setup_dir(self.folder, recursive=True)
-            self.assertEqual(mock_logger2.log.call_count, 2)
-            mock_logger2.log.assert_any_call(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
-            mock_logger2.log.assert_any_call(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
-
-    def tearDown(self) -> None:
-        def _clean(self: Test_setup_dir) -> None:
-            self.filename.unlink(missing_ok=True)
-            self.subfile.unlink(missing_ok=True)
-            with contextlib.suppress(FileNotFoundError):
-                self.subdir.rmdir()
-            with contextlib.suppress(FileNotFoundError):
-                self.folder.rmdir()
-
-        try:
-            _clean(self)
-        except {PermissionError, OSError}:  # type: ignore[misc]  # pragma: no cover
-            # pause to let Windows catch up and close files
-            time.sleep(1)
-            # retry
-            _clean(self)
 
 
 # %% fix_rollover

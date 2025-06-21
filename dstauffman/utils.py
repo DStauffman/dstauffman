@@ -22,11 +22,11 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Generator, Iterable, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, TypeVar, Unpack
+from typing import Any, Callable, Generator, Iterable, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 import warnings
 
-from slog import ReturnCodes
+from slog import ReturnCodes, write_text_file
 
 from dstauffman.constants import HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
 from dstauffman.units import MONTHS_PER_YEAR
@@ -50,7 +50,6 @@ if TYPE_CHECKING:
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
-    _StrOrListStr = TypeVar("_StrOrListStr", str, list[str])
     _SingleNum = int | float | np.datetime64
     _Lists = _N | list[_N] | tuple[_N, ...]
     _FN = float | np.floating | _N
@@ -642,108 +641,6 @@ def compare_two_dicts(  # noqa: C901
     return is_same
 
 
-# %% Functions - read_text_file
-def read_text_file(filename: str | Path, encoding: str = "utf-8") -> str:
-    r"""
-    Open and read a complete text file.
-
-    Parameters
-    ----------
-    filename : str or class pathlib.Path
-        fullpath name of the file to read
-    encoding : str, optional, default is "utf-8"
-        Encoding used to write file
-
-    Returns
-    -------
-    text : str
-        text of the desired file
-
-    Raises
-    ------
-    RuntimeError
-        If unable to open, or unable to read file.
-
-    See Also
-    --------
-    write_text_file, open
-
-    Examples
-    --------
-    >>> from dstauffman import read_text_file, write_text_file, get_tests_dir
-    >>> import os
-    >>> text = "Hello, World\n"
-    >>> filename = get_tests_dir() / "temp_file.txt"
-    >>> write_text_file(filename, text)
-    >>> text2 = read_text_file(get_tests_dir() / "temp_file.txt")
-    >>> print(text2)
-    Hello, World
-    <BLANKLINE>
-
-    >>> filename.unlink()
-
-    """
-    try:
-        # open file for reading
-        with open(filename, "rt", encoding=encoding) as file:
-            # read file
-            text = file.read()
-        # return results
-        return text
-    except:
-        # on any exceptions, print a message and re-raise the error
-        print(f'Unable to open file "{filename}" for reading.')
-        raise
-
-
-# %% Functions - write_text_file
-def write_text_file(filename: str | Path, text: str, encoding: str = "utf-8", *, append: bool = False) -> None:
-    r"""
-    Open and write the specified text to a file.
-
-    Parameters
-    ----------
-    filename : str
-        fullpath name of the file to read
-    text : str
-        text to be written to the file
-    encoding : str, optional, default is "utf-8"
-        Encoding used to write file
-    append : bool, optional, default is False
-        Whether to append to an existing file
-
-    Raises
-    ------
-    RuntimeError
-        If unable to open, or unable to write file.
-
-    See Also
-    --------
-    open_text_file, open
-
-    Examples
-    --------
-    >>> from dstauffman import write_text_file, get_tests_dir
-    >>> import os
-    >>> text = "Hello, World\n"
-    >>> filename = get_tests_dir() / "temp_file.txt"
-    >>> write_text_file(filename, text)
-
-    >>> filename.unlink()
-
-    """
-    mode = "at" if append else "wt"
-    try:
-        # open file for writing
-        with open(filename, mode, encoding=encoding) as file:
-            # write file
-            file.write(text)
-    except:
-        # on any exceptions, print a message and re-raise the error
-        print(f'Unable to open file "{filename}" for writing.')
-        raise
-
-
 # %% Functions - magnitude
 def magnitude(data: _Lists, axis: int = 0) -> np.floating | _N:
     r"""
@@ -1019,7 +916,7 @@ def np_digitize(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
 
     # do the calculations by calling the numpy command and shift results by one
     out = np.digitize(x, bins, right) - 1  # type: ignore[arg-type]
-    return out  # type: ignore[return-value]
+    return out
 
 
 # %% histcounts
@@ -1133,73 +1030,6 @@ def full_print(**kwargs: Unpack[_PrintOptsKwArgs]) -> Generator[None, None, None
     np.set_printoptions(**opt)
 
 
-# %% line_wrap
-@overload
-def line_wrap(text: str, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> str: ...
-@overload
-def line_wrap(text: list[str], wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> list[str]: ...
-def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> _StrOrListStr:
-    r"""
-    Wrap lines of text to the specified length, breaking at any whitespace characters.
-
-    Parameters
-    ----------
-    text : str or list of str
-        Text to be wrapped
-    wrap : int, optional
-        Number of characters to wrap text at, default is 80
-    min_wrap : int, optional
-        Minimum number of characters to wrap at, default is 0
-    indent : int, optional
-        Number of characters to indent the next line with, default is 4
-    line_cont : str, optional
-        Line continuation character, default is "\"
-
-    Returns
-    -------
-    out : str or list of str
-        wrapped form of text
-
-    Examples
-    --------
-    >>> from dstauffman import line_wrap
-    >>> text = ("lots of repeated words " * 4).strip()
-    >>> wrap = 40
-    >>> out = line_wrap(text, wrap)
-    >>> print(out)
-    lots of repeated words lots of \
-        repeated words lots of repeated \
-        words lots of repeated words
-
-    """
-    # check if single str
-    if isinstance(text, str):
-        text_list = [text]
-    else:
-        text_list = text
-    # create the pad for any newline
-    pad = " " * indent
-    # initialize output
-    out: list[str] = []
-    # loop through text lines
-    for this_line in text_list:
-        # determine if too long
-        while len(this_line) > wrap:
-            # find the last whitespace to break on, possibly with a minimum start
-            space_break = this_line.rfind(" ", min_wrap, wrap - 1)
-            if space_break == -1 or space_break <= indent:
-                raise ValueError(f'The specified min_wrap:wrap of "{min_wrap}:{wrap}" was too small.')
-            # add the shorter line
-            out.append(this_line[:space_break] + " " + line_cont)
-            # reduce and repeat
-            this_line = pad + this_line[space_break + 1 :]
-        # add the final shorter line
-        out.append(this_line)
-    if isinstance(text, str):
-        return "\n".join(out)
-    return out
-
-
 # %% combine_per_year
 @overload
 def combine_per_year(data: None, func: Callable[..., Any]) -> None: ...
@@ -1260,7 +1090,7 @@ def combine_per_year(data: _Array | None, func: Callable[..., Any] | None = None
             data2 = func(np.reshape(data[: num_year * MONTHS_PER_YEAR, :], (num_year, MONTHS_PER_YEAR, num_chan)), axis=1)
     # optionally squeeze the vector case back to 1D
     if is_1d:
-        data2 = data2.squeeze(axis=1)  # type: ignore[assignment]
+        data2 = data2.squeeze(axis=1)
     return data2
 
 
@@ -2011,9 +1841,9 @@ def drop_following_time(
     for drop_time in drop_starts:
         # drop the times within the specified window
         if reverse:
-            drop_mask |= (times > drop_time - dt_drop) & (times <= drop_time)
+            drop_mask |= (times > drop_time - dt_drop) & (times <= drop_time)  # type: ignore[call-overload, operator]
         else:
-            drop_mask |= (times >= drop_time) & (times < drop_time + dt_drop)
+            drop_mask |= (times >= drop_time) & (times < drop_time + dt_drop)  # type: ignore[call-overload, operator]
     return drop_mask
 
 

@@ -16,9 +16,9 @@ import subprocess
 import sys
 import unittest
 
-from slog import ReturnCodes
+from slog import list_python_files, ReturnCodes
 
-from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_coverage, run_docstrings, run_pytests, run_unittests
+from dstauffman import get_root_dir, get_tests_dir, run_coverage, run_docstrings, run_pytests, run_unittests
 
 
 # %% Functions - parse_tests

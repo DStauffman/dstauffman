@@ -256,7 +256,7 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     dot_prod = np.multiply(vec1.T, np.conj(vec2).T).T
     temp = np.sum(dot_prod, axis=0)
     if temp.ndim == 0:
-        if temp > 1.0 and temp < 1 + 3 * np.finfo(float).eps:
+        if temp > 1.0 and temp < 1 + 3 * np.finfo(float).eps:  # pylint: disable=chained-comparison
             temp = 1.0
     else:
         temp[(temp > 1.0) & (temp < 1 + 3 * np.finfo(float).eps)] = 1.0

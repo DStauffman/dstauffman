@@ -78,23 +78,6 @@ class Test_get_output_dir(unittest.TestCase):
         self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "results")))
 
 
-# %% list_python_files
-class Test_list_python_files(unittest.TestCase):
-    r"""
-    Tests the list_python_files function with the following cases:
-        TBD
-    """
-
-    def setUp(self) -> None:
-        self.folder = dcs.get_root_dir() / "commands"
-        self.expected = [self.folder / x for x in ["help.py", "runtests.py"]]
-
-    def test_nominal(self) -> None:
-        files = dcs.list_python_files(self.folder)
-        for file, exp in zip(sorted(files), self.expected):
-            self.assertEqual(file, exp)
-
-
 # %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

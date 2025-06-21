@@ -9,7 +9,9 @@ Notes
 # %% Imports
 import unittest
 
-from dstauffman import get_data_dir, HAVE_NUMPY, NP_DATETIME_FORM, NP_NAT, read_text_file
+from slog import read_text_file
+
+from dstauffman import get_data_dir, HAVE_NUMPY, NP_DATETIME_FORM, NP_NAT
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:

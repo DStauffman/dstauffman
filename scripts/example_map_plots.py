@@ -55,29 +55,29 @@ if __name__ == "__main__":
     lat, lon, alt = space.ecf2geod(pos_ecf, output="split")
 
     # no colors, with ground track
-    fig2 = plot.plot_map(None, lat, lon, land_colors="none")
+    fig2 = plot.plot_map(None, lat, lon, land_colors="none")  # type: ignore[arg-type]
 
     # ground track colored by altitude, multicolor countries
     map_data, map_labels, map_colors = plot.get_map_data()
     color_by = ("Altitude [km]", 1e-3 * alt)
-    fig3 = plot.plot_map(map_data, lat, lon, land_colors="multi", color_by=color_by, dir_skip=12, title="ISS orbit")
+    fig3 = plot.plot_map(map_data, lat, lon, land_colors="multi", color_by=color_by, dir_skip=12, title="ISS orbit")  # type: ignore[arg-type]
 
     # ground track with event
-    xy_events: tuple[tuple[float, float], ...] = ((lon[10], lat[10]),)
+    xy_events: tuple[tuple[float, float], ...] = ((lon[10], lat[10]),)  # type: ignore[index]
     xy_annotations: tuple[str, ...] = ("ISS",)
-    fig4 = plot.plot_map(None, lat, lon, land_colors="same", color_by=color_by, cbar_colormap="spring",
+    fig4 = plot.plot_map(None, lat, lon, land_colors="same", color_by=color_by, cbar_colormap="spring",  # type: ignore[arg-type]
         title="Event", xy_events=xy_events, xy_annotations=xy_annotations)  # fmt: skip  # noqa: E128
 
     # ground track with multiple events and custom colors
-    m = len(lat) // 2
-    xy_events = ((lon[0], lat[0]), (lon[m], lat[m]))
+    m = len(lat) // 2  # type: ignore[arg-type]
+    xy_events = ((lon[0], lat[0]), (lon[m], lat[m]))  # type: ignore[index]
     xy_annotations = ("Rev Start", "Rev Middle")
     xy_colors = ("xkcd:green", "xkcd:red")
     map_colors2: dict[str, str | int] = defaultdict(lambda: "xkcd:green")
     map_colors2["United States of America"] = "xkcd:white"
     map_colors2["Mexico"] = 0
     map_colors2["Canada"] = 5
-    fig5 = plot.plot_map(None, lat, lon, land_colors="multi", color_by=color_by, map_colors=map_colors2,
+    fig5 = plot.plot_map(None, lat, lon, land_colors="multi", color_by=color_by, map_colors=map_colors2,  # type: ignore[arg-type]
         title="Custom Colors", xy_events=xy_events, xy_annotations=xy_annotations, xy_colors=xy_colors,  # noqa: E128
         background="xkcd:cyan", border="xkcd:yellow", land_colormap="tab10")  # fmt: skip  # noqa: E128
 

@@ -368,7 +368,7 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
     # initialize output assuming no one is selected
     is_set = np.zeros(chances.shape, dtype=bool)
     # determine who got picked
-    is_set[eligible] = prng.rand(np.count_nonzero(eligible)) < chances[eligible]
+    is_set[eligible] = prng.rand(np.count_nonzero(eligible)) < chances[eligible]  # type: ignore[call-overload]
     # set those who were always going to be chosen
     is_set[chances >= 1] = True
     return is_set
@@ -409,7 +409,7 @@ def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.RandomState, inpla
     """
     out = mask if inplace else mask.copy()
 
-    keep = prng.rand(np.count_nonzero(mask)) < prob
+    keep = prng.rand(np.count_nonzero(mask)) < prob  # type: ignore[call-overload]
     out[mask] &= keep
     return out
 

@@ -10,10 +10,8 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import contextlib
 import doctest
 import logging
-from pathlib import Path
 from typing import Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
@@ -41,71 +39,6 @@ if TYPE_CHECKING:
 
 # %% Globals
 logger = logging.getLogger(__name__)
-
-
-# %% Functions - setup_dir
-def setup_dir(folder: str | Path, recursive: bool = False) -> None:
-    r"""
-    Clear the contents for existing folders or instantiates the directory if it doesn't exist.
-
-    Parameters
-    ----------
-    folder : str
-        Location of the folder to empty or instantiate.
-    recursive : bool, optional
-        Whether to recursively delete contents.
-
-    See Also
-    --------
-    os.makedirs, os.rmdir, os.remove, pathlib.Path.mkdir, pathlib.Path.rmdir
-
-    Raises
-    ------
-    RuntimeError
-        Problems creating or deleting a file or folder, likely due to permission issues.
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in Feb 2015.
-
-    Examples
-    --------
-    >>> from dstauffman import setup_dir
-    >>> setup_dir(r"C:\Temp\test_folder")  # doctest: +SKIP
-
-    """
-    # convert older string API to paths
-    if isinstance(folder, str):
-        # check for an empty string and exit
-        if not folder:
-            return
-        folder = Path(folder)
-    if folder.is_dir():
-        # Loop through the contained files/folders
-        for this_elem in folder.glob("*"):
-            # alias the fullpath of this file element
-            this_full_elem = this_elem.resolve()
-            # check if a folder or file
-            if this_full_elem.is_dir():
-                # if a folder, then delete recursively if recursive is True
-                if recursive:
-                    setup_dir(this_full_elem, recursive=recursive)
-                    with contextlib.suppress(FileNotFoundError):
-                        this_full_elem.rmdir()
-            elif this_full_elem.is_file():
-                # if a file, then remove it
-                this_full_elem.unlink(missing_ok=True)
-            else:
-                raise RuntimeError(f'Unexpected file type, neither file nor folder: "{this_full_elem}".')  # pragma: no cover
-        logger.log(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', folder)
-    else:
-        # create directory if it does not exist
-        try:
-            folder.mkdir(parents=True)
-            logger.log(LogLevel.L1, 'Created directory: "%s"', folder)
-        except:  # pragma: no cover  # pylint: disable=try-except-raise
-            # re-raise last exception, could try to handle differently in the future
-            raise  # pragma: no cover
 
 
 # %% Functions - fix_rollover
@@ -343,13 +276,13 @@ def remove_outliers(
     """
     x = np.asanyarray(x)
     y = x if inplace else x.copy()
-    num_nans = np.count_nonzero(np.isnan(x))
+    num_nans = int(np.count_nonzero(np.isnan(x)))
     if hardmax is None:
         num_hard = 0
     else:
         ix_hard = np.greater(np.abs(y), hardmax, where=~np.isnan(y), out=np.zeros(y.shape, dtype=bool))
         y[ix_hard] = np.nan
-        num_hard = np.count_nonzero(ix_hard)
+        num_hard = int(np.count_nonzero(ix_hard))
     for i in range(num_iters):
         rms_all = rms(y, axis=axis, ignore_nans=True, keepdims=True)
         if i == 0:
@@ -357,7 +290,7 @@ def remove_outliers(
         ix_bad = np.greater(np.abs(y), rms_all * sigma, out=np.zeros(y.shape, dtype=bool), where=~np.isnan(y))
         y[ix_bad] = np.nan
     rms_removed: _FN = rms(y, axis=axis, ignore_nans=True)
-    num_replaced = np.count_nonzero(np.isnan(y)) - num_nans
+    num_replaced = int(np.count_nonzero(np.isnan(y))) - num_nans
     num_removed = num_replaced - num_hard
     logger.log(LogLevel.L6, "Number of NaNs = %s", num_nans)
     logger.log(LogLevel.L6, "Number exceeding hardmax = %s", num_hard)

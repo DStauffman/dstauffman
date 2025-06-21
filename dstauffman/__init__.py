@@ -20,8 +20,7 @@ from .matlab    import load_matlab, orth, subspace, ecdf, mat_divide, find_first
 from .multipass import MultipassExceptionWrapper, parfor_wrapper
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \
                            process_command_line_options
-from .paths     import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, get_output_dir, \
-                           list_python_files
+from .paths     import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, get_output_dir
 from .repos     import run_docstrings, run_unittests, run_pytests, run_coverage
 from .stats     import convert_annual_to_monthly_probability, \
                            convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
@@ -36,12 +35,11 @@ from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, 
                            ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, DEGREE_SIGN, \
                            MICRO_SIGN, get_factors, get_time_factor, get_unit_conversion
 from .utils     import find_in_range, rms, rss, compare_two_classes, compare_two_dicts, \
-                           read_text_file, write_text_file, magnitude, unit, modd, is_np_int, \
-                           np_digitize, histcounts, full_print, line_wrap, combine_per_year, \
-                           execute, execute_wrapper, get_env_var, get_username, is_datetime, \
-                           intersect, issorted, zero_order_hold, linear_interp, \
+                           magnitude, unit, modd, is_np_int, np_digitize, histcounts, full_print, \
+                           combine_per_year, execute, execute_wrapper, get_env_var, get_username, \
+                           is_datetime, intersect, issorted, zero_order_hold, linear_interp, \
                            linear_lowpass_interp, drop_following_time
-from .utils_log import setup_dir, fix_rollover, remove_outliers
+from .utils_log import fix_rollover, remove_outliers
 from .version   import version_info
 # fmt: on
 

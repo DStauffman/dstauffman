@@ -679,7 +679,7 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
         if ti in time:
             ix = np.where(ti == time)[0]
             if not ix:  # pragma: no branch
-                qout = quat[:, ix]  # type: ignore[assignment]
+                qout = quat[:, ix]
                 return qout
 
     # Check time bounds
@@ -749,7 +749,7 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
 
     # Drop result for single time point to single dimension
     if num == 1:
-        qout = qout[:, 0]  # type: ignore[assignment]
+        qout = qout[:, 0]
 
     return qout
 

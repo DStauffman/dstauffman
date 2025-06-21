@@ -13,8 +13,6 @@ from functools import lru_cache
 from pathlib import Path
 import unittest
 
-from slog import is_dunder
-
 
 # %% Functions - get_root_dir
 @lru_cache
@@ -144,50 +142,6 @@ def get_output_dir() -> Path:
     """
     # this folder is the "results" subfolder
     return get_root_dir().parent / "results"
-
-
-# %% Functions - list_python_files
-def list_python_files(folder: Path, recursive: bool = False, include_all: bool = False) -> list[Path]:
-    r"""
-    Returns a list of all non dunder python files in the folder.
-
-    Parameters
-    ----------
-    folder : class pathlib.Path
-        Folder location
-    recursive : bool, optional
-        Whether to search recursively, default is False
-    include_all : bool, optional
-        Whether to include all files, even the __dunder__ ones
-
-    Returns
-    -------
-    files : list
-        All *.py files that don't start with __
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in March 2020.
-
-    Examples
-    --------
-    >>> from dstauffman import list_python_files, get_root_dir
-    >>> folder = get_root_dir()
-    >>> files = list_python_files(folder)
-
-    """
-    # find all the files that end in .py and are not dunder (__name__) files
-    if not folder.is_dir():
-        return []
-    if include_all:
-        files = list(folder.glob("*.py"))
-    else:
-        files = [file for file in folder.glob("*.py") if not is_dunder(file.stem)]
-    if recursive:
-        dirs = [x for x in folder.glob("*") if x.is_dir()]
-        for this_folder in sorted(dirs):
-            files.extend(list_python_files(this_folder, recursive=recursive, include_all=include_all))
-    return files
 
 
 # %% Unit test

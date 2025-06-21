@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dstauffman"
-version = "3.8.0"
+version = "3.9.0"
 description = "Generic python utilities for Aerospace applications"
 readme = "README.rst"
 dependencies = ["nubs", "slog"]
@@ -61,7 +61,7 @@ skips = ["B101"]
 
 [tool.black]
 line-length = 128
-target_version = ["py310", "py311", "py312"]
+target_version = ["py313"]
 
 [tool.coverage.run]
 branch = true
@@ -104,7 +104,7 @@ directory = "coverage_html_report"
 output = "coverage_html_report/coverage.xml"
 
 [tool.isort]
-py_version = 312
+py_version = 313
 profile = "black"
 line_length = 128
 combine_as_imports = true

@@ -11,8 +11,6 @@ from __future__ import annotations
 
 import copy
 import os
-import pathlib
-import platform
 from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import patch
@@ -695,110 +693,6 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertTrue(is_same)
 
 
-# %% read_text_file
-class Test_read_text_file(unittest.TestCase):
-    r"""
-    Tests the read_text_file function with the following cases:
-        read a file that exists
-        read a file that does not exist (raise error)
-    """
-
-    folder: pathlib.Path
-    contents: str
-    filepath: pathlib.Path
-    badpath: pathlib.Path
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.folder = dcs.get_tests_dir()
-        cls.contents = "Hello, World!\n"
-        cls.filepath = cls.folder / "temp_file.txt"
-        cls.badpath = pathlib.Path(r"AA:\non_existent_path\bad_file.txt")
-        with open(cls.filepath, "wt") as file:
-            file.write(cls.contents)
-
-    def test_reading(self) -> None:
-        text = dcs.read_text_file(self.filepath)
-        self.assertEqual(text, self.contents)
-
-    def test_string(self) -> None:
-        text = dcs.read_text_file(str(self.filepath))
-        self.assertEqual(text, self.contents)
-
-    def test_bad_reading(self) -> None:
-        with capture_output() as ctx:
-            with self.assertRaises((OSError, IOError, FileNotFoundError)):
-                dcs.read_text_file(self.badpath)
-        output = ctx.get_output()
-        ctx.close()
-        self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for reading.')
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.filepath.unlink(missing_ok=True)
-
-
-# %% write_text_file
-class Test_write_text_file(unittest.TestCase):
-    r"""
-    Tests the write_text_file function with the following cases:
-        write a file
-        write a bad file location (raise error)
-    """
-
-    folder: pathlib.Path
-    contents: str
-    filepath: pathlib.Path
-    badpath: pathlib.Path
-
-    @classmethod
-    def setUpClass(cls) -> None:
-        cls.folder = dcs.get_tests_dir()
-        cls.contents = "Hello, World!\n"
-        cls.filepath = cls.folder / "temp_file.txt"
-        cls.badpath = pathlib.Path(r"AA:\non_existent_path\bad_file.txt")
-
-    def test_writing(self) -> None:
-        dcs.write_text_file(self.filepath, self.contents)
-        with open(self.filepath, "rt") as file:
-            text = file.read()
-        self.assertEqual(text, self.contents)
-
-    def test_str(self) -> None:
-        dcs.write_text_file(str(self.filepath), self.contents)
-        with open(str(self.filepath), "rt") as file:
-            text = file.read()
-        self.assertEqual(text, self.contents)
-
-    def test_bad_writing(self) -> None:
-        if platform.system() != "Windows":
-            return  # pragma: noc windows
-        with capture_output() as ctx:
-            with self.assertRaises((OSError, IOError, FileNotFoundError)):
-                dcs.write_text_file(self.badpath, self.contents)
-        output = ctx.get_output()
-        ctx.close()
-        self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for writing.')
-
-    def test_append_file(self) -> None:
-        dcs.write_text_file(self.filepath, self.contents)
-        with open(self.filepath, "rt") as file:
-            text = file.read()
-        self.assertEqual(text, self.contents)
-        dcs.write_text_file(self.filepath, "New Contents\n")
-        with open(self.filepath, "rt") as file:
-            text = file.read()
-        self.assertEqual(text, "New Contents\n")
-        dcs.write_text_file(self.filepath, "Additional Notes.\n\n", append=True)
-        with open(self.filepath, "rt") as file:
-            text = file.read()
-        self.assertEqual(text, "New Contents\nAdditional Notes.\n\n")
-
-    @classmethod
-    def tearDownClass(cls) -> None:
-        cls.filepath.unlink(missing_ok=True)
-
-
 # %% magnitude
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_magnitude(unittest.TestCase):
@@ -1142,46 +1036,6 @@ class Test_full_print(unittest.TestCase):
     def tearDown(self) -> None:
         # restore the print_options
         np.set_printoptions(**self.orig)
-
-
-# %% line_wrap
-class Test_line_wrap(unittest.TestCase):
-    r"""
-    Tests the line_wrap function with the following cases:
-        TBD
-    """
-
-    def setUp(self) -> None:
-        self.text = ("lots of repeated words " * 4).strip()
-        self.wrap = 40
-        self.min_wrap = 0
-        self.indent = 4
-        self.out = [
-            "lots of repeated words lots of \\",
-            "    repeated words lots of repeated \\",
-            "    words lots of repeated words",
-        ]
-
-    def test_str(self) -> None:
-        out = dcs.line_wrap(self.text, self.wrap, self.min_wrap, self.indent)
-        self.assertEqual(out, "\n".join(self.out))
-
-    def test_list(self) -> None:
-        out = dcs.line_wrap([self.text], self.wrap, self.min_wrap, self.indent)
-        self.assertEqual(out, self.out)
-
-    def test_list2(self) -> None:
-        out = dcs.line_wrap(3 * ["aaaaaaaaaa bbbbbbbbbb cccccccccc"], wrap=25, min_wrap=15, indent=2)
-        self.assertEqual(out, 3 * ["aaaaaaaaaa bbbbbbbbbb \\", "  cccccccccc"])
-
-    def test_min_wrap(self) -> None:
-        out = dcs.line_wrap("aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb", 25, 18, 0)
-        self.assertEqual(out, "aaaaaaaaaaaaaaaaaaaa \\\nbbbbbbbbbb")
-
-    def test_min_wrap2(self) -> None:
-        with self.assertRaises(ValueError) as context:
-            dcs.line_wrap("aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb", 25, 22, 0)
-        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:25" was too small.')
 
 
 # %% combine_per_year

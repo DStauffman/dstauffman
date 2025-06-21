@@ -23,7 +23,7 @@ from typing import Any, Callable, ClassVar, Literal, overload, TYPE_CHECKING
 import unittest
 
 from nubs import ncjit
-from slog import LogLevel
+from slog import LogLevel, make_dir
 
 from dstauffman import (
     Frozen,
@@ -34,7 +34,6 @@ from dstauffman import (
     parfor_wrapper,
     pprint_dict,
     SaveAndLoad,
-    setup_dir,
 )
 
 if HAVE_NUMPY:
@@ -1449,7 +1448,7 @@ def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:  # noqa: C901
     if is_saving:
         if opti_opts.output_folder is not None and not opti_opts.output_folder.is_dir():
             # if the folder doesn't exist, then create it
-            setup_dir(opti_opts.output_folder)  # pragma: no cover
+            make_dir(opti_opts.output_folder)  # pragma: no cover
 
     # Do some stuff
     convergence = False

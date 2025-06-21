@@ -17,7 +17,7 @@ import unittest
 
 from slog import IntEnumPlus, is_dunder
 
-from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, HAVE_SCIPY, NP_DATETIME_FORM, NP_NAT, NP_ONE_DAY, RAD2DEG
+from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, NP_DATETIME_FORM, NP_NAT, NP_ONE_DAY, RAD2DEG
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH, PI, TAU
 from dstauffman.aerospace.orbit_conv import (
     anomaly_eccentric_2_mean,
@@ -25,6 +25,7 @@ from dstauffman.aerospace.orbit_conv import (
     anomaly_hyperbolic_2_mean,
     anomaly_hyperbolic_2_true,
     anomaly_mean_2_eccentric,
+    anomaly_mean_2_hyperbolic,
     anomaly_true_2_eccentric,
     anomaly_true_2_hyperbolic,
     anomaly_true_2_mean,
@@ -35,8 +36,6 @@ from dstauffman.aerospace.quat import quat_times_vector
 
 if HAVE_NUMPY:
     import numpy as np
-if HAVE_SCIPY:
-    from scipy.optimize import root
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -448,7 +447,7 @@ def rv_2_oe(r: _N, v: _N, mu: _FN = 1.0, unit: bool = False, precision: float = 
     n_mag = norm(n)
     ix = n_mag == 0.0
     if np.any(ix):
-        n[..., ix] = np.tile(np.array([[1.0], [0.0], [0.0]]), (1, np.count_nonzero(ix)))
+        n[..., ix] = np.tile(np.array([[1.0], [0.0], [0.0]]), (1, np.count_nonzero(ix)))  # type: ignore[arg-type]
         n_mag[ix] = 1.0
 
     e = 1.0 / mu * ((norm_v**2 - _zero_divide(mu, norm_r)) * r - dot(r, v) * v)
@@ -717,8 +716,7 @@ def advance_true_anomaly(a: _FN, e: _FN, vo: _FN, mu: _FN, time: _FN) -> _FN:
         # find new mean anomaly based on delta time
         M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
         # solve transcendental function for E
-        temp = root(lambda E: M - E + e * np.sin(E), PI)
-        E = temp.x[0]
+        E = anomaly_mean_2_eccentric(M, e)
         # calculate the new true anomaly from the eccentric anomaly
         nu = anomaly_eccentric_2_true(E, e)
     elif np.all(e == 1.0):  # parabolic
@@ -726,8 +724,7 @@ def advance_true_anomaly(a: _FN, e: _FN, vo: _FN, mu: _FN, time: _FN) -> _FN:
         Mi = anomaly_eccentric_2_mean(Ei, e)  # find new mean anomaly based on delta time
         M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
         # solve transcendental function for E
-        temp = root(lambda E: M - E + e * np.sin(E), PI)
-        E = temp.x[0]
+        E = anomaly_mean_2_eccentric(M, e)
         # calculate the new true anomaly from the eccentric anomaly
         nu = anomaly_eccentric_2_true(E, e)
     elif np.all(e > 1.0):  # hyperbolic
@@ -736,8 +733,7 @@ def advance_true_anomaly(a: _FN, e: _FN, vo: _FN, mu: _FN, time: _FN) -> _FN:
         # find new mean anomaly based on delta time
         M = np.mod(np.sqrt(mu / (-a) ** 3) * time + Mi, TAU)
         # solve transcendental function for F
-        temp = root(lambda F: M + F - e * np.sinh(F), PI)
-        F = temp.x[0]
+        F = anomaly_mean_2_hyperbolic(M, e)
         # calculate the new true anomaly from the eccentric anomaly
         nu = anomaly_hyperbolic_2_true(F, e)
     else:

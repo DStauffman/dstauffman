@@ -71,8 +71,7 @@ class Test_aerospace_anomaly_eccentric_2_mean(unittest.TestCase):
 
     def test_nominal(self) -> None:
         M = space.anomaly_eccentric_2_mean(self.E2, self.e2)
-        assert isinstance(M, float)
-        self.assertAlmostEqual(M, self.exp2, 14)
+        self.assertAlmostEqual(M, self.exp2, 14)  # type: ignore[misc]
 
     def test_vector1(self) -> None:
         E = np.array([self.E1, self.E2])
@@ -106,9 +105,8 @@ class Test_aerospace_anomaly_eccentric_2_mean(unittest.TestCase):
     def test_range_loop(self) -> None:
         with patch("dstauffman.aerospace.orbit_conv.logger") as mock_logger:
             M = space.anomaly_eccentric_2_mean(self.E2 + 2 * np.pi, self.e2)
-        assert isinstance(M, float)
         mock_logger.log.assert_called_with(LogLevel.L6, "The eccentric anomaly was outside the range of 0 to 2*pi")
-        self.assertAlmostEqual(M, self.exp2, 14)
+        self.assertAlmostEqual(M, self.exp2, 14)  # type: ignore[misc]
 
 
 # %% aerospace.anomaly_eccentric_2_true
@@ -130,8 +128,7 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
 
     def test_nominal(self) -> None:
         nu = space.anomaly_eccentric_2_true(self.E2, self.e2)
-        assert isinstance(nu, float)
-        self.assertAlmostEqual(nu, self.exp2, 14)
+        self.assertAlmostEqual(nu, self.exp2, 14)  # type: ignore[misc]
 
     def test_vector1(self) -> None:
         E = np.array([self.E1, self.E2])
@@ -165,9 +162,8 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
     def test_range_loop(self) -> None:
         with patch("dstauffman.aerospace.orbit_conv.logger") as mock_logger:
             nu = space.anomaly_eccentric_2_true(self.E2 + 2 * np.pi, self.e2)
-        assert isinstance(nu, float)
         mock_logger.log.assert_called_with(LogLevel.L6, "The eccentric anomaly was outside the range of 0 to 2*pi")
-        self.assertAlmostEqual(nu, self.exp2, 14)
+        self.assertAlmostEqual(nu, self.exp2, 14)  # type: ignore[misc]
 
 
 # %% aerospace.anomaly_hyperbolic_2_mean
@@ -209,7 +205,6 @@ class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
 
     def test_nominal(self) -> None:
         E = space.anomaly_mean_2_eccentric(self.M2, self.e2)
-        assert isinstance(E, float)
         self.assertEqual(E, self.exp2)
 
     def test_vector1(self) -> None:

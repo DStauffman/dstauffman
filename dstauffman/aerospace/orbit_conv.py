@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import Any, TYPE_CHECKING
+from typing import Any, overload, TYPE_CHECKING
 import unittest
 
 from slog import LogLevel
@@ -36,6 +36,7 @@ if TYPE_CHECKING:
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
     _Q = NDArray[np.floating]  # (4,)
+    _F = float | np.floating
     _FN = float | np.floating | _N
 
 # %% Globals
@@ -54,7 +55,15 @@ def _any(x: Any) -> bool:
 
 
 # %% Functions - anomaly_eccentric_2_mean
-def anomaly_eccentric_2_mean(E: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_eccentric_2_mean(E: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_eccentric_2_mean(E: _F, e: _N) -> _N: ...
+@overload
+def anomaly_eccentric_2_mean(E: _N, e: _F) -> _N: ...
+@overload
+def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N: ...
+def anomaly_eccentric_2_mean(E: _FN, e: _FN) -> np.floating | _N:
     r"""
     Finds the mean anomaly from the eccentric anomaly.
 
@@ -99,7 +108,15 @@ def anomaly_eccentric_2_mean(E: _FN, e: _FN) -> _FN:
 
 
 # %% Functions - anomaly_eccentric_2_true
-def anomaly_eccentric_2_true(E: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_eccentric_2_true(E: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_eccentric_2_true(E: _F, e: _N) -> _N: ...
+@overload
+def anomaly_eccentric_2_true(E: _N, e: _F) -> _N: ...
+@overload
+def anomaly_eccentric_2_true(E: _N, e: _N) -> _N: ...
+def anomaly_eccentric_2_true(E: _FN, e: _FN) -> np.floating | _N:
     r"""
     Finds the true anomaly from the eccentric anomaly.
 
@@ -153,7 +170,15 @@ def anomaly_eccentric_2_true(E: _FN, e: _FN) -> _FN:
 
 
 # %% Functions - anomaly_hyperbolic_2_mean
-def anomaly_hyperbolic_2_mean(F: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_hyperbolic_2_mean(F: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_hyperbolic_2_mean(F: _F, e: _N) -> _N: ...
+@overload
+def anomaly_hyperbolic_2_mean(F: _N, e: _F) -> _N: ...
+@overload
+def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N: ...
+def anomaly_hyperbolic_2_mean(F: _FN, e: _FN) -> np.floating | _N:
     r"""
     Finds the mean anomaly from the hyperbolic anomaly.
 
@@ -194,7 +219,15 @@ def anomaly_hyperbolic_2_mean(F: _FN, e: _FN) -> _FN:
 
 
 # %% Functions - anomaly_hyperbolic_2_true
-def anomaly_hyperbolic_2_true(F: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_hyperbolic_2_true(F: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_hyperbolic_2_true(F: _F, e: _N) -> _N: ...
+@overload
+def anomaly_hyperbolic_2_true(F: _N, e: _F) -> _N: ...
+@overload
+def anomaly_hyperbolic_2_true(F: _N, e: _N) -> _N: ...
+def anomaly_hyperbolic_2_true(F: _FN, e: _FN) -> np.floating | _N:
     r"""
     Finds the true anomaly from the hyperbolic anomaly.
 
@@ -244,7 +277,15 @@ def anomaly_hyperbolic_2_true(F: _FN, e: _FN) -> _FN:
 
 
 # %% Functions - anomaly_mean_2_eccentric
-def anomaly_mean_2_eccentric(M: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_mean_2_eccentric(M: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_mean_2_eccentric(M: _F, e: _N) -> _N: ...
+@overload
+def anomaly_mean_2_eccentric(M: _N, e: _F) -> _N: ...
+@overload
+def anomaly_mean_2_eccentric(M: _N, e: _N) -> _N: ...
+def anomaly_mean_2_eccentric(M: _FN, e: _FN) -> np.floating | _N:
     r"""
     Finds the eccentric anomaly from the mean anomaly.
 
@@ -290,23 +331,48 @@ def anomaly_mean_2_eccentric(M: _FN, e: _FN) -> _FN:
     # get vector lengths
     l1 = np.size(M)
     l2 = np.size(e)
-    # make vectors the same lengths
-    if ((l1 > 1) ^ (l2 > 1)) and l1 != l2:
-        M = np.repeat(M, l2)
-        e = np.repeat(e, l1)
     if l1 == 1 and l2 == 1:
-        temp = root(lambda E: _anomalies(E, M, e), PI)
-        E = temp.x[0]
+        E = root(lambda E: _anomalies(E, M, e), PI).x[0]
     else:
-        num = max(l1, l2)
-        E = np.zeros(num)
-        for i in range(num):
-            # calculate the eccentric anomaly
-            temp = root(lambda E: _anomalies(E, M[i], e[i]), PI)  # type: ignore[index]  # pylint: disable=cell-var-from-loop
-            E[i] = temp.x[0]
+        E = np.array([root(lambda E: _anomalies(E, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)])  # fmt: skip  # pylint: disable=cell-var-from-loop
     # mod with 2*pi in case a different solution was found
     E = np.mod(E, TAU)
     return E  # type: ignore[no-any-return]
+
+
+# %% Functions - anomaly_mean_2_hyperbolic
+@overload
+def anomaly_mean_2_hyperbolic(M: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_mean_2_hyperbolic(M: _F, e: _N) -> _N: ...
+@overload
+def anomaly_mean_2_hyperbolic(M: _N, e: _F) -> _N: ...
+@overload
+def anomaly_mean_2_hyperbolic(M: _N, e: _N) -> _N: ...
+def anomaly_mean_2_hyperbolic(M: _FN, e: _FN) -> np.floating | _N:
+    r"""Finds the hyperbolic anomaly from the true anomaly."""
+
+    def _anomalies(F: _FN, M: _FN, e: _FN) -> _FN:
+        return M + F - e * np.sinh(F)
+
+    # check if orbit is hyperbolic
+    if np.any(e < 1):
+        raise ValueError("The hyperbolic anomaly is not defined when e <= 1")
+
+    # check if M is outside the range of 0 to 2*pi
+    if np.any((M > TAU) | (M < 0)):
+        logger.log(LogLevel.L6, "The mean anomaly was outside the range of 0 to 2*pi")
+        M = np.mod(M, TAU)
+    # get vector lengths
+    l1 = np.size(M)
+    l2 = np.size(e)
+    if l1 == 1 and l2 == 1:
+        F = root(lambda F: _anomalies(F, M, e), PI).x[0]
+    else:
+        F = np.fromiter((root(lambda F: _anomalies(F, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)), float, count=max(l1, l2))  # fmt: skip  # pylint: disable=cell-var-from-loop
+    # mod with 2*pi in case a different solution was found
+    F = np.mod(F, TAU)
+    return F  # type: ignore[no-any-return]
 
 
 # %% Functions - anomaly_mean_2_true
@@ -535,7 +601,15 @@ def semimajor_2_period(a: _FN, mu: _FN) -> _FN:
 
 
 # %% Functions - sidereal_2_long
-def sidereal_2_long(theta: _FN, t: _FN) -> _FN:
+@overload
+def sidereal_2_long(theta: _F, t: _F) -> np.floating: ...
+@overload
+def sidereal_2_long(theta: _F, t: _N) -> _N: ...
+@overload
+def sidereal_2_long(theta: _N, t: _F) -> _N: ...
+@overload
+def sidereal_2_long(theta: _N, t: _N) -> _N: ...
+def sidereal_2_long(theta: _FN, t: _FN) -> np.floating | _N:
     r"""
     Converts a sidereal longitude to a geographic longitude.
 
@@ -585,7 +659,15 @@ def sidereal_2_long(theta: _FN, t: _FN) -> _FN:
 
 
 # %% Functions - raan_2_mltan
-def raan_2_mltan(raan: _FN, time_jd: _FN, return_descending: bool = False) -> _FN:
+@overload
+def raan_2_mltan(raan: _F, time_jd: _F, return_descending: bool = ...) -> np.floating: ...
+@overload
+def raan_2_mltan(raan: _F, time_jd: _N, return_descending: bool = ...) -> _N: ...
+@overload
+def raan_2_mltan(raan: _N, time_jd: _F, return_descending: bool = ...) -> _N: ...
+@overload
+def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = ...) -> _N: ...
+def raan_2_mltan(raan: _FN, time_jd: _FN, return_descending: bool = False) -> np.floating | _N:
     r"""
     Convents RAAN to Mean Location Time of the Ascending Node.
 
@@ -612,7 +694,11 @@ def raan_2_mltan(raan: _FN, time_jd: _FN, return_descending: bool = False) -> _F
 
 
 # %% Functions - jd_2_sidereal
-def jd_2_sidereal(time_jd: _FN) -> _FN:
+@overload
+def jd_2_sidereal(time_jd: _F) -> np.floating: ...
+@overload
+def jd_2_sidereal(time_jd: _N) -> _N: ...
+def jd_2_sidereal(time_jd: _FN) -> np.floating | _N:
     r"""
     Converts a julian day to the local siderial time of day.
 
@@ -642,7 +728,7 @@ def jd_2_sidereal(time_jd: _FN) -> _FN:
 
 
 # %% Functions - quat_eci_2_ecf_approx
-def quat_eci_2_ecf_approx(time_jd: _FN) -> _FN:
+def quat_eci_2_ecf_approx(time_jd: _FN) -> _Q:
     r"""
     Calculate the ECI to ECF transformation assuming the Z axis is perfectly aligned.
 

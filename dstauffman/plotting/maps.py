@@ -214,7 +214,7 @@ def plot_map(  # noqa: C901
                 low=float(np.nanmin(cbar_data)),
                 high=float(np.nanmax(cbar_data)),
             )
-            colors = tuple(cbar_cmap.get_color(x) for x in cbar_data)
+            colors = tuple(cbar_cmap.get_color(x) for x in cbar_data)  # type: ignore[unused-ignore]
         else:
             colors = "xkcd:orange"  # type: ignore[assignment]
         ax.scatter(latlon_scale * lon, latlon_scale * lat, s=10, c=colors, label="Trace", zorder=6)

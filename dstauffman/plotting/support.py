@@ -401,7 +401,7 @@ class ColorMap(Frozen):
         # must initialize the empty scalar mapplable to show the colorbar correctly
         self.smap.set_array([])
 
-    def get_color(self, value: float | int) -> tuple[float, float, float, float]:
+    def get_color(self, value: float | int | np.floating | np.int_) -> tuple[float, float, float, float]:
         r"""Get the color based on the scalar value."""
         return self.smap.to_rgba(value)  # type: ignore[arg-type, return-value]
 

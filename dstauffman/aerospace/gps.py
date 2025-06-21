@@ -364,8 +364,8 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
         prn[i] = xgi
 
         # shift generators
-        g1 = np.hstack((g1n, g1[:-1]))  # type: ignore[assignment]
-        g2 = np.hstack((g2n, g2[:-1]))  # type: ignore[assignment]
+        g1 = np.hstack((g1n, g1[:-1]))
+        g2 = np.hstack((g2n, g2[:-1]))
 
     return prn
 

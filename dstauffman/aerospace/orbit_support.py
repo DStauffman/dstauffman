@@ -384,7 +384,7 @@ def ijk_2_sez(ijk: _N, geo_loc: _N, time_jd: _N) -> _N:  # noqa: C901
     # then transform the SEZ vector from the IJK frame to the SEZ frame
     if n == 1 and length == 1:
         D = _find_D(L, theta)
-        sez = D * sez_in_ijk  # type: ignore[assignment]
+        sez = D * sez_in_ijk
     elif n == 1 and length != 1:
         for i in range(length):
             D = _find_D(L[i], theta[i])
