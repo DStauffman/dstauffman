@@ -4,6 +4,7 @@ dstauffman python commands.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2020.
+
 """
 
 # %% Imports

@@ -4,6 +4,7 @@ Contains statistics related routines that can be independently defined and used 
 Notes
 -----
 #.  Written by David C. Stauffer in December 2015.
+
 """
 
 # %% Imports
@@ -315,7 +316,7 @@ mp2ar = monthly_probability_to_annual_rate
 
 
 # %% Functions - rand_draw
-def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = True) -> _B:
+def rand_draw(chances: _N, prng: np.random.Generator, *, check_bounds: bool = True) -> _B:
     r"""
     Draws psuedo-random numbers from the given generator to compare to given factors.
 
@@ -325,7 +326,7 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
     ----------
     chances : ndarray of float
         Probability that someone should be chosen
-    prng : class numpy.random.RandomState
+    prng : class numpy.random.Generator
         Pseudo-random number generator
     check_bounds : bool
         Whether this function should check for known outcomes and not generate random numbers for
@@ -349,7 +350,7 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
     >>> from dstauffman import rand_draw
     >>> import numpy as np
     >>> chances = np.array([-0.5, 0., 0.5, 1., 5, np.inf])
-    >>> prng = np.random.RandomState()
+    >>> prng = np.random.default_rng()
     >>> is_set = rand_draw(chances, prng)
     >>> print(is_set[0])
     False
@@ -360,7 +361,7 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
     """
     # simple version
     if not check_bounds:
-        is_set = prng.rand(*chances.shape) < chances
+        is_set = prng.random(chances.shape) < chances
         return is_set
 
     # find those who need a random number draw
@@ -368,14 +369,14 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
     # initialize output assuming no one is selected
     is_set = np.zeros(chances.shape, dtype=bool)
     # determine who got picked
-    is_set[eligible] = prng.rand(np.count_nonzero(eligible)) < chances[eligible]  # type: ignore[call-overload]
+    is_set[eligible] = prng.random(np.count_nonzero(eligible)) < chances[eligible]
     # set those who were always going to be chosen
     is_set[chances >= 1] = True
     return is_set
 
 
 # %% Functions - apply_prob_to_mask
-def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.RandomState, inplace: bool = False) -> _B:
+def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.Generator, inplace: bool = False) -> _B:
     r"""
     Applies a one-time probability to a logical mask while minimizing the random number calls.
 
@@ -399,8 +400,8 @@ def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.RandomState, inpla
     --------
     >>> from dstauffman import apply_prob_to_mask
     >>> import numpy as np
-    >>> prng = np.random.RandomState()
-    >>> mask = prng.rand(50000) < 0.5
+    >>> prng = np.random.default_rng()
+    >>> mask = prng.random(50000) < 0.5
     >>> prob = 0.3
     >>> out = apply_prob_to_mask(mask, prob, prng)
     >>> assert np.count_nonzero(mask) < 30000, "Too many trues in mask."
@@ -409,7 +410,7 @@ def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.RandomState, inpla
     """
     out = mask if inplace else mask.copy()
 
-    keep = prng.rand(np.count_nonzero(mask)) < prob  # type: ignore[call-overload]
+    keep = prng.random(np.count_nonzero(mask)) < prob
     out[mask] &= keep
     return out
 

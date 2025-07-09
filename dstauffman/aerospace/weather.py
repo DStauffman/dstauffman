@@ -4,6 +4,7 @@ Contains utilities to load Space Weather data.
 Notes
 -----
 #.  Written by David C. Stauffer in October 2023.
+
 """
 
 # %% Imports

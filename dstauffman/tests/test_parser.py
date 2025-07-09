@@ -4,6 +4,7 @@ Test file for the `parser` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2020.
+
 """
 
 # %% Imports
@@ -19,9 +20,7 @@ import dstauffman as dcs
 
 # %% _VALID_COMMANDS
 class Test__VALID_COMMANDS(unittest.TestCase):
-    r"""
-    Tests the _VALID_COMMANDS enumerator for expected values.
-    """
+    r"""Tests the _VALID_COMMANDS enumerator for expected values."""
 
     def test_nominal(self) -> None:
         self.assertIn("coverage", dcs.parser._VALID_COMMANDS)

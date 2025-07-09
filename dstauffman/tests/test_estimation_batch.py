@@ -5,6 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
 #.  Renamed from bpe.py to estimation.py by David C. Stauffer in May 2020.
+
 """
 
 # %% Imports
@@ -902,7 +903,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.delta_param = np.array([1.0, 2.0, 3.0])
         self.gradient    = np.array([4.0, 5.0, 6.0])
         self.hessian     = np.array([[5.0, 2.0, 1.0], [1.0, 2.0, 5.0], [3.0, 3.0, 3.0]])
-        self.jacobian    = np.random.rand(201, 3)
+        self.jacobian    = np.random.default_rng().random((201, 3))
         self.normalized  = False
         # fmt: on
 

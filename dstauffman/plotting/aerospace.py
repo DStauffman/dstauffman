@@ -4,6 +4,7 @@ Plots related to Kalman Filter analysis.
 Notes
 -----
 #.  Written by David C. Stauffer in April 2019.
+
 """  # pylint: disable=too-many-lines
 
 # %% Imports
@@ -343,11 +344,12 @@ def make_quaternion_plot(
     >>> from dstauffman.aerospace import quat_norm
     >>> import numpy as np
     >>> from datetime import datetime
+    >>> prng = np.random.default_rng()
     >>> description      = "example"
     >>> time_one         = np.arange(11)
     >>> time_two         = np.arange(2, 13)
-    >>> quat_one         = quat_norm(np.random.rand(4, 11))
-    >>> quat_two         = quat_norm(quat_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] + 1e-5 * np.random.rand(4, 11))
+    >>> quat_one         = quat_norm(prng.random((4, 11)))
+    >>> quat_two         = quat_norm(quat_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] + 1e-5 * prng.random((4, 11)))
     >>> name_one         = "test1"
     >>> name_two         = "test2"
     >>> time_units       = "sec"
@@ -920,11 +922,13 @@ def plot_position(  # noqa: C901
     >>> from dstauffman.aerospace import Kf
     >>> import numpy as np
 
+    >>> prng = np.random.default_rng()
+
     >>> kf1      = Kf()
     >>> kf1.name = "KF1"
     >>> kf1.time = np.arange(11)
-    >>> kf1.pos  = 1e6 * np.random.rand(3, 11)
-    >>> kf1.vel  = 1e3 * np.random.rand(3, 11)
+    >>> kf1.pos  = 1e6 * prng.random((3, 11))
+    >>> kf1.vel  = 1e3 * prng.random((3, 11))
 
     >>> kf2      = Kf()
     >>> kf2.name = "KF2"
@@ -1200,18 +1204,19 @@ def plot_innovations(  # noqa: C901
 
     >>> num_axes   = 2
     >>> num_innovs = 11
+    >>> prng = np.random.default_rng()
 
     >>> kf1       = KfInnov()
     >>> kf1.units = "m"
     >>> kf1.time  = np.arange(num_innovs, dtype=float)
-    >>> kf1.innov = 1e-6 * np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
-    >>> kf1.norm  = np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
+    >>> kf1.innov = 1e-6 * np.ones((num_axes, num_innovs)) * np.sign(prng.uniform(-0.5, 0.5, (num_axes, num_innovs)))
+    >>> kf1.norm  = np.ones((num_axes, num_innovs)) * np.sign(prng.uniform(-0.5, 0.5, (num_axes, num_innovs)))
 
     >>> ix        = np.hstack((np.arange(7), np.arange(8, num_innovs)))
     >>> kf2       = KfInnov()
     >>> kf2.time  = kf1.time[ix]
-    >>> kf2.innov = kf1.innov[:, ix] + 1e-8 * np.random.rand(num_axes, ix.size)
-    >>> kf2.norm  = kf1.norm[:, ix] + 0.1 * np.random.rand(num_axes, ix.size)
+    >>> kf2.innov = kf1.innov[:, ix] + 1e-8 * prng.random((num_axes, ix.size))
+    >>> kf2.norm  = kf1.norm[:, ix] + 0.1 * prng.random((num_axes, ix.size))
 
     >>> opts = Opts()
     >>> opts.case_name = "test_plot"
@@ -1545,13 +1550,14 @@ def plot_innov_fplocs(
 
     >>> num_axes   = 2
     >>> num_innovs = 11
+    >>> prng = np.random.default_rng()
 
     >>> kf1       = KfInnov()
     >>> kf1.units = "m"
     >>> kf1.time  = np.arange(num_innovs, dtype=float)
-    >>> kf1.innov = np.full((num_axes, num_innovs), 5e-3) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
+    >>> kf1.innov = np.full((num_axes, num_innovs), 5e-3) * np.sign(prng.uniform(-0.5, 0.5, (num_axes, num_innovs)))
     >>> kf1.innov[:, :5] *= 0.1
-    >>> kf1.fploc = np.full((num_axes, num_innovs), 0.05) + 0.2 * np.random.rand(num_axes, num_innovs) - 0.1
+    >>> kf1.fploc = np.full((num_axes, num_innovs), 0.05) + 0.2 * prng.random((num_axes, num_innovs)) - 0.1
 
     >>> opts = Opts()
     >>> opts.case_name = "test_plot"
@@ -1744,6 +1750,7 @@ def plot_covariance(  # noqa: C901
 
     >>> num_points = 11
     >>> num_states = 6
+    >>> prng = np.random.default_rng()
 
     >>> kf1        = Kf()
     >>> kf1.name   = "KF1"
@@ -1753,7 +1760,7 @@ def plot_covariance(  # noqa: C901
 
     >>> kf2        = Kf(name="KF2")
     >>> kf2.time   = kf1.time
-    >>> kf2.covar  = kf1.covar + 1e-9 * np.random.rand(*kf1.covar.shape)
+    >>> kf2.covar  = kf1.covar + 1e-9 * prng.random(kf1.covar.shape)
     >>> kf2.active = kf1.active
 
     >>> opts = Opts()
@@ -1920,9 +1927,8 @@ def plot_covariance(  # noqa: C901
     # Setup plots
     setup_plots(figs, opts)
     if not figs:
-        logger.log(  # pylint: disable=logging-fstring-interpolation
-            LogLevel.L5, f"No {'/'.join(fields.values())} data was provided, so no plots were generated."
-        )
+        msg = f"No {'/'.join(fields.values())} data was provided, so no plots were generated."
+        logger.log(LogLevel.L5, msg)
     if return_err:
         return (figs, err)
     return figs
@@ -2056,8 +2062,8 @@ def plot_tci(
     if solar_cycles is not None:
         plot_phases(ax, solar_cycles, labels=solar_labels)
     for name, color, value in zip(quintile_names, quintile_colors, quintiles):
-        ax.axhline(value, label=name, color=color)  # type: ignore[arg-type]
-        ax.annotate(name, (time[0], value), color=color, fontsize=16, verticalalignment="top", zorder=10)  # type: ignore[arg-type]
+        ax.axhline(value, label=name, color=color)
+        ax.annotate(name, (time[0], value), color=color, fontsize=16, verticalalignment="top", zorder=10)
     setup_plots(fig, opts=opts)
     return fig
 
@@ -2133,7 +2139,7 @@ def plot_kp(
                 Rectangle(
                     (t, 0),
                     delta_time,
-                    d,  # type: ignore[arg-type]
+                    d,
                     facecolor=kp_colormap.colors[b],  # type: ignore[index]
                     edgecolor="none",
                 )

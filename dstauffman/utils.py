@@ -6,6 +6,7 @@ Notes
 #.  By design, this module does not reference any other piece of the dstauffman code base except
         constants to avoid circular references.
 #.  Written by David C. Stauffer in March 2015.
+
 """  # pylint: disable=too-many-lines
 
 # %% Imports
@@ -37,7 +38,7 @@ if HAVE_NUMPY:
 else:
     from math import inf, isnan, nan  # type: ignore[assignment]
 
-    logical_not = lambda x: not x  # type: ignore[assignment]  # pylint: disable=unnecessary-lambda-assignment
+    logical_not = lambda x: not x  # type: ignore[assignment]  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
 
 if HAVE_SCIPY:
     from scipy.interpolate import interp1d
@@ -116,7 +117,7 @@ def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: C901
     def _is_nan(x: Any) -> bool:
         try:
             out = isnan(x)
-        except:
+        except Exception:  # pylint: disable=broad-exception-caught
             return False
         return out  # type: ignore[no-any-return]
 
@@ -130,7 +131,7 @@ def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: C901
                     _ = np.isfinite(a) & np.isfinite(b)
                 except TypeError:
                     do_simple = True
-                except:
+                except Exception:  # pylint: disable=broad-exception-caught
                     pass
             if do_simple:
                 np.testing.assert_array_equal(a, b)
@@ -1841,9 +1842,9 @@ def drop_following_time(
     for drop_time in drop_starts:
         # drop the times within the specified window
         if reverse:
-            drop_mask |= (times > drop_time - dt_drop) & (times <= drop_time)  # type: ignore[call-overload, operator]
+            drop_mask |= (times > drop_time - dt_drop) & (times <= drop_time)
         else:
-            drop_mask |= (times >= drop_time) & (times < drop_time + dt_drop)  # type: ignore[call-overload, operator]
+            drop_mask |= (times >= drop_time) & (times < drop_time + dt_drop)
     return drop_mask
 
 

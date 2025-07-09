@@ -1,11 +1,13 @@
 r"""
 Example script for generating plots, but having a flag to disable them from being interactive.
+
 This allows you to use one script for development, but also run it on a server that might not have
 a display, and then just save the results directly to disk.
 
 Notes
 -----
 #.  Written by David C. Stauffer in July 2020.
+
 """
 
 # %% Imports

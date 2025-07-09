@@ -4,6 +4,7 @@ Test file for the `aerospace` module of the "dstauffman.plotting" library.
 Notes
 -----
 #.  Written by David C. Stauffer in December 2018.
+
 """
 
 # %% Imports
@@ -102,12 +103,13 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        prng = np.random.default_rng()
         # fmt: off
         self.description      = "example"
         self.time_one         = np.arange(11)
         self.time_two         = np.arange(2, 13)
-        self.quat_one         = quat_norm(np.random.rand(4, 11))
-        self.quat_two         = quat_norm(np.random.rand(4, 11))
+        self.quat_one         = quat_norm(prng.random((4, 11)))
+        self.quat_two         = quat_norm(prng.random((4, 11)))
         self.name_one         = "test1"
         self.name_two         = "test2"
         self.time_units       = "sec"

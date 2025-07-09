@@ -4,6 +4,7 @@ Example script for running the Batch Parameter Estimation (BPE) portion of the D
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
+
 """  # pylint: disable=redefined-outer-name
 
 # %% Imports
@@ -189,7 +190,7 @@ if __name__ == "__main__":
         # fmt: on
 
         # make model plots
-        extra_plotter = lambda fig, ax: ax[0].plot(  # pylint: disable=unnecessary-lambda-assignment
+        extra_plotter = lambda fig, ax: ax[0].plot(  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
             truth_time, truth_data, ".-", color="xkcd:black", zorder=8, label="Observed"
         )
         f1 = plot.plot_time_history("Output vs. Time", time, results, opts=opts, extra_plotter=extra_plotter)

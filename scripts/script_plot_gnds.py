@@ -22,6 +22,8 @@ plots["los"] = False
 plots["sts"] = False
 
 # %% Initializations
+prng = np.random.default_rng()
+
 q1 = space.quat_norm(np.array([0.1, -0.2, 0.3, 0.4]))
 dq = space.quat_from_euler(1e-6 * np.array([-300, 100, 200]), [3, 1, 2])
 q2 = space.quat_mult(dq, q1)
@@ -44,17 +46,17 @@ kf1        = space.Kf()
 kf1.name   = "KF1"
 kf1.time   = np.linspace(0, 10, num_points)
 kf1.att    = np.tile(q1[:, np.newaxis], (1, kf1.time.size))
-kf1.pos    = 1e6 * np.random.rand(3, kf1.time.size)
-kf1.vel    = 1e3 * np.random.rand(3, kf1.time.size)
+kf1.pos    = 1e6 * prng.random((3, kf1.time.size))
+kf1.vel    = 1e3 * prng.random((3, kf1.time.size))
 kf1.covar  = 1e-6 * np.tile(np.arange(1, num_states + 1, dtype=float)[:, np.newaxis], (1, num_points))
 kf1.active = np.array([1, 2, 3, 4, 8, 12])
 
 kf1.innov.name  = "Sensor 1"
 kf1.innov.units = "m"
 kf1.innov.time  = np.arange(num_innovs, dtype=float)
-kf1.innov.innov = 1e-6 * np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
-kf1.innov.norm  = np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
-kf1.innov.fploc = np.random.rand(2, num_innovs)
+kf1.innov.innov = 1e-6 * np.ones((num_axes, num_innovs)) * np.sign(prng.uniform(-0.5, 0.5, (num_axes, num_innovs)))
+kf1.innov.norm  = np.ones((num_axes, num_innovs)) * np.sign(prng.uniform(-0.5, 0.5, (num_axes, num_innovs)))
+kf1.innov.fploc = prng.random((2, num_innovs))
 
 # %% KF2
 kf2        = space.Kf()
@@ -65,14 +67,14 @@ kf2.att[3, 4] += 50e-6
 kf2.att    = space.quat_norm(kf2.att)
 kf2.pos    = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
 kf2.vel    = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100
-kf2.covar  = kf1.covar + 1e-9 * np.random.rand(*kf1.covar.shape)
+kf2.covar  = kf1.covar + 1e-9 * prng.random(*kf1.covar.shape)
 kf2.active = kf1.active
 
 ix              = np.hstack((np.arange(7), np.arange(8, num_innovs)))
 kf2.innov.name  = "Sensor 1"
 kf2.innov.time  = kf1.innov.time[ix]
-kf2.innov.innov = kf1.innov.innov[:, ix] + 1e-8 * np.random.rand(num_axes, ix.size)
-kf2.innov.norm  = kf1.innov.norm[:, ix] + 0.1 * np.random.rand(num_axes, ix.size)
+kf2.innov.innov = kf1.innov.innov[:, ix] + 1e-8 * prng.random((num_axes, ix.size))
+kf2.innov.norm  = kf1.innov.norm[:, ix] + 0.1 * prng.random((num_axes, ix.size))
 
 # %% Opts
 opts1           = plot.Opts()

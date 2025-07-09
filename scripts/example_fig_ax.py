@@ -4,6 +4,7 @@ Script to demonstrate how to plot on custom subplots using the fig_ax argument.
 Notes
 -----
 #.  Written by David C. Stauffer in January 2022.
+
 """
 
 import matplotlib.pyplot as plt
@@ -28,9 +29,10 @@ if __name__ == "__main__":
 
     # %% Example 1
     # create data
+    prng = np.random.default_rng()
     description = "Focal Plane Sightings"
-    points = 2 * np.random.rand(2, 1000) - 1.0
-    innovs = 0.1 * np.random.randn(*points.shape)
+    points = 2 * prng.random((2, 1000)) - 1.0
+    innovs = 0.1 * prng.normal(size=points.shape)
     innovs[:, points[0, :] < 0] -= 0.1
     innovs[:, points[1, :] > 0] += 0.2
 
@@ -70,7 +72,7 @@ if __name__ == "__main__":
     bins = np.array([0.0, 1.0, 2.0, 3.0, 5.0, 7.0])
     plot_histogram(description, data, bins, fig_ax=fig_ax2[0], skip_setup_plots=comb_plots)
     # correlation matrix
-    data = unit(np.random.rand(10, 10), axis=0)
+    data = unit(prng.random((10, 10)), axis=0)
     labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
     units = "m"
     opts = Opts(case_name="Test")

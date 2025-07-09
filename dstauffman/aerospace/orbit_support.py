@@ -4,7 +4,8 @@ Functions that support orbital elements in different frames.
 Notes
 -----
 #.  Written by David C. Stauffer in August 2021.
-"""
+
+"""  # pylint: disable=too-many-lines
 
 # %% Imports
 from __future__ import annotations
@@ -25,6 +26,26 @@ if TYPE_CHECKING:
     _D = NDArray[np.datetime64]
     _N = NDArray[np.floating]
     _FN = float | np.floating | _N
+
+
+# %% Functions - _cosd
+@overload
+def _cosd(deg: float | np.floating) -> np.floating: ...
+@overload
+def _cosd(deg: _N) -> _N: ...
+def _cosd(deg: _FN) -> _FN:
+    """Cosine of an angle that is given in degrees."""
+    return np.cos(DEG2RAD * deg)
+
+
+# %% Functions - _sind
+@overload
+def _sind(deg: float | np.floating) -> np.floating: ...
+@overload
+def _sind(deg: _N) -> _N: ...
+def _sind(deg: _FN) -> _FN:
+    """Sine of an angle that is given in degrees."""
+    return np.sin(DEG2RAD * deg)
 
 
 # %% Functions - d_2_r
@@ -214,11 +235,11 @@ def d_2_dms(x: _FN, /) -> _N:
     # initialize output
     out = np.empty(3) if n == 1 else np.empty((3, n))
     # find whole degrees
-    out[0, ...] = np.floor(x)
+    out[0, ...] = np.trunc(x)
     # find whole minutes
-    out[1, ...] = np.floor(np.mod(x, 1) * ONE_MINUTE)
+    out[1, ...] = np.floor(np.mod(np.abs(x), 1) * ONE_MINUTE)
     # find fractional seconds
-    out[2, ...] = (np.mod(x, 1) - out[1, ...] / ONE_MINUTE) * ONE_HOUR
+    out[2, ...] = (np.mod(np.abs(x), 1) - out[1, ...] / ONE_MINUTE) * ONE_HOUR
     return out
 
 
@@ -228,8 +249,10 @@ def dms_2_d(x: _N, /) -> np.floating | _N:
     x = np.asanyarray(x)
     if x.shape[0] != 3:
         raise ValueError("d_2_dms expects a 3xN array as input.")
+    # sign term, but still 1.0 when x is zero
+    s = np.where(np.signbit(x[0, ...]), -1.0, 1.0)
     # find fractional degrees by adding parts together
-    out = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
+    out = x[0, ...] + s * x[1, ...] / ONE_MINUTE + s * x[2, ...] / ONE_HOUR
     return out
 
 
@@ -239,8 +262,10 @@ def hms_2_r(x: _N, /) -> np.floating | _N:
     x = np.asanyarray(x)
     if x.shape[0] != 3:
         raise ValueError("hms_2_r expects a 3xN array as input.")
+    # sign term, but still 1.0 when x is zero
+    s = np.where(np.signbit(x[0, ...]), -1.0, 1.0)
     # find fractional degrees by adding parts together
-    hours = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
+    hours = x[0, ...] + s * x[1, ...] / ONE_MINUTE + s * x[2, ...] / ONE_HOUR
     out = hours / 24 * TAU
     return out
 
@@ -261,9 +286,9 @@ def r_2_hms(x: _FN, /) -> _N:
     # initialize output
     out = np.empty(3) if n == 1 else np.empty((3, n))
     # convert from angle to fractional hours
-    hours = 24 * (x / TAU)
+    hours = 24 * (np.abs(x) / TAU)
     # find whole hours
-    out[0, ...] = np.floor(hours)
+    out[0, ...] = np.where(np.signbit(x), -1.0, 1.0) * np.floor(hours)
     # find whole minutes
     out[1, ...] = np.floor(np.mod(hours, 1) * ONE_MINUTE)
     # find fractional seconds
@@ -832,6 +857,139 @@ def get_sun_distance(time_jd: _FN) -> np.floating | _N:
     # Mean anomaly of the Sun
     g = np.mod(6.2400408 + 0.01720197 * n, TAU)
     return 1.000_14 - 0.016_71 * np.cos(g) - 0.000_14 * np.cos(2 * g)  # type: ignore[no-any-return]
+
+
+# %% Functions - get_moon_radec_approx
+@overload
+def get_moon_radec_approx(time_jd: float) -> tuple[np.floating, np.floating]: ...
+@overload
+def get_moon_radec_approx(time_jd: np.floating) -> tuple[np.floating, np.floating]: ...
+@overload
+def get_moon_radec_approx(time_jd: _N) -> tuple[_N, _N]: ...
+def get_moon_radec_approx(time_jd: _FN) -> tuple[np.floating, np.floating] | tuple[_N, _N]:
+    r"""
+    Approximates the right ascension and declination angles to the Moon for the given julian time.
+
+    Between 1900-2100, errors will rarely exceed 0.2 Earth radii in distance, 0.3 degrees in right
+    acsension, and 0.2 degrees in declination.
+
+    Parameters
+    ----------
+    time_jd : numpy.ndarray
+        Julian date
+
+    Returns
+    -------
+    ra : numpy.ndarray
+        Right ascension [rad]
+    dec : numpy.ndarray
+        Declination [rad]
+
+    Notes
+    -----
+    #.  Algorithm from Astronomical Almanac 2023, page D22.
+    #.  Written by David C. Stauffer in Jun 2025.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import get_moon_radec_approx, numpy_to_jd
+    >>> from dstauffman import convert_datetime_to_np
+    >>> import datetime
+    >>> date = datetime.datetime(2025,  7,  8, 22, 34, 16)
+    >>> np_date = convert_datetime_to_np(date)
+    >>> time_jd = numpy_to_jd(np_date)
+    >>> (ra, dec) = get_moon_radec_approx(time_jd)
+    >>> print(f"{ra:.3f}")
+    4.607
+
+    >>> print(f"{dec:.3f}")
+    -0.495
+
+    """
+    # time in julian centuries
+    (_, T) = jd_2_century(time_jd)
+
+    L = (
+        218.32
+        + 481_267.881 * T
+        + 6.29 * _sind(135.0 + 477_198.87 * T)
+        - 1.27 * _sind(259.3 - 413_335.36 * T)
+        + 0.66 * _sind(235.7 + 890_534.22 * T)
+        + 0.21 * _sind(269.9 + 954_397.74 * T)
+        - 0.19 * _sind(357.5 + 35_999.05 * T)
+        - 0.11 * _sind(186.5 + 966_404.03 * T)
+    )
+    B = (
+        5.13 * _sind(93.3 + 483_202.02 * T)
+        + 0.28 * _sind(228.2 + 960_400.89 * T)
+        - 0.28 * _sind(318.3 + 6_003.15 * T)
+        - 0.17 * _sind(217.6 - 407_332.21 * T)
+    )
+
+    el = _cosd(B) * _cosd(L)
+    em = 0.9175 * _cosd(B) * _sind(L) - 0.3978 * _sind(B)
+    en = 0.3978 * _cosd(B) * _sind(L) + 0.9175 * _sind(B)
+
+    ra = np.mod(np.arctan2(em, el), TAU)
+    dec = np.arcsin(en)
+    return (ra, dec)
+
+
+# %% Functions - get_moon_distance
+@overload
+def get_moon_distance(time_jd: float) -> np.floating: ...
+@overload
+def get_moon_distance(time_jd: np.floating) -> np.floating: ...
+@overload
+def get_moon_distance(time_jd: _N) -> _N: ...
+def get_moon_distance(time_jd: _FN) -> np.floating | _N:
+    r"""
+    Calculate the distance to the Moon from the Earth.
+
+    Likely accurate to 0.2 EU of error between 1900-2100.
+
+    Parameters
+    ----------
+    time_jd : numpy.ndarray
+        Julian date
+
+    Returns
+    -------
+    numpy.ndarray
+        Distance to the Earth in EU
+
+    Notes
+    -----
+    #.  Algorithm from Astronomical Almanac 2023, page D22.
+    #.  Written by David C. Stauffer in June 2025.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import get_moon_distance, numpy_to_jd
+    >>> from dstauffman import convert_datetime_to_np
+    >>> import datetime
+    >>> date = datetime.datetime(2025,  7,  1,  0, 34, 25)
+    >>> np_date = convert_datetime_to_np(date)
+    >>> time_jd = numpy_to_jd(np_date)
+    >>> moon_dist_eu = get_moon_distance(time_jd)
+    >>> print(f"{moon_dist_eu:.5f}")
+    61.88075
+
+    """
+    # time in julian centuries
+    (_, T) = jd_2_century(time_jd)
+
+    P = (
+        0.9508
+        + 0.0518 * _cosd(135.0 + 477_198.87 * T)
+        + 0.0095 * _cosd(259.3 - 413_335.36 * T)
+        + 0.0078 * _cosd(235.7 + 890_534.22 * T)
+        + 0.0028 * _cosd(269.9 + 954_397.74 * T)
+    )
+
+    # semidiameter = 0.2724 * P
+
+    return 1.0 / _sind(P)
 
 
 # %% Functions - beta_from_oe

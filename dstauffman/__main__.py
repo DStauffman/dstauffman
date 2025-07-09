@@ -4,6 +4,7 @@ Python script wrapper to execute commands related to dstauffman library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2020.
+
 """
 
 # %% Imports

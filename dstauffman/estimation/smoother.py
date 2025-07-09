@@ -4,6 +4,7 @@ Functions related to doing a backwards information smoother over a Kalman filter
 Notes
 -----
 #.  Written by David C. Stauffer in July 2020.
+
 """
 
 # %% Imports

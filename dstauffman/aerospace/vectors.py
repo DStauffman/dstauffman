@@ -4,6 +4,7 @@ Contains generic vector utilities that can be independently defined and used by 
 Notes
 -----
 #.  Written by David C. Stauffer in March 2020.
+
 """
 
 # %% Imports
@@ -255,6 +256,7 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     # Note: using sum and multiply instead of dot for 2D case
     dot_prod = np.multiply(vec1.T, np.conj(vec2).T).T
     temp = np.sum(dot_prod, axis=0)
+    # handle small floating point errors (but let others still crash)
     if temp.ndim == 0:
         if temp > 1.0 and temp < 1 + 3 * np.finfo(float).eps:  # pylint: disable=chained-comparison
             temp = 1.0
@@ -284,6 +286,8 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
 # %% Functions - cart2sph
 @overload
 def cart2sph(x: float, y: float, z: float) -> tuple[float, float, float]: ...
+@overload
+def cart2sph(x: np.floating, y: np.floating, z: np.floating) -> tuple[np.floating, np.floating, np.floating]: ...
 @overload
 def cart2sph(x: _N, y: _N, z: _N) -> tuple[_N, _N, _N]: ...
 @ncjit
@@ -329,6 +333,8 @@ def cart2sph(x: _FN, y: _FN, z: _FN) -> tuple[_FN, _FN, _FN]:
 # %% Functions - sph2cart
 @overload
 def sph2cart(az: float, el: float, rad: float) -> tuple[float, float, float]: ...
+@overload
+def sph2cart(az: np.floating, el: np.floating, rad: np.floating) -> tuple[np.floating, np.floating, np.floating]: ...
 @overload
 def sph2cart(az: _N, el: _N, rad: _N) -> tuple[_N, _N, _N]: ...
 @ncjit
@@ -486,14 +492,14 @@ def interp_vector(
     # fmt: off
     if "btype" not in kwargs or kwargs["btype"] == "linear":
         if x_is_datetime:
-            func = lambda x, xp, yp, **kwargs: linear_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+            func = lambda x, xp, yp, **kwargs: linear_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
         else:
-            func = lambda x, xp, yp, **kwargs: linear_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+            func = lambda x, xp, yp, **kwargs: linear_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
     else:
         if x_is_datetime:
-            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
         else:
-            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
     # fmt: on
 
     if yp.ndim == 1:

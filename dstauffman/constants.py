@@ -4,6 +4,7 @@ Define constants for use in the rest of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 # %% Imports

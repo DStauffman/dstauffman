@@ -4,6 +4,7 @@ Test file for the `utils` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 # %% Imports
@@ -1390,6 +1391,7 @@ class Test_zero_order_hold(unittest.TestCase):
     Notes
     -----
     #.  Uses scipy.interpolate.interp1d as the gold standard (but it's slower)
+
     """
 
     @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
@@ -1535,9 +1537,10 @@ class Test_linear_interp(unittest.TestCase):
 
     @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_unsorted(self) -> None:
+        prng = np.random.default_rng()
         ix = np.arange(self.xp.size)
         while dcs.issorted(ix):
-            np.random.shuffle(ix)
+            prng.shuffle(ix)
         y = dcs.linear_interp(self.x, self.xp[ix], self.yp[ix], assume_sorted=False)
         np.testing.assert_array_almost_equal(y, self.y, 12)
 
@@ -1559,6 +1562,7 @@ class Test_linear_interp(unittest.TestCase):
 
     @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_extrapolation_scipy(self) -> None:
+        prng = np.random.default_rng()
         xp = self.xp.copy()
         yp = self.yp.copy()
         xp[0] = self.x[5]
@@ -1570,7 +1574,7 @@ class Test_linear_interp(unittest.TestCase):
         exp[-4:] = 750.0
         ix = np.arange(xp.size)
         while dcs.issorted(ix):
-            np.random.shuffle(ix)
+            prng.shuffle(ix)
         with self.assertRaises(ValueError) as context:
             dcs.linear_interp(self.x, xp[ix], yp[ix], assume_sorted=False, extrapolate=False)
         text = str(context.exception)

@@ -4,6 +4,7 @@ Contains binary manipulation routines.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2023.
+
 """
 
 # %% Imports

@@ -5,6 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
 #.  Incorporated into dstauffman by David C. Stauffer in July 2020.
+
 """
 
 # %% Imports

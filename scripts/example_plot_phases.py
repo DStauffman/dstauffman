@@ -37,8 +37,8 @@ def extra_plotter_func(
 if __name__ == "__main__":
     # %% Use directly
     fig = plt.figure()
-    assert (manager := fig.canvas.manager) is not None
-    manager.set_window_title("Sine Wave")
+    assert fig.canvas.manager is not None
+    fig.canvas.manager.set_window_title("Sine Wave")
     ax = fig.add_subplot(111)
     time = np.arange(101)
     data = np.cos(time / 10)

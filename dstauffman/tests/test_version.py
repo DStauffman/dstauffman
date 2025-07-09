@@ -4,6 +4,7 @@ Test file for the `version` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in February 2019.
+
 """
 
 # %% Imports

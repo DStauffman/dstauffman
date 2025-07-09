@@ -56,29 +56,29 @@ if __name__ == "__main__":
     lat, lon, alt = space.ecf2geod(pos_eci, output="split")
 
     # no colors, with orbit
-    fig2 = plot.plot_map_3d(None, lat, lon, land_colors="none")  # type: ignore[arg-type]
+    fig2 = plot.plot_map_3d(None, lat, lon, land_colors="none")
 
     # orbit colored by altitude, multicolor countries
     map_data, map_labels, map_colors = plot.get_map_data()
     color_by = ("Altitude [km]", 1e-3 * alt)
-    fig3 = plot.plot_map_3d(map_data, lat, lon, alt, land_colors="multi", color_by=color_by, dir_skip=12, title="ISS orbit")  # type: ignore[arg-type]
+    fig3 = plot.plot_map_3d(map_data, lat, lon, alt, land_colors="multi", color_by=color_by, dir_skip=12, title="ISS orbit")
 
     # orbit with event (satellite location)
-    lla_events: tuple[tuple[float, float, float], ...] = ((lon[10], lat[10], alt[10]),)  # type: ignore[index]
+    lla_events: tuple[tuple[float, float, float], ...] = ((lon[10], lat[10], alt[10]),)
     lla_annotations: tuple[str, ...] = ("ISS",)
-    fig4 = plot.plot_map_3d(None, lat, lon, alt, land_colors="same", color_by=color_by, cbar_colormap="spring",  # type: ignore[arg-type]
+    fig4 = plot.plot_map_3d(None, lat, lon, alt, land_colors="same", color_by=color_by, cbar_colormap="spring",
         title="Event", lla_events=lla_events, lla_annotations=lla_annotations)  # fmt: skip  # noqa: E128
 
     # orbit with multiple events and custom colors
-    m = len(lat) // 2  # type: ignore[arg-type]
-    lla_events = ((lon[0], lat[0], alt[0]), (lon[m], lat[m], alt[m]))  # type: ignore[index]
+    m = len(lat) // 2
+    lla_events = ((lon[0], lat[0], alt[0]), (lon[m], lat[m], alt[m]))
     lla_annotations = ("Rev Start", "Rev Middle")
     lla_colors = ("xkcd:green", "xkcd:red")
     map_colors2: dict[str, str | int] = defaultdict(lambda: "xkcd:green")
     map_colors2["United States of America"] = "xkcd:white"
     map_colors2["Mexico"] = 0
     map_colors2["Canada"] = 5
-    fig5 = plot.plot_map_3d(None, lat, lon, alt, land_colors="multi", color_by=color_by, map_colors=map_colors2,  # type: ignore[arg-type]
+    fig5 = plot.plot_map_3d(None, lat, lon, alt, land_colors="multi", color_by=color_by, map_colors=map_colors2,
         title="Custom Colors", lla_events=lla_events, lla_annotations=lla_annotations, lla_colors=lla_colors,  # noqa: E128
         background="xkcd:cyan", border="xkcd:yellow", land_colormap="tab10")  # fmt: skip  # noqa: E128
 

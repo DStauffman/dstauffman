@@ -4,6 +4,7 @@ Test file for the `utils_log` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.  Split to separate file in June 2020.
+
 """
 
 # %% Imports
@@ -148,7 +149,8 @@ class Test_remove_outliers(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.x = 0.6 * np.random.rand(1000)
+        self.prng = np.random.default_rng()
+        self.x = 0.6 * self.prng.random(1000)
         self.x[5] = 1e5
         self.x[15] = 1e24
         self.x[100] = np.nan
@@ -164,7 +166,7 @@ class Test_remove_outliers(unittest.TestCase):
         mock_logger.log.assert_any_call(LogLevel.L6, "Number of outliers = %s", 2)
 
     def test_sigma(self, mock_logger: Mock) -> None:
-        x = np.random.rand(10000)
+        x = self.prng.random(10000)
         x[50] = 4.0
         y = dcs.remove_outliers(x, sigma=3.0)
         self.assertTrue(np.isnan(y[50]))
@@ -172,7 +174,7 @@ class Test_remove_outliers(unittest.TestCase):
         self.assertFalse(np.any(np.isnan(y)))
 
     def test_2d_axis(self, mock_logger: Mock) -> None:
-        x = 1e-3 * np.random.rand(3, 5000)
+        x = 1e-3 * self.prng.random((3, 5000))
         x[0, 10] = 1e5
         x[1, 20] = 1e3
         x[0, 30] = 1.4e-3

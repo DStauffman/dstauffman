@@ -4,6 +4,7 @@ Test file for the `binary` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2023.
+
 """
 
 # %% Imports

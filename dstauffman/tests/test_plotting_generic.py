@@ -4,6 +4,7 @@ Test file for the `generic` module of the "dstauffman.plotting" library.
 Notes
 -----
 #.  Written by David C. Stauffer in May 2020.
+
 """
 
 # %% Imports
@@ -168,7 +169,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader(self) -> None:
         time = np.linspace(0.0, 1000.0, 10**6)
-        data = np.random.rand(10**6)
+        data = np.random.default_rng().random(10**6)
         self.fig = plot.make_time_plot(self.description, time, data, use_datashader=True)
         self.assertIsNotNone(self.fig)
 
@@ -178,7 +179,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         time = np.datetime64("2021-06-01T00:00:00", NP_DATETIME_UNITS) + np.round(temp * NP_INT64_PER_SEC).astype(
             np.int64
         ).astype(NP_TIMEDELTA_FORM)
-        data = np.random.rand(10**6)
+        data = np.random.default_rng().random(10**6)
         self.fig = plot.make_time_plot(self.description, time, data, time_units="numpy", use_datashader=True)
         self.assertIsNotNone(self.fig)
 
@@ -204,12 +205,13 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        prng = np.random.default_rng()
         # fmt: off
         self.description      = "Random Data Error Bars"
         self.time             = np.arange(11)
-        self.data             = np.array([[3.0], [-2.0], [5]]) + np.random.rand(3, 11)
-        self.mins             = self.data - 0.5 * np.random.rand(3, 11)
-        self.maxs             = self.data + 1.5 * np.random.rand(3, 11)
+        self.data             = np.array([[3.0], [-2.0], [5]]) + prng.random((3, 11))
+        self.mins             = self.data - 0.5 * prng.random((3, 11))
+        self.maxs             = self.data + 1.5 * prng.random((3, 11))
         self.elements         = ["x", "y", "z"]
         self.units            = "rad"
         self.time_units       = "sec"
@@ -280,7 +282,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.description      = "example"
         self.time_one         = np.arange(11)
         self.time_two         = np.arange(2, 13)
-        self.data_one         = 1e-6 * np.random.rand(2, 11)
+        self.data_one         = 1e-6 * np.random.default_rng().random((2, 11))
         self.data_two         = self.data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
         self.name_one         = "test1"
         self.name_two         = "test2"
@@ -820,9 +822,10 @@ class Test_plotting_make_connected_sets(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        prng = np.random.default_rng()
         self.description = "Focal Plane Sightings"
-        self.points = 2 * np.random.rand(2, 100) - 1.0
-        self.innovs = 0.1 * np.random.randn(*self.points.shape)
+        self.points = 2 * prng.uniform(-1.0, 0, (2, 100))
+        self.innovs = 0.1 * prng.normal(size=self.points.shape)
         self.fig: Figure | None = None
 
     def test_nominal(self) -> None:

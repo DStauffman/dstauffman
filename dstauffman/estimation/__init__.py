@@ -5,6 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
 #.  Moved into subfolder by David C. Stauffer in July 2020.
+
 """
 
 # %% Imports

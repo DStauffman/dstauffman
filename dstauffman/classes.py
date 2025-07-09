@@ -6,6 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 #.  Added mutable integer Counter class in January 2016.
 #.  Updated by David C. Stauffer in June 2020 to make MetaClass methods public for direct use if desired.
+
 """
 
 # %% Imports
@@ -276,7 +277,7 @@ def load_hdf5(  # type: ignore[misc]  # noqa: C901
         out = type("Temp", (object,), cls)
         limit_fields = True
     elif isinstance(cls, (list, set, tuple)):
-        out = type("Temp", (object,), {k: None for k in cls})
+        out = type("Temp", (object,), {k: None for k in cls})  # noqa: C420
         limit_fields = True
     else:
         out = cls()
@@ -374,8 +375,8 @@ def save_convert_hdf5(self: Any, **kwargs: Any) -> dict[str, bool]:
         try:
             datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
         except AttributeError:
-            datetime_fields = tuple()
-    convert_dates = all(map(lambda key: is_datetime(getattr(self, key)), datetime_fields))
+            datetime_fields = ()
+    convert_dates = all(map(lambda key: is_datetime(getattr(self, key)), datetime_fields))  # noqa: C417
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert the dates."
         for key in datetime_fields:
@@ -395,7 +396,7 @@ def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) 
             try:
                 datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
             except AttributeError:
-                datetime_fields = tuple()
+                datetime_fields = ()
         for key in datetime_fields:
             if (value := getattr(self, key)) is not None:
                 setattr(self, key, value.astype(NP_DATETIME_FORM))
@@ -405,7 +406,7 @@ def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) 
         try:
             string_fields = self._string_fields()  # pylint: disable=protected-access
         except AttributeError:
-            string_fields = tuple()
+            string_fields = ()
     for key in string_fields:
         if not isinstance(getattr(self, key), str):
             setattr(self, key, getattr(self, key).decode("utf-8"))
@@ -489,7 +490,7 @@ def pprint_dict(  # noqa: C901
                     offset=offset + indent,
                     max_elements=max_elements,
                 )
-            except:
+            except Exception:  # pylint: disable=broad-exception-caught
                 # TODO: do I need this check or just let it fail?
                 warnings.warn("pprint recursive call failed, reverting to default.")
                 this_pad = " " * (pad_len - len(this_key)) if align else ""

@@ -5,6 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in April 2016.
 #.  Expanded by David C. Stauffer in December 2018 for additional linalg functions.
+
 """
 
 # %% Imports
@@ -205,7 +206,7 @@ class Test_ecdf(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        y = np.random.rand(10000)
+        y = np.random.default_rng().random(10000)
         (x, f) = dcs.ecdf(y)
         dt = x[1] - x[0]
         exp = np.arange(x[0], x[-1] + dt, dt)

@@ -4,6 +4,7 @@ Classes related to GPS processing.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2021.
+
 """
 
 # %% Imports

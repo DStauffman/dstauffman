@@ -4,6 +4,7 @@ Test file for the `orbit_conv` module of the "dstauffman.aerospace" library.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2021.
+
 """
 
 # %% Imports
@@ -292,7 +293,6 @@ class Test_aerospace_mean_motion_2_semimajor(unittest.TestCase):
 
     def test_nominal(self) -> None:
         a = space.mean_motion_2_semimajor(self.n2, self.mu2)
-        assert isinstance(a, float)
         self.assertEqual(a, self.exp2)
 
     def test_vector1(self) -> None:

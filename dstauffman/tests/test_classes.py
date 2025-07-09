@@ -4,6 +4,7 @@ Test file for the `classes` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 # %% Imports
@@ -101,9 +102,7 @@ class _Example_Times(object):
 
 # %% save_hdf5 & load_hdf5 - mostly covered by SaveAndLoad
 class Test_save_and_load_hdf5(unittest.TestCase):
-    r"""
-    Additionally tests the save and load HDF5 functions with a pandas DataFrame.
-    """
+    r"""Additionally tests the save and load HDF5 functions with a pandas DataFrame."""
 
     def setUp(self) -> None:
         self.filename = dcs.get_tests_dir() / "results_test_df_save.hdf5"

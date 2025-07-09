@@ -8,6 +8,7 @@ Notes
 #.  Written by David C. Stauffer in May 2015 and continued in April 2016.  This work is based
     loosely on prior experience at Lockheed Martin using the GOLF/BPE code with GARSE, but all the
     numeric algorithms are re-coded from external sources to avoid any potential proprietary issues.
+
 """  # pylint: disable=too-many-lines
 
 # %% Imports

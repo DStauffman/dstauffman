@@ -4,6 +4,7 @@ Example script for creating your own class to save to HDF5 files with datetimes.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2022.
+
 """
 
 # %% Imports
@@ -42,7 +43,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
 
     def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None, name: str = ""):
         self.time = np.arange(num)
-        self.data = np.random.rand(*self.time.shape)
+        self.data = np.random.default_rng().random(self.time.shape)
         self.date = np.full(self.time.shape, NP_NAT)
         self.name = name
         self.meta = {"who": "cares"}

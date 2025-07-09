@@ -4,6 +4,7 @@ Generic functions related to managing repositories.
 Notes
 -----
 #.  Split out of utils by David C. Stauffer in July 2019.
+
 """
 
 # %% Imports
@@ -60,7 +61,7 @@ def run_docstrings(files: list[Path], verbose: bool = False) -> int:
     # disable plots from showing up
     try:
         from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
-    except:
+    except Exception:  # pylint: disable=broad-exception-caught
         pass
     else:
         suppress_plots()
@@ -107,7 +108,7 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     # disable plots from showing up
     try:
         from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
-    except:
+    except Exception:  # pylint: disable=broad-exception-caught
         pass
     else:
         suppress_plots()
@@ -146,7 +147,7 @@ def run_pytests(folder: Path, *args: str, **kwargs: Any) -> int:
     # disable plots from showing up
     try:
         from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
-    except:
+    except Exception:  # pylint: disable=broad-exception-caught
         pass
     else:
         suppress_plots()

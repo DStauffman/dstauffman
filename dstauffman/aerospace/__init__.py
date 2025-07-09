@@ -7,6 +7,7 @@ Notes
 #.  Moved into subfolder by David C. Stauffer in July 2020.
 #.  Updated by David C. Stauffer in February 2021 to include optimized versions for single
         quaternions.
+
 """
 
 # %% Imports
@@ -31,7 +32,8 @@ from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to
                              long_2_sidereal, rdr_2_aer, rdr_2_ijk, sez_2_aer, sez_2_ijk, \
                              rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, rv_ijk_2_sez, rv_sez_2_aer, \
                              rv_sez_2_ijk, get_sun_radec_approx, get_sun_radec, get_sun_distance, \
-                             beta_from_oe, eclipse_fraction, earth_radius_by_latitude
+                             get_moon_radec_approx, get_moon_distance, beta_from_oe, \
+                             eclipse_fraction, earth_radius_by_latitude
 from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, \
                              advance_true_anomaly, advance_elements
 from .quat        import QUAT_SIZE, QuatAssertionError, suppress_quat_checks, \

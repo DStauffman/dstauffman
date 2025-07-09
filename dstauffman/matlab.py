@@ -6,6 +6,7 @@ Notes
 #.  Written by David C. Stauffer in May 2016.  Mostly based on Matlab routines.
 #.  Expanded by David C. Stauffer in December 2018 to include load_matlab capabilities.
 #.  Combined by David C. Stauffer in August 2022 for what used to be estimation.linalg.
+
 """
 
 # %% Imports
@@ -277,7 +278,7 @@ def ecdf(y: float | list[float] | _N, /) -> tuple[_N, _N]:
     --------
     >>> from dstauffman import ecdf
     >>> import numpy as np
-    >>> y = np.random.rand(1000)
+    >>> y = np.random.default_rng().random(1000)
     >>> (x, f) = ecdf(y)
     >>> exp = np.arange(0.001, 1.001, 0.001)
     >>> print(np.max(np.abs(f - exp)) < 0.05)

@@ -4,6 +4,7 @@ Test file for the `runtests` module of the "dstauffman.commands" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2020.
+
 """
 
 # %% Imports

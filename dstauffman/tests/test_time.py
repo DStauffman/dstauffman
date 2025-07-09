@@ -4,6 +4,7 @@ Test file for the `time` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in May 2020.
+
 """
 
 # %% Imports
@@ -131,7 +132,7 @@ class Test_round_num_datetime(unittest.TestCase):
 
     def setUp(self) -> None:
         self.date_exact = np.arange(0, 10.1, 0.1)
-        self.date_in = self.date_exact + 0.001 * np.random.rand(101)
+        self.date_in = self.date_exact + 0.001 * np.random.default_rng().random(101)
         self.time_delta = 0.1
 
     def test_nominal(self) -> None:

@@ -4,6 +4,7 @@ Test file for the `repos` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2019.
+
 """
 
 # %% Imports
@@ -42,9 +43,9 @@ class Test_run_docstrings(unittest.TestCase):
                 return_code = dcs.run_docstrings(files, verbose)
         lines = ctx.get_output().split("\n")
         self.assertEqual(return_code, ReturnCodes.test_failures)
-        exp = f"Testing \"{dcs.get_tests_dir().joinpath('test_matlab.py')}\":"
+        exp = f'Testing "{dcs.get_tests_dir().joinpath("test_matlab.py")}":'
         self.assertIn(exp, lines)
-        exp = f"Testing \"{dcs.get_tests_dir().joinpath('test_repos.py')}\":"
+        exp = f'Testing "{dcs.get_tests_dir().joinpath("test_repos.py")}":'
         self.assertIn(exp, lines)
         mock_tester.assert_any_call(files[0], report=True, verbose=verbose, module_relative=False)
         mock_tester.assert_called_with(files[1], report=True, verbose=verbose, module_relative=False)

@@ -5,6 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
 #.  Split by logging options by David C. Stauffer in June 2020.
+
 """
 
 # %% Imports
@@ -255,7 +256,7 @@ def remove_outliers(
     --------
     >>> from dstauffman import remove_outliers
     >>> import numpy as np
-    >>> x = 0.6 * np.random.rand(1000)
+    >>> x = 0.6 * np.random.default_rng().random(1000)
     >>> x[5] = 1e5
     >>> x[15] = 1e24
     >>> x[100] = np.nan

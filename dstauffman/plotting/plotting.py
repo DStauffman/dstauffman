@@ -4,6 +4,7 @@ Defines useful plotting utilities.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """  # pylint: disable=too-many-lines
 
 # %% Imports
@@ -504,7 +505,7 @@ def plot_time_history(
     >>> import numpy as np
     >>> description = "Random Data"
     >>> time = np.arange(0, 5, 1./12) + 2000
-    >>> data = np.random.rand(5, len(time)).cumsum(axis=1)
+    >>> data = np.random.default_rng().random((5, len(time))).cumsum(axis=1)
     >>> data = 10 * data / np.expand_dims(data[:, -1], axis=1)
     >>> fig  = plot_time_history(description, time, data)
 
@@ -661,12 +662,13 @@ def plot_time_difference(
     >>> from dstauffman.plotting import plot_time_difference
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> prng = np.random.default_rng()
     >>> description = "Random Data"
     >>> time_one = np.arange(0, 5, 1./12) + 2000
-    >>> data_one = np.random.rand(5, len(time_one)).cumsum(axis=1)
+    >>> data_one = prng.random((5, len(time_one))).cumsum(axis=1)
     >>> data_one[:] = 10 * data_one / np.expand_dims(data_one[:, -1], axis=1)
     >>> time_two = np.arange(0, 5, 0.5) + 2000
-    >>> data_two = np.random.rand(5, len(time_two)).cumsum(axis=1)
+    >>> data_two = prng.random((5, len(time_two))).cumsum(axis=1)
     >>> data_two[:] = 10 * data_two / np.expand_dims(data_two[:, -1], axis=1)
     >>> figs1 = plot_time_difference(description, time_one, data_one, time_two, data_two)
 
@@ -839,7 +841,7 @@ def plot_correlation_matrix(  # noqa: C901
     >>> from dstauffman import unit
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
-    >>> data = unit(np.random.rand(10, 10), axis=0)
+    >>> data = unit(np.random.default_rng().random((10, 10)), axis=0)
     >>> labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
     >>> units = "m"
     >>> opts = None
@@ -1033,7 +1035,7 @@ def plot_bar_breakdown(
     >>> import numpy as np
     >>> description = "Test"
     >>> time = np.arange(0, 5, 1./12) + 2000
-    >>> data = np.random.rand(5, len(time))
+    >>> data = np.random.default_rng().random((5, len(time)))
     >>> mag  = np.sum(data, axis=0)
     >>> data = data / np.expand_dims(mag, axis=0)
     >>> fig  = plot_bar_breakdown(description, time, data)
@@ -1490,7 +1492,7 @@ def save_zoomed_version(
     >>> from dstauffman.plotting import save_zoomed_version, plot_time_history, Opts
     >>> import numpy as np
     >>> time = np.arange(30.0)
-    >>> data = np.random.rand(30)
+    >>> data = np.random.default_rng().random(30)
     >>> data[10] = 1e5
     >>> opts = Opts()
     >>> fig = plot_time_history("Data vs Time", time, data, opts=opts, second_units=("milli", 1e-3))

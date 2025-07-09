@@ -4,6 +4,7 @@ Test file for the `quat` module of the "dstauffman.aerospace" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 # %% Imports

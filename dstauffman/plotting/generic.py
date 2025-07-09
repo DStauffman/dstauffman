@@ -4,6 +4,7 @@ Defines low-level plotting routines meant to be wrapped in higher level ones.
 Notes
 -----
 #.  Written by David C. Stauffer in May 2020.
+
 """  # pylint: disable=too-many-lines
 
 # %% Imports
@@ -527,18 +528,18 @@ def make_generic_plot(  # noqa: C901
             if data_is_list:
                 data_func = [func_lamb(data_one[j][ix["one"][j]], None) for j in range(num_channels)]  # type: ignore[misc, index]
             elif data_as_rows:
-                data_func = func_lamb(data_one[:, ix["one"]], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[arg-type, assignment, call-overload, index]
+                data_func = func_lamb(data_one[:, ix["one"]], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[assignment, call-overload, index]
             else:
-                data_func = func_lamb(data_one[ix["one"], :], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[arg-type, assignment, call-overload, index]
+                data_func = func_lamb(data_one[ix["one"], :], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[assignment, call-overload, index]
         if doing_diffs:
             # TODO: combine with non diff version
-            data_func = func_lamb(data_one[:, ix["one"]], 1) if have_data_one and np.any(ix["one"]) else nans  # type: ignore[arg-type, assignment, call-overload, index]
-            data2_func = func_lamb(data_two[:, ix["two"]], 1) if have_data_two and np.any(ix["two"]) else nans  # type: ignore[arg-type, call-overload, index]
+            data_func = func_lamb(data_one[:, ix["one"]], 1) if have_data_one and np.any(ix["one"]) else nans  # type: ignore[assignment, call-overload, index]
+            data2_func = func_lamb(data_two[:, ix["two"]], 1) if have_data_two and np.any(ix["two"]) else nans  # type: ignore[call-overload, index]
             if is_quat_diff:
-                nondeg_func = func_lamb(nondeg_error[:, ix["overlap"]], 1) if have_both and np.any(ix["overlap"]) else nans  # type: ignore[arg-type]
-                mag_func = func_lamb(nondeg_angle[ix["overlap"]], 0) if have_both and np.any(ix["overlap"]) else nans[0:1]  # type: ignore[arg-type]
+                nondeg_func = func_lamb(nondeg_error[:, ix["overlap"]], 1) if have_both and np.any(ix["overlap"]) else nans
+                mag_func = func_lamb(nondeg_angle[ix["overlap"]], 0) if have_both and np.any(ix["overlap"]) else nans[0:1]
             else:
-                nondeg_func = func_lamb(diffs[:, ix["overlap"]], 1) if have_both and np.any(ix["overlap"]) else nans  # type: ignore[arg-type]
+                nondeg_func = func_lamb(diffs[:, ix["overlap"]], 1) if have_both and np.any(ix["overlap"]) else nans
             # output errors
             err = {"one": data_func, "two": data2_func, "diff": nondeg_func}
             if is_quat_diff:
@@ -1261,11 +1262,12 @@ def make_error_bar_plot(
     >>> from dstauffman.plotting import make_error_bar_plot
     >>> import numpy as np
     >>> from datetime import datetime
+    >>> prng             = np.random.default_rng()
     >>> description      = "Random Data Error Bars"
     >>> time             = np.arange(11)
-    >>> data             = np.array([[3.], [-2.], [5]]) + np.random.rand(3, 11)
-    >>> mins             = data - 0.5 * np.random.rand(3, 11)
-    >>> maxs             = data + 1.5 * np.random.rand(3, 11)
+    >>> data             = np.array([[3.], [-2.], [5]]) + prng.random((3, 11))
+    >>> mins             = data - 0.5 * prng.random((3, 11))
+    >>> maxs             = data + 1.5 * prng.random((3, 11))
     >>> elements         = ["x", "y", "z"]
     >>> units            = "rad"
     >>> time_units       = "sec"
@@ -1481,11 +1483,12 @@ def make_difference_plot(
     >>> from dstauffman.plotting import make_difference_plot, get_nondeg_colorlists
     >>> import numpy as np
     >>> from datetime import datetime
+    >>> prng             = np.random.default_rng()
     >>> description      = "example"
     >>> time_one         = np.arange(11)
     >>> time_two         = np.arange(2, 13)
-    >>> data_one         = 50e-6 * np.random.rand(2, 11)
-    >>> data_two         = data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6 * np.random.rand(2, 11)
+    >>> data_one         = 50e-6 * prng.random((2, 11))
+    >>> data_two         = data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6 * prng.random((2, 11))
     >>> name_one         = "test1"
     >>> name_two         = "test2"
     >>> elements         = ["x", "y"]
@@ -1774,7 +1777,7 @@ def make_bar_plot(
     >>> import numpy as np
     >>> description      = "Test vs Time"
     >>> time             = np.arange(0, 5, 1./12) + 2000
-    >>> data             = np.random.rand(5, len(time))
+    >>> data             = np.random.default_rng().random((5, len(time)))
     >>> mag              = np.sum(data, axis=0)
     >>> data             = 100 * data / mag
     >>> name             = ""
@@ -1915,8 +1918,9 @@ def make_connected_sets(  # noqa: C901
     >>> innovs = 5*np.array([[0.01, 0.02, 0.03], [-0.01, -0.015, -0.01]])
     >>> fig = make_connected_sets(description, points, innovs)
 
-    >>> points2 = 2 * np.random.rand(2, 100) - 1.
-    >>> innovs2 = 0.1 * np.random.randn(*points2.shape)
+    >>> prng = np.random.default_rng()
+    >>> points2 = 2 * prng.uniform(-1.0, 0.0, (2, 100))
+    >>> innovs2 = 0.1 * prng.normal(size=points2.shape)
     >>> fig2 = make_connected_sets(description, points2, innovs2, color_by="direction")
 
     >>> fig3 = make_connected_sets(description, points2, innovs2, color_by="magnitude", \

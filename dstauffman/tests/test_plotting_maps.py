@@ -4,6 +4,7 @@ Test file for the `maps` module of the "dstauffman.plotting" library.
 Notes
 -----
 #.  Written by David C. Stauffer in December 2024.
+
 """
 
 # %% Imports

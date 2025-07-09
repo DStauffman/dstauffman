@@ -4,6 +4,7 @@ Test file for the `support` module of the "dstauffman.plotting" library.
 Notes
 -----
 #.  Written by David C. Stauffer in December 2018.
+
 """
 
 # %% Imports
@@ -1244,10 +1245,11 @@ class Test_plotting_add_datashaders(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        self.prng = np.random.default_rng()
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.plot([0, 0], [1, 1], ".-")
-        self.points = 0.5 + 0.25 * np.random.rand(2, 1000)
+        self.points = 0.5 + 0.25 * self.prng.random((2, 1000))
         self.datashaders = [{"time": self.points[0, :], "data": self.points[1, :], "ax": self.ax}]
 
     def test_nominal(self) -> None:
@@ -1258,7 +1260,7 @@ class Test_plotting_add_datashaders(unittest.TestCase):
         self.datashaders[0]["color"] = "xkcd:black"
         self.datashaders.append({"color": "xkcd:blue", "ax": self.ax})
         self.datashaders[1]["time"] = np.arange(np.datetime64("now", "ns"), np.timedelta64(1, "m"), np.timedelta64(1, "s"))
-        self.datashaders[1]["data"] = np.random.rand(*self.datashaders[1]["time"].shape)  # type: ignore[attr-defined]
+        self.datashaders[1]["data"] = self.prng.random(self.datashaders[1]["time"].shape)  # type: ignore[attr-defined]
         self.datashaders[1]["time_units"] = "numpy"
         plot.add_datashaders(self.datashaders)
 

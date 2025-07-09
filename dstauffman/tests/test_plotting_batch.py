@@ -4,6 +4,7 @@ Test file for the `batch` module of the "dstauffman.plotting" library.
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
+
 """
 
 # %% Imports
@@ -80,7 +81,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
     def test_nominal(self) -> None:
         # add data
         names = ["a", "b", "c", "d"]
-        matrix = np.random.rand(4, 4)
+        matrix = np.random.default_rng().random((4, 4))
         # fmt: off
         self.bpe_results.param_names  = [x.encode("utf-8") for x in names]
         self.bpe_results.begin_innovs = np.array([1.0, 2.0, 3.0, 4.0])

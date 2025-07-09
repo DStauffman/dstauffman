@@ -4,6 +4,7 @@ Test file for the `quat_opt` module of the "dstauffman.aerospace" library.
 Notes
 -----
 #.  Written by David C. Stauffer in February 2021.
+
 """
 
 # %% Imports

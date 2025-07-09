@@ -5,6 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in July 2016.
 #.  Moved to joint plotting submodule by David C. Stauffer in July 2020.
+
 """
 
 # %% Imports

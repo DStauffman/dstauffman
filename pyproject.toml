@@ -183,3 +183,152 @@ reportUnboundVariable = false
 reportOptionalMemberAccess = true
 enableTypeIgnoreComments = true
 reportUnnecessaryTypeIgnoreComment = false
+
+[tool.ruff]
+include = ["pyproject.toml", "dstauffman/**/*.py", "scripts/**/*.py"]
+line-length = 128
+indent-width = 4
+target-version = "py313"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D105",  # missing docstring in magic method
+    "D107",  # missing docstring in __init__
+    "D203",  # one blank line required before class docstring
+    "D212",  # multiline docstring summary should start at the first line
+    "D401",  # first line of docstring should be in imperative mood
+    "D417",  # temp, fix these
+    "E501",  # line too long, (use black to manage this)
+    "B007",
+    "B010",
+    "B018",
+    "B023",
+    "B026",
+    "B028",
+    "B030",
+    "B905",
+    "F841",
+    "G001",
+    "I001",  # Import block is un-sorted or un-formatted (use isort to manage this)
+    "N801",
+    "N802",
+    "N803",
+    "N806",
+    "N812",
+    "N816",
+    "S101",
+    "S106",
+    "S107",
+    "S110",
+    "S603",
+    "S606",
+    "S607",
+    "T201",
+    "ANN204",
+    "ANN401",
+    "ARG001",
+    "ARG005",
+    "ARG002",
+    "BLE001",
+    "COM812",
+    "COM819",
+    "DTZ001",
+    "DTZ005",
+    "DTZ007",
+    "EM101",
+    "EM102",
+    "EM103",
+    "ERA001",
+    "FBT001",
+    "FBT002",
+    "FBT003",
+    "FIX002",  # line contains TODO
+    "FURB105",
+    "ICN001",
+    "ISC003",
+    "PD002",
+    "PERF401",
+    "PERF403",
+    "PIE790",
+    "PIE810",
+    "PLC0206",
+    "PLC0208",
+    "PLC0414",
+    "PLC0415",
+    "PLR0402",
+    "PLR0911",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+    "PLR1714",
+    "PLR1730",
+    "PLR2004",
+    "PLR5501",
+    "PLW0603",
+    "PLW1641",
+    "PLW2901",
+    "PT009",  # Use assert instead of unittest assertEqual
+    "PT018",
+    "PT027",
+    "PTH100",  # Fix this one!
+    "PTH118",  # Fix this one!
+    "PTH123",  # Fix this one!
+    "PYI032",
+    "PYI041",
+    "PYI050",
+    "RET504",
+    "RUF001",
+    "RUF005",
+    "RUF021",
+    "RUF028",
+    "RUF034",
+    "RUF100",
+    "SIM102",
+    "SIM103",
+    "SIM105",
+    "SIM108",
+    "SIM110",
+    "SIM117",
+    "SIM118",
+    "SIM210",
+    "SIM300",
+    "SLF001",
+    "TC001",
+    "TC002",
+    "TC003",
+    "TD002",
+    "TD003",
+    "TD005",
+    "TRY002",
+    "TRY003",
+    "TRY004",
+    "TRY203",
+    "TRY300",
+    "UP004",
+    "UP006",
+    "UP012",
+    "UP015",
+    "UP017",
+    "UP032",
+    "UP034",
+    "UP035",
+    "UP037",
+    "UP043",
+    "UP047",
+    "YTT204",
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 30
+
+[tool.ruff.lint.per-file-ignores]
+"dstauffman/**/__init__.py" = ["F401"]
+"dstauffman/tests/*" = ["D102", "D205", "D400", "D415", "N801", "N802", "N806"]
+"scripts/*.py" = ["INP001"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"

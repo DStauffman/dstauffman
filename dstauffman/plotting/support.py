@@ -4,6 +4,7 @@ Defines useful plotting utilities.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """  # pylint: disable=too-many-lines
 
 # %% Imports
@@ -211,7 +212,7 @@ class _HoverButton(QPushButton):
 class ExtraPlotter(Protocol):
     r"""Custom Protocol to type the extra_plotter argument to all the plots."""
 
-    def __call__(self, fig: Figure, ax: list[Axes]) -> None: ...
+    def __call__(self, fig: Figure, ax: list[Axes]) -> None: ...  # noqa: D102
 
 
 # %% Classes - MyCustomToolbar
@@ -437,7 +438,7 @@ class ColorMap(Frozen):
         try:
             # for when PIL is not installed
             pnginfo = PngInfo()
-        except:
+        except Exception:  # pylint: disable=broad-exception-caught
             return None
         pnginfo.add_text("Title", title)
         pnginfo.add_text("Description", title)
@@ -706,7 +707,7 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> str | tuple[st
             else:
                 try:
                     raw_title = fig.axes[0].get_title()
-                except:
+                except Exception:  # pylint: disable=broad-exception-caught
                     pass
         if raw_title is None:
             raw_title = "None"
@@ -1648,7 +1649,7 @@ def plot_vert_lines(
     for i, this_x in enumerate(x):  # type: ignore[arg-type]
         this_color = cm.get_color(i)
         this_label = labels[i] if show_in_legend else ""
-        ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=10, label=this_label)  # type: ignore[arg-type]
+        ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=10, label=this_label)
 
 
 # %% plot_phases
@@ -2345,9 +2346,9 @@ def fig_ax_factory(  # noqa: C901
     Parameters
     ----------
     num_figs : int
-        Number of igures to produce
+        Number of figures to produce
     num_axes : int or (int, int)
-        Number of axes
+        Total number of axes
     suptitle : str
         Title to put over all axes
     layout : str

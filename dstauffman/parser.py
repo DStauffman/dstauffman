@@ -4,6 +4,7 @@ Parser used to parse all commands from the terminal and pass to the revelant com
 Notes
 -----
 #.  Written by David C. Stauffer in March 2020.
+
 """
 
 # %% Imports
@@ -173,7 +174,7 @@ def process_command_line_options(log_start: bool | str | None = None) -> _Flags:
 
     # log any non-defaults
     # fmt: off
-    print_func: Callable[[str], None] = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)  # type: ignore[assignment]
+    print_func: Callable[[str], None] = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)  # type: ignore[assignment]  # noqa: E731
     # fmt: on
     if not use_display:
         print_func("Running without displaying any plots.")

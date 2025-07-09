@@ -4,6 +4,7 @@ Generic time based utilities.
 Notes
 -----
 #.  Written by David C. Stauffer in May 2020.
+
 """
 
 # %% Imports
@@ -278,7 +279,7 @@ def round_num_datetime(date_in: _N, /, time_delta: float, floor: bool = False) -
     >>> from dstauffman import round_num_datetime
     >>> import numpy as np
     >>> date_exact = np.arange(0, 10.1, 0.1)
-    >>> date_in    = date_exact + 0.001 * np.random.rand(101)
+    >>> date_in    = date_exact + 0.001 * np.random.default_rng().random(101)
     >>> time_delta = 0.1
     >>> date_out   = round_num_datetime(date_in, time_delta)
     >>> print(np.all(np.abs(date_out - date_exact) < 1e-12))
@@ -612,7 +613,8 @@ def convert_datetime_to_np(
 
 # %% Functions - convert_duration_to_np
 def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_UNITS) -> np.timedelta64:
-    r"""Convenience wrapper to convert a datetime.timedelta to a numpy.timedelta64 with the desired units.
+    r"""
+    Convenience wrapper to convert a datetime.timedelta to a numpy.timedelta64 with the desired units.
 
     Parameters
     ----------
@@ -644,7 +646,8 @@ def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_U
 
 # %% Functions - convert_num_dt_to_np
 def convert_num_dt_to_np(dt: int | float, /, units: str = "sec", np_units: str = NP_TIMEDELTA_FORM) -> np.timedelta64:
-    r"""Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
+    r"""
+    Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
 
     Parameters
     ----------

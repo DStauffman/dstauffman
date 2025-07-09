@@ -4,6 +4,7 @@ Test file for the `plotting` module of the "dstauffman.plotting" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 # %% Imports
@@ -181,10 +182,11 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def setUp(self) -> None:
         # fmt: off
+        self.prng           = np.random.default_rng()
         self.description    = "Plot description"
         self.time           = np.arange(0, 10, 0.1) + 2000
         num_channels        = 5
-        self.row_data       = np.random.rand(len(self.time), num_channels)
+        self.row_data       = self.prng.random((len(self.time), num_channels))
         mag                 = np.sum(self.row_data, axis=1)
         self.row_data       = 10 * self.row_data / np.expand_dims(mag, axis=1)
         self.col_data       = self.row_data.T.copy()
@@ -249,7 +251,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.assertIsNotNone(self.fig)
 
     def test_bad_3d(self) -> None:
-        bad_data = np.random.rand(self.time.shape[0], 4, 5)
+        bad_data = self.prng.random((self.time.shape[0], 4, 5))
         with self.assertRaises(AssertionError):
             plot.plot_time_history(self.description, self.time, bad_data, opts=self.opts)
 
@@ -266,7 +268,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def test_lists1(self) -> None:
         time = np.arange(10)
-        data: list[_N] = [np.random.rand(10), 5 * np.random.rand(10)]
+        data: list[_N] = [self.prng.random(10), 5 * self.prng.random(10)]
         elements = ("Item 1", "5 Times")
         self.fig = plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements)
         self.assertIsNotNone(self.fig)
@@ -312,7 +314,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
     def setUp(self) -> None:
         num = 10
         self.fig: Figure | None = None
-        self.data = unit(np.random.rand(num, num), axis=0)
+        self.data = unit(np.random.default_rng().random((num, num)), axis=0)
         self.labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
         self.units = "percentage"
         self.opts = plot.Opts()
@@ -428,7 +430,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
     def setUp(self) -> None:
         self.time = np.arange(0, 5, 1.0 / 12) + 2000
         num_bins = 5
-        self.data = np.random.rand(num_bins, len(self.time))
+        self.data = np.random.default_rng().random((num_bins, len(self.time)))
         mag = np.sum(self.data, axis=0)
         self.data = self.data / np.expand_dims(mag, axis=0)
         self.description = "Plot bar testing"

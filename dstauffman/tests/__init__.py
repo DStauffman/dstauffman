@@ -4,6 +4,7 @@ Full test suite of the "dstauffman" module based on the Python `unittest` librar
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 # %% Imports

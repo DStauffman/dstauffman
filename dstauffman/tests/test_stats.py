@@ -4,6 +4,7 @@ Test file for the `stats` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in December 2015.
+
 """
 
 # %% Imports
@@ -300,7 +301,7 @@ class Test_rand_draw(unittest.TestCase):
 
     def setUp(self) -> None:
         self.chances = np.array([0.1, 0.2, 0.8, 0.9])
-        self.prng = np.random.RandomState()
+        self.prng = np.random.default_rng()
 
     def test_nominal(self) -> None:
         is_set = dcs.rand_draw(self.chances, self.prng)
@@ -336,10 +337,10 @@ class Test_apply_prob_to_mask(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.prng = np.random.RandomState()
+        self.prng = np.random.default_rng()
 
     def test_nominal(self) -> None:
-        mask = self.prng.rand(50000) < 0.5
+        mask = self.prng.random(50000) < 0.5
         prob = 0.3
         num = np.count_nonzero(mask)
         out = dcs.apply_prob_to_mask(mask, prob, self.prng)
@@ -348,7 +349,7 @@ class Test_apply_prob_to_mask(unittest.TestCase):
         self.assertLess(np.count_nonzero(out), 4 * num // 10, "Too many trues in out.")  # type: ignore[call-overload]
 
     def test_inplace(self) -> None:
-        mask = self.prng.rand(50000) < 0.2
+        mask = self.prng.random(50000) < 0.2
         prob = 0.8
         num = np.count_nonzero(mask)
         out = dcs.apply_prob_to_mask(mask, prob, self.prng, inplace=True)
@@ -357,13 +358,13 @@ class Test_apply_prob_to_mask(unittest.TestCase):
         self.assertLess(np.count_nonzero(out), num, "Too many trues in out.")  # type: ignore[call-overload]
 
     def test_zero_prob(self) -> None:
-        mask = self.prng.rand(1000) < 0.8
+        mask = self.prng.random(1000) < 0.8
         prob = 0.0
         out = dcs.apply_prob_to_mask(mask, prob, self.prng)
         self.assertTrue(np.all(~out))
 
     def test_one_prob(self) -> None:
-        mask = self.prng.rand(1000) < 0.4
+        mask = self.prng.random(1000) < 0.4
         prob = 1.0
         out = dcs.apply_prob_to_mask(mask, prob, self.prng)
         self.assertIsNot(out, mask)

@@ -4,6 +4,7 @@ Test file for the `orbit_support` module of the "dstauffman.aerospace" library.
 Notes
 -----
 #.  Written by David C. Stauffer in August 2021.
+
 """
 
 # %% Imports
@@ -212,6 +213,14 @@ class Test_aerospace_d_2_dms(unittest.TestCase):
         dms = space.d_2_dms(np.array([0.0, 38.4541666666666666]))
         np.testing.assert_array_almost_equal(dms, np.array([[0.0, 0.0, 0], [38.0, 27.0, 15.0]]).T, 11)
 
+    def test_negative(self) -> None:
+        dms = space.d_2_dms(-38.4541666666666666)
+        np.testing.assert_array_almost_equal(dms, np.array([-38.0, 27.0, 15.0]), 11)
+
+    def test_small_negative(self) -> None:
+        dms = space.d_2_dms(0.25)
+        np.testing.assert_array_almost_equal(dms, np.array([-0.0, 15.0, 0.0]), 11)
+
     def test_bad_size(self) -> None:
         with self.assertRaises(ValueError):
             space.d_2_dms(np.zeros((3, 10)))
@@ -227,12 +236,22 @@ class Test_aerospace_dms_2_d(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        dms = space.dms_2_d(np.array([38.0, 27.0, 15.0]))
-        np.testing.assert_array_almost_equal(dms, 38.4541666666666666, 11)
+        d = space.dms_2_d(np.array([38.0, 27.0, 15.0]))
+        self.assertAlmostEqual(d, 38.4541666666666666, 11)  # type: ignore[misc]
 
     def test_vector(self) -> None:
-        dms = space.dms_2_d(np.array([[0.0, 0.0, 0], [38.0, 27.0, 15.0]]).T)
-        np.testing.assert_array_almost_equal(dms, np.array([0.0, 38.4541666666666666]), 11)
+        d = space.dms_2_d(np.array([[0.0, 0.0, 0], [38.0, 27.0, 15.0]]).T)
+        np.testing.assert_array_almost_equal(d, np.array([0.0, 38.4541666666666666]), 11)
+
+    def test_negative(self) -> None:
+        d = space.dms_2_d(np.array([-38.0, 27.0, 15.0]))
+        self.assertAlmostEqual(d, -38.4541666666666666, 11)  # type: ignore[misc]
+
+    def test_small_negative(self) -> None:
+        d = space.dms_2_d(np.array([0.0, 15.0, 0.0]))
+        self.assertAlmostEqual(d, 0.25, 11)  # type: ignore[misc]
+        d = space.dms_2_d(np.array([-0.0, 15.0, 0.0]))
+        self.assertAlmostEqual(d, -0.25, 11)  # type: ignore[misc]
 
     def test_bad_size(self) -> None:
         with self.assertRaises(ValueError):
@@ -260,6 +279,16 @@ class Test_aerospace_hms_2_r(unittest.TestCase):
         x = space.hms_2_r(np.array([[0.0, 0.0, 0], self.hms, [8.0, 0.0, 0.0], [23, 59, 60]]).T)
         np.testing.assert_array_almost_equal(x, np.array([0.0, self.exp, 2 * pi / 3, 2 * pi]), 11)
 
+    def test_negative(self) -> None:
+        x = space.hms_2_r(np.array([-self.hms[0], self.hms[1], self.hms[2]]))
+        self.assertAlmostEqual(x, -self.exp, 14)  # type: ignore[misc]
+
+    def test_small_negative(self) -> None:
+        d = space.dms_2_d(np.array([0.0, 15.0, 0.0]))
+        self.assertAlmostEqual(d, 0.25, 11)  # type: ignore[misc]
+        d = space.dms_2_d(np.array([-0.0, 15.0, 0.0]))
+        self.assertAlmostEqual(d, -0.25, 11)  # type: ignore[misc]
+
 
 # %% aerospace.r_2_hms
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
@@ -283,6 +312,19 @@ class Test_aerospace_r_2_hms(unittest.TestCase):
         hms = space.r_2_hms(r)
         exp = np.array([[0.0, 0.0, 0], self.exp, [8.0, 0.0, 0.0], [24, 0, 0]]).T
         np.testing.assert_array_almost_equal(hms, exp, 11)
+
+    def test_negative(self) -> None:
+        hms = space.r_2_hms(-self.r)
+        exp = np.array([-self.exp[0], self.exp[1], self.exp[2]])
+        np.testing.assert_array_almost_equal(hms, exp, 11)
+
+    def test_small_negative(self) -> None:
+        hms = space.r_2_hms(pi / 24)
+        np.testing.assert_array_almost_equal(hms, np.array([0.0, 30.0, 0.0]), 11)
+        self.assertFalse(np.signbit(hms[0]))
+        hms = space.r_2_hms(-pi / 24)
+        np.testing.assert_array_almost_equal(hms, np.array([-0.0, 30.0, 0.0]), 11)
+        self.assertTrue(np.signbit(hms[0]))
 
 
 # %% aerospace.aer_2_rdr
@@ -510,6 +552,26 @@ class Test_aerospace_get_sun_distance(unittest.TestCase):
         sun_dist = space.get_sun_distance(np.array([self.time_jd_jan, self.time_jd_jul]))
         exp = np.array([self.dist_jan, self.dist_jul])
         np.testing.assert_array_almost_equal(sun_dist, exp, self.limit)
+
+
+# %% aerospace.get_moon_radec_approx
+class Test_aerospace_get_moon_radec_approx(unittest.TestCase):
+    r"""
+    Tests the aerospace.get_moon_radec_approx function with the following cases:
+        TBD
+    """
+
+    pass  # TODO: write this
+
+
+# %% aerospace.get_moon_distance
+class Test_aerospace_get_moon_distance(unittest.TestCase):
+    r"""
+    Tests the aerospace.get_moon_distance function with the following cases:
+        TBD
+    """
+
+    pass  # TODO: write this
 
 
 # %% aerospace.beta_from_oe

@@ -4,6 +4,7 @@ Test file for the `orbit_const` module of the "dstauffman.aerospace" library.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2021.
+
 """
 
 # %% Imports
@@ -14,9 +15,7 @@ import dstauffman.aerospace as space
 
 # %% Classes for testing
 class Test_orbits_all_values(unittest.TestCase):
-    r"""
-    Tests all the constant values in the module.
-    """
+    r"""Tests all the constant values in the module."""
 
     def setUp(self) -> None:
         self.float: list[str] = [

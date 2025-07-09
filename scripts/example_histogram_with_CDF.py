@@ -9,7 +9,7 @@ from dstauffman.plotting import close_all, plot_histogram
 if __name__ == "__main__":
     close_all()
     description = "Histogram"
-    data = np.abs(np.random.randn(1000) / 3.0)
+    data = np.abs(np.random.default_rng().normal(size=1000) / 3.0)
     bins = np.arange(0.0, 2.1, 0.1)
     if np.max(data) > 2.0:
         bins = np.hstack([bins, np.max(data) + 0.1])

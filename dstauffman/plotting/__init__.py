@@ -6,6 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 #.  Added support and generic files in May 2020.
 #.  Split into separate submodule to not require matplotlib in July 2020.
+
 """
 
 # %% Imports

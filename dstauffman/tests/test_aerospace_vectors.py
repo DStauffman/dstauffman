@@ -4,6 +4,7 @@ Test file for the `vectors` module of the "dstauffman.aerospace" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2020.
+
 """
 
 # %% Imports
@@ -251,9 +252,10 @@ class Test_aerospace_cart2sph(unittest.TestCase):
 
     def test_loop(self) -> None:
         num = 10
-        x = 3 * np.random.rand(num)
-        y = -4 * np.random.rand(num)
-        z = 10 * np.random.rand(num)
+        prng = np.random.default_rng()
+        x = 3 * prng.random(num)
+        y = -4 * prng.random(num)
+        z = 10 * prng.random(num)
         (az, el, rad) = space.cart2sph(x, y, z)
         (x2, y2, z2) = space.sph2cart(az, el, rad)
         np.testing.assert_array_almost_equal(x, x2, 14)
@@ -301,9 +303,10 @@ class Test_aerospace_sph2cart(unittest.TestCase):
 
     def test_loop(self) -> None:
         num = 10
-        az = 2 * np.pi * np.random.rand(num) - np.pi
-        el = np.pi / 2 * np.random.rand(num)
-        rad = 10 * np.random.rand(num)
+        prng = np.random.default_rng()
+        az = 2 * np.pi * prng.random(num) - np.pi
+        el = np.pi / 2 * prng.random(num)
+        rad = 10 * prng.random(num)
         (x, y, z) = space.sph2cart(az, el, rad)
         (az2, el2, rad2) = space.cart2sph(x, y, z)
         np.testing.assert_array_almost_equal(az, az2, 14)
@@ -377,9 +380,10 @@ class Test_aerospace_linear_interp(unittest.TestCase):
 
     @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_unsorted(self) -> None:
+        prng = np.random.default_rng()
         ix = np.arange(self.xp.size)
         while issorted(ix):
-            np.random.shuffle(ix)
+            prng.shuffle(ix)
         y = space.interp_vector(self.x, self.xp[ix], self.yp[ix], assume_sorted=False)
         np.testing.assert_array_almost_equal(y, self.y, 12)
 

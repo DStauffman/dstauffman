@@ -4,6 +4,7 @@ Functions related to converting orbital elements from one form to another.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2021.
+
 """
 
 # %% Imports
@@ -376,7 +377,15 @@ def anomaly_mean_2_hyperbolic(M: _FN, e: _FN) -> np.floating | _N:
 
 
 # %% Functions - anomaly_mean_2_true
-def anomaly_mean_2_true(M: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_mean_2_true(M: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_mean_2_true(M: _F, e: _N) -> _N: ...
+@overload
+def anomaly_mean_2_true(M: _N, e: _F) -> _N: ...
+@overload
+def anomaly_mean_2_true(M: _N, e: _N) -> _N: ...
+def anomaly_mean_2_true(M: _FN, e: _FN) -> np.floating | _N:
     r"""Finds the eccentric anomaly from the true anomaly."""
     E = anomaly_mean_2_eccentric(M, e)
     nu = anomaly_eccentric_2_true(E, e)
@@ -384,7 +393,15 @@ def anomaly_mean_2_true(M: _FN, e: _FN) -> _FN:
 
 
 # %% Functions - anomaly_true_2_eccentric
-def anomaly_true_2_eccentric(nu: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_true_2_eccentric(nu: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_true_2_eccentric(nu: _F, e: _N) -> _N: ...
+@overload
+def anomaly_true_2_eccentric(nu: _N, e: _F) -> _N: ...
+@overload
+def anomaly_true_2_eccentric(nu: _N, e: _N) -> _N: ...
+def anomaly_true_2_eccentric(nu: _FN, e: _FN) -> np.floating | _N:
     r"""Finds the true anomaly from the eccentric anomaly."""
     # check if orbit is circular or elliptical
     if np.any(e >= 1.0):
@@ -408,7 +425,15 @@ def anomaly_true_2_eccentric(nu: _FN, e: _FN) -> _FN:
 
 
 # %% Functions - anomaly_true_2_hyperbolic
-def anomaly_true_2_hyperbolic(nu: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_true_2_hyperbolic(nu: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_true_2_hyperbolic(nu: _F, e: _N) -> _N: ...
+@overload
+def anomaly_true_2_hyperbolic(nu: _N, e: _F) -> _N: ...
+@overload
+def anomaly_true_2_hyperbolic(nu: _N, e: _N) -> _N: ...
+def anomaly_true_2_hyperbolic(nu: _FN, e: _FN) -> np.floating | _N:
     r"""Finds the hyperbolic anomaly from the true anomaly."""
     # check if orbit is hyperbolic
     if np.any(e < 1.0):
@@ -431,7 +456,15 @@ def anomaly_true_2_hyperbolic(nu: _FN, e: _FN) -> _FN:
 
 
 # %% Functions - anomaly_true_2_mean
-def anomaly_true_2_mean(nu: _FN, e: _FN) -> _FN:
+@overload
+def anomaly_true_2_mean(nu: _F, e: _F) -> np.floating: ...
+@overload
+def anomaly_true_2_mean(nu: _F, e: _N) -> _N: ...
+@overload
+def anomaly_true_2_mean(nu: _N, e: _F) -> _N: ...
+@overload
+def anomaly_true_2_mean(nu: _N, e: _N) -> _N: ...
+def anomaly_true_2_mean(nu: _FN, e: _FN) -> np.floating | _N:
     r"""Finds the mean anomaly from the true anomaly."""
     E = anomaly_true_2_eccentric(nu, e)
     M = anomaly_eccentric_2_mean(E, e)
@@ -439,7 +472,15 @@ def anomaly_true_2_mean(nu: _FN, e: _FN) -> _FN:
 
 
 # %% Functions - mean_motion_2_semimajor
-def mean_motion_2_semimajor(n: _FN, mu: _FN) -> _FN:
+@overload
+def mean_motion_2_semimajor(n: _F, mu: _F) -> np.floating: ...
+@overload
+def mean_motion_2_semimajor(n: _F, mu: _N) -> _N: ...
+@overload
+def mean_motion_2_semimajor(n: _N, mu: _F) -> _N: ...
+@overload
+def mean_motion_2_semimajor(n: _N, mu: _N) -> _N: ...
+def mean_motion_2_semimajor(n: _FN, mu: _FN) -> np.floating | _N:
     r"""
     Calculates the semi-major axis from the mean motion.
 
@@ -479,7 +520,15 @@ def mean_motion_2_semimajor(n: _FN, mu: _FN) -> _FN:
 
 
 # %% Functions - period_2_semimajor
-def period_2_semimajor(p: _FN, mu: _FN) -> _FN:
+@overload
+def period_2_semimajor(p: _F, mu: _F) -> np.floating: ...
+@overload
+def period_2_semimajor(p: _F, mu: _N) -> _N: ...
+@overload
+def period_2_semimajor(p: _N, mu: _F) -> _N: ...
+@overload
+def period_2_semimajor(p: _N, mu: _N) -> _N: ...
+def period_2_semimajor(p: _FN, mu: _FN) -> np.floating | _N:
     r"""
     Calculates the semi-major axis from the period.
 
@@ -519,7 +568,15 @@ def period_2_semimajor(p: _FN, mu: _FN) -> _FN:
 
 
 # %% Functions - semimajor_2_mean_motion
-def semimajor_2_mean_motion(a: _FN, mu: _FN) -> _FN:
+@overload
+def semimajor_2_mean_motion(a: _F, mu: _F) -> np.floating: ...
+@overload
+def semimajor_2_mean_motion(a: _F, mu: _N) -> _N: ...
+@overload
+def semimajor_2_mean_motion(a: _N, mu: _F) -> _N: ...
+@overload
+def semimajor_2_mean_motion(a: _N, mu: _N) -> _N: ...
+def semimajor_2_mean_motion(a: _FN, mu: _FN) -> np.floating | _N:
     r"""
     Calculates the mean motion from the semi-major axis.
 
@@ -560,7 +617,15 @@ def semimajor_2_mean_motion(a: _FN, mu: _FN) -> _FN:
 
 
 # %% Functions - semimajor_2_period
-def semimajor_2_period(a: _FN, mu: _FN) -> _FN:
+@overload
+def semimajor_2_period(a: _F, mu: _F) -> np.floating: ...
+@overload
+def semimajor_2_period(a: _F, mu: _N) -> _N: ...
+@overload
+def semimajor_2_period(a: _N, mu: _F) -> _N: ...
+@overload
+def semimajor_2_period(a: _N, mu: _N) -> _N: ...
+def semimajor_2_period(a: _FN, mu: _FN) -> np.floating | _N:
     r"""
     Calculates the period from the semi-major axis.
 

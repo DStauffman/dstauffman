@@ -4,6 +4,7 @@ Contains generic quaternion utilities that are optimized for runtime performance
 Notes
 -----
 #.  Written by David C. Stauffer in February 2021.
+
 """
 
 # %% Imports

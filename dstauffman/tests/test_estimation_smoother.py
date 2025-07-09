@@ -4,6 +4,7 @@ Test file for the `smoother` module of the "dstauffman.estimation" library.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2020.
+
 """
 
 # %% Imports

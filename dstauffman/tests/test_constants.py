@@ -4,6 +4,7 @@ Test file for the `constants` module of the "dstauffman" library.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 # %% Imports
@@ -17,9 +18,7 @@ if dcs.HAVE_NUMPY:
 
 # %% Classes for testing
 class Test_all_values(unittest.TestCase):
-    r"""
-    Tests all the constant values in the module.
-    """
+    r"""Tests all the constant values in the module."""
 
     def setUp(self) -> None:
         self.ints: list[str] = ["INT_TOKEN", "NP_INT64_PER_SEC"]

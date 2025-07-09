@@ -4,6 +4,7 @@ Contains generic quaternion utilities that can be independently defined and used
 Notes
 -----
 #.  Written by David C. Stauffer in April 2015.
+
 """  # pylint: disable=too-many-lines
 
 # %% Imports

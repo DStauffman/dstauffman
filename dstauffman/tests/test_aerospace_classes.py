@@ -4,6 +4,7 @@ Test file for the `classes` module of the "dstauffman.aerospace" library.
 Notes
 -----
 #.  Written by David C. Stauffer in December 2018.
+
 """
 
 # %% Imports
@@ -149,16 +150,17 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         self.assertIsNone(innov3.snr)
 
     def test_combine_inplace(self) -> None:
+        prng = np.random.default_rng()
         innov1 = space.KfInnov(
             name="Gnd", units="m", chan=["X", "Y", "Z"], num_innovs=60, num_axes=3, time_dtype=NP_DATETIME_FORM
         )
-        innov1.fploc = np.random.rand(2, 60)
-        innov1.snr = np.random.rand(60)
+        innov1.fploc = prng.random((2, 60))
+        innov1.snr = prng.random(60)
         innov2 = space.KfInnov(
             name="Gnd", units="m", chan=["X", "Y", "Z"], num_innovs=50, num_axes=3, time_dtype=NP_DATETIME_FORM
         )
-        innov2.fploc = np.random.rand(2, 50)
-        innov2.snr = np.random.rand(50)
+        innov2.fploc = prng.random((2, 50))
+        innov2.snr = prng.random(50)
         innov3 = innov1.combine(innov2, inplace=True)
         self.assertIs(innov1, innov3)
         self.assertEqual(innov3.name, "Gnd")
@@ -179,7 +181,7 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         assert innov.norm is not None
         assert innov.status is not None
         innov.time[:] = np.arange(60.0)
-        innov.innov[:] = np.random.rand(2, 60)
+        innov.innov[:] = np.random.default_rng().random((2, 60))
         innov.norm[:] = 10 * innov.innov
         innov.status[:] = np.ones(60, dtype=int)
         innov2 = innov.chop(ti=10, tf=20, include_last=False)
@@ -219,7 +221,7 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         assert innov.norm is not None
         assert innov.status is not None
         innov.time[:] = np.arange(60.0)
-        innov.innov[:] = np.random.rand(2, 60)
+        innov.innov[:] = np.random.default_rng().random((2, 60))
         innov.norm[:] = 10 * innov.innov
         innov.status[:] = np.ones(60, dtype=int)
         innov2 = innov.chop(ti=10, tf=20, inplace=True)
@@ -243,7 +245,7 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         assert innov.norm is not None
         assert innov.status is not None
         innov.time[:] = np.arange(60.0)
-        innov.innov[:] = np.random.rand(2, 60)
+        innov.innov[:] = np.random.default_rng().random((2, 60))
         innov.norm[:] = 10 * innov.innov
         innov.status[:] = np.ones(60, dtype=int)
         (innov3, innov2, innov4) = innov.chop(ti=10, tf=20, return_ends=True)
@@ -287,6 +289,7 @@ class Test_aerospace_Kf(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        self.prng = np.random.default_rng()
         self.filename = get_tests_dir() / "test_kf.hdf5"
         self.date_zero = np.datetime64("2021-07-01T12:00:00", NP_DATETIME_UNITS)
 
@@ -328,7 +331,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         )
         kf1.time[:] = np.arange(30.0)  # type: ignore[index]
         kf1.innov.time[:] = np.arange(10.0, 20.0) + 0.2
-        kf1.innov.innov[:] = np.random.rand(2, 10)
+        kf1.innov.innov[:] = self.prng.random((2, 10))
         kf2 = space.Kf(
             name="Name 2",
             units="m",
@@ -342,7 +345,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         )
         kf2.time[:] = np.arange(30.0, 90.0)  # type: ignore[index]
         kf2.innov.time[:] = np.arange(40.0, 70.0) + 0.2
-        kf2.innov.innov[:] = np.random.rand(2, 30)
+        kf2.innov.innov[:] = self.prng.random((2, 30))
         kf3 = kf1.combine(kf2)
         self.assertEqual(kf3.name, "Name 1")
         self.assertEqual(kf3.chan, ("a", "b", "c", "d", "e", "f"))
@@ -397,7 +400,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         )
         kf1.time[:] = self.date_zero + (10**9 * np.arange(30)).astype(NP_TIMEDELTA_FORM)  # type: ignore[index]
         kf1.innov.time[:] = self.date_zero + (10**9 * np.arange(10, 20) + 2 * 10**8).astype(NP_TIMEDELTA_FORM)
-        kf1.innov.innov[:] = np.random.rand(3, 10)
+        kf1.innov.innov[:] = self.prng.random((3, 10))
         kf2 = space.Kf(
             name="Name 2",
             units="rad",
@@ -411,7 +414,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         )
         kf2.time[:] = self.date_zero + (10**9 * np.arange(30, 90)).astype(NP_TIMEDELTA_FORM)  # type: ignore[index]
         kf2.innov.time[:] = self.date_zero + (10**9 * np.arange(40, 70) + 2 * 10**8).astype(NP_TIMEDELTA_FORM)
-        kf2.innov.innov[:] = np.random.rand(3, 30)
+        kf2.innov.innov[:] = self.prng.random((3, 30))
         kf3 = kf1.combine(kf2, inplace=True)
         self.assertIs(kf1, kf3)
         self.assertEqual(kf3.name, "Name 1")
@@ -437,7 +440,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         )
         kf.time[:] = np.arange(60.0)  # type: ignore[index]
         kf.innov.time[:] = np.arange(5.0, 60.0, 0.5)
-        kf.innov.innov[:] = np.random.rand(2, 110)
+        kf.innov.innov[:] = self.prng.random((2, 110))
         kf2 = kf.chop(ti=10, tf=20, include_last=False)
         kf3 = kf.chop(ti=20, tf=40, include_last=True)
         self.assertIsNot(kf, kf2)
@@ -472,7 +475,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         )
         kf.time[:] = np.arange(60.0)  # type: ignore[index]
         kf.innov.time[:] = np.arange(5.0, 60.0, 0.5)
-        kf.innov.innov[:] = np.random.rand(2, 110)
+        kf.innov.innov[:] = self.prng.random((2, 110))
         kf2 = kf.chop(ti=10, tf=20, inplace=True)
         self.assertIs(kf, kf2)
         self.assertEqual(kf.name, "Gnd")
@@ -498,7 +501,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         )
         kf.time[:] = np.arange(60.0)  # type: ignore[index]
         kf.innov.time[:] = np.arange(5.0, 60.0, 0.5)
-        kf.innov.innov[:] = np.random.rand(2, 110)
+        kf.innov.innov[:] = self.prng.random((2, 110))
         (kf3, kf2, kf4) = kf.chop(ti=10, tf=20, return_ends=True)
         self.assertIsNot(kf, kf2)
         for this in [kf, kf2, kf3, kf4]:

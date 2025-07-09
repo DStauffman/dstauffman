@@ -4,6 +4,7 @@ Classes and functions related to orbits and orbit determination and propagation.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2021.
+
 """
 
 # %% Imports
@@ -720,7 +721,7 @@ def advance_true_anomaly(a: _FN, e: _FN, vo: _FN, mu: _FN, time: _FN) -> _FN:
         # calculate the new true anomaly from the eccentric anomaly
         nu = anomaly_eccentric_2_true(E, e)
     elif np.all(e == 1.0):  # parabolic
-        Ei = 0
+        Ei = np.array(0.0)
         Mi = anomaly_eccentric_2_mean(Ei, e)  # find new mean anomaly based on delta time
         M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
         # solve transcendental function for E
