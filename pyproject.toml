@@ -54,7 +54,7 @@ Changelog = "https://github.com/DStauffman/dstauffman/blob/main/CHANGELOG.md"
 dcs = "dstauffman.__main__:main"
 
 [tool.setuptools.package-data]
-dstauffman = ["CHANGELOG.md", "LICENSE.txt", "MANIFEST.in", "pyproject.toml", "README.rst", "*.png", "*.pdf", "*.rst", "*.tex", "*.bat", "*.sh"]
+dstauffman = ["CHANGELOG.md", "LICENSE.txt", "pyproject.toml", "README.rst", "*.png", "*.pdf", "*.rst", "*.tex", "*.bat", "*.sh"]
 
 [tool.bandit]
 skips = ["B101"]
@@ -224,7 +224,7 @@ ignore = [
     "S603",
     "S606",
     "S607",
-    "T201",
+    "T201",  # `print` found
     "ANN204",
     "ANN401",
     "ARG001",
@@ -271,9 +271,6 @@ ignore = [
     "PT009",  # Use assert instead of unittest assertEqual
     "PT018",
     "PT027",
-    "PTH100",  # Fix this one!
-    "PTH118",  # Fix this one!
-    "PTH123",  # Fix this one!
     "PYI032",
     "PYI041",
     "PYI050",
@@ -297,8 +294,8 @@ ignore = [
     "TC001",
     "TC002",
     "TC003",
-    "TD002",
-    "TD003",
+    "TD002",  # Missing author in TODO
+    "TD003",  # Missing issue link in TODO
     "TD005",
     "TRY002",
     "TRY003",

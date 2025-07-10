@@ -63,7 +63,7 @@ def get_map_data(source: str = "110m") -> tuple[dict[str, _M], dict[str, tuple[f
         filename = get_data_dir() / "earth_50m.geo.json"
     else:
         raise ValueError(f"Unknown data source: {source}")
-    with open(filename, encoding="utf-8") as file:
+    with filename.open(encoding="utf-8") as file:
         raw_data = json.load(file)
     features = raw_data["features"]
 

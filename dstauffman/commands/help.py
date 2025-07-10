@@ -35,11 +35,11 @@ def print_help(help_file: Path | None = None) -> int:
 
     """
     if help_file is None:
-        help_file = get_root_dir().parent / "README.rst"
+        help_file = get_root_dir().parent.joinpath("README.rst")
     if not help_file.is_file():
         print(f'Warning: help file at "{help_file}" was not found.')
         return ReturnCodes.bad_help_file
-    with open(help_file, encoding="utf-8") as file:
+    with help_file.open(encoding="utf-8") as file:
         text = file.read()
     print(text)
     return ReturnCodes.clean

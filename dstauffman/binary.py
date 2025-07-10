@@ -183,7 +183,7 @@ def read_bit_stream(file: BinaryIO, num_lines: int = 10, reset: bool = False, en
     >>> from dstauffman import read_bit_stream, get_tests_dir
     >>> import numpy as np
     >>> filename = get_tests_dir() / "test_big_endian.bin"
-    >>> with open(filename, "rb") as file:
+    >>> with filename.open("rb") as file:
     ...     read_bit_stream(file, num_lines=10)
     00000000000000000000000000000011 11111111111111111111111111111101
     uint32 = [3, 4294967293]
