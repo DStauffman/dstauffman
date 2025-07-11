@@ -52,7 +52,7 @@ class Test_get_data_dir(unittest.TestCase):
 
     def test_function(self) -> None:
         folder = dcs.get_data_dir()
-        self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "data")))  # noqa: PTH100,PTH118
+        self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "data")))  # noqa: PTH100,PTH118  # fmt: skip
 
 
 # %% get_images_dir
@@ -64,7 +64,7 @@ class Test_get_images_dir(unittest.TestCase):
 
     def test_function(self) -> None:
         folder = dcs.get_images_dir()
-        self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "images")))  # noqa: PTH100,PTH118
+        self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "images")))  # noqa: PTH100,PTH118  # fmt: skip
 
 
 # %% get_output_dir
@@ -76,7 +76,7 @@ class Test_get_output_dir(unittest.TestCase):
 
     def test_function(self) -> None:
         folder = dcs.get_output_dir()
-        self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "results")))  # noqa: PTH100,PTH118
+        self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "results")))  # noqa: PTH100,PTH118  # fmt: skip
 
 
 # %% Unit test execution

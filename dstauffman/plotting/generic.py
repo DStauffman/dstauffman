@@ -456,7 +456,7 @@ def make_generic_plot(  # noqa: C901
 
     # optional inputs
     if elements is None:
-        elements = [f"Channel {i+1}" for i in range(np.max((s1, s2)))]
+        elements = [f"Channel {i + 1}" for i in range(np.max((s1, s2)))]
     # find number of elements being plotted
     num_channels = len(elements)
     if num_channels != np.maximum(s1, s2):

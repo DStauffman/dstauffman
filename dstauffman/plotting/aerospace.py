@@ -1579,7 +1579,7 @@ def plot_innov_fplocs(
 
     name = kf1.name + " - " if kf1.name else ""
     description = name + "Focal Plane Sightings"
-    extra_text = f'(by {kwargs["color_by"]}) ' if "color_by" in kwargs and kwargs["color_by"] != "none" else ""
+    extra_text = f"(by {kwargs['color_by']}) " if "color_by" in kwargs and kwargs["color_by"] != "none" else ""
     logger.log(LogLevel.L4, "Plotting %s plots %s...", description, extra_text)
 
     # check for data
@@ -1919,7 +1919,7 @@ def plot_covariance(  # noqa: C901
                 )
                 if return_err:
                     figs += out[0]
-                    err[field][f"Group {ix+1}"] = out[1]
+                    err[field][f"Group {ix + 1}"] = out[1]
                 else:
                     figs += out
         logger.log(LogLevel.L4, "... done.")

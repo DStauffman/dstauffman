@@ -790,19 +790,19 @@ def advance_elements(elements: Elements, mu: _FN, time: _FN) -> Elements:
      P          = nan
      lo         = nan
      T          = nan
-     type       = OrbitType.elliptic: 1
+     type       = ...1
      equatorial = True
      circular   = True
      t          = 2023-06-01T00:10:00...
 
     """
-    # initialize output to the same as the input
+    # advance the elements
+    nu = advance_true_anomaly(elements.a, elements.e, elements.vo, mu, time)
+    # initialize output to the same as the input (potentially broadcast)
     new_elements = Elements(len(elements))
     for key, value in vars(elements).items():
         if not is_dunder(key):
-            setattr(new_elements, key, value)
-    # advance the elements
-    nu = advance_true_anomaly(elements.a, elements.e, elements.vo, mu, time)
+            setattr(new_elements, key, np.broadcast_to(value, nu.shape))  # type: ignore[union-attr]
     # store update variables
     new_elements.vo = nu
     new_elements.t = elements.t + NP_ONE_DAY * (time / JULIAN["day"])

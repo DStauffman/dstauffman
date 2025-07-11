@@ -32,6 +32,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+    _F = float | np.floating
     _N = NDArray[np.floating]
     _M = NDArray[np.floating]  # 2D
 
@@ -100,7 +101,7 @@ def plot_map(  # noqa: C901
     units: str = "deg",
     latlon_units: str = "rad",
     opts: Opts | None = None,
-    xy_events: tuple[tuple[float, float], ...] | list[tuple[float, float]] | None = None,
+    xy_events: tuple[tuple[_F, _F], ...] | list[tuple[_F, _F]] | None = None,
     xy_annotations: tuple[str, ...] | list[str] | None = None,
     xy_colors: tuple[str, ...] | list[str] | None = None,
     land_colors: str = "same",
@@ -245,7 +246,7 @@ def plot_map(  # noqa: C901
             cbar.ax.set_ylabel(cbar_title)
     if xy_events is not None:
         for i in range(len(xy_events)):  # pylint: disable=consider-using-enumerate
-            xy_event = tuple(np.multiply(latlon_scale, xy_events[i]))
+            xy_event = (float(latlon_scale * xy_events[i][0]), float(latlon_scale * xy_events[i][1]))
             xy_color = xy_colors[i] if xy_colors is not None else "xkcd:green"
             xy_annot = xy_annotations[i] if xy_annotations is not None else None
             circle = plt.Circle(xy_event, 5.0, color=xy_color, fill=False, linewidth=3.0, zorder=10)
