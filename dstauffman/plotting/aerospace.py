@@ -25,12 +25,11 @@ from dstauffman.plotting.generic import (
     make_categories_plot,
     make_connected_sets,
     make_difference_plot,
-    make_generic_plot,
+    make_quaternion_plot,
     make_time_plot,
 )
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
 from dstauffman.plotting.support import (
-    COLOR_LISTS,
     ColorMap,
     ExtraPlotter,
     fig_ax_factory,
@@ -48,10 +47,6 @@ if HAVE_MPL:
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
-
-    inf = np.inf
-else:
-    from math import inf
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -210,223 +205,6 @@ def minimize_names(names: tuple[str, ...], *, sep: str = ",") -> str:
     else:
         match = i + 1
     return names[0][:match] + sep.join(name[match:] for name in names)
-
-
-# %% Functions - make_quaternion_plot
-@overload
-def make_quaternion_plot(
-    description: str,
-    time_one: _Times | None,
-    time_two: _Times | None,
-    quat_one: _Q | None,
-    quat_two: _Q | None,
-    *,
-    name_one: str,
-    name_two: str,
-    time_units: str,
-    start_date: str,
-    plot_components: bool,
-    rms_xmin: _Time,
-    rms_xmax: _Time,
-    disp_xmin: _Time,
-    disp_xmax: _Time,
-    make_subplots: bool,
-    single_lines: bool,
-    use_mean: bool,
-    plot_zero: bool,
-    show_rms: bool,
-    legend_loc: str,
-    show_extra: bool,
-    second_units: _SecUnits,
-    leg_scale: _SecUnits,
-    data_as_rows: bool,
-    tolerance: _DeltaTime,
-    return_err: Literal[False] = ...,
-    use_zoh: bool,
-    label_vert_lines: bool,
-    extra_plotter: ExtraPlotter | None,
-    use_datashader: bool,
-) -> _Figs: ...
-@overload
-def make_quaternion_plot(
-    description: str,
-    time_one: _Times | None,
-    time_two: _Times | None,
-    quat_one: _Q | None,
-    quat_two: _Q | None,
-    *,
-    name_one: str,
-    name_two: str,
-    time_units: str,
-    start_date: str,
-    plot_components: bool,
-    rms_xmin: _Time,
-    rms_xmax: _Time,
-    disp_xmin: _Time,
-    disp_xmax: _Time,
-    make_subplots: bool,
-    single_lines: bool,
-    use_mean: bool,
-    plot_zero: bool,
-    show_rms: bool,
-    legend_loc: str,
-    show_extra: bool,
-    second_units: _SecUnits,
-    leg_scale: _SecUnits,
-    data_as_rows: bool,
-    tolerance: _DeltaTime,
-    return_err: Literal[True],
-    use_zoh: bool,
-    label_vert_lines: bool,
-    extra_plotter: ExtraPlotter | None,
-    use_datashader: bool,
-) -> tuple[_Figs, dict[str, _N]]: ...
-def make_quaternion_plot(
-    description: str,
-    time_one: _Times | None,
-    time_two: _Times | None,
-    quat_one: _Q | None,
-    quat_two: _Q | None,
-    *,
-    name_one: str = "",
-    name_two: str = "",
-    time_units: str = "sec",
-    start_date: str = "",
-    plot_components: bool = True,
-    rms_xmin: _Time = -inf,
-    rms_xmax: _Time = inf,
-    disp_xmin: _Time = -inf,
-    disp_xmax: _Time = inf,
-    make_subplots: bool = True,
-    single_lines: bool = False,
-    use_mean: bool = False,
-    plot_zero: bool = False,
-    show_rms: bool = True,
-    legend_loc: str = "best",
-    show_extra: bool = True,
-    second_units: _SecUnits = "micro",
-    leg_scale: _SecUnits = None,
-    data_as_rows: bool = True,
-    tolerance: _DeltaTime = 0,
-    return_err: bool = False,
-    use_zoh: bool = False,
-    label_vert_lines: bool = True,
-    extra_plotter: ExtraPlotter | None = None,
-    use_datashader: bool = False,
-) -> _Figs | tuple[_Figs, dict[str, _N]]:
-    r"""
-    Generic quaternion comparison plot for use in other wrapper functions.
-
-    Plots two quaternion histories over time, along with a difference from one another.
-    See make_generic_plot for input details.
-
-    Returns
-    -------
-    fig : class matplotlib.Figure
-        figure handle
-    err : dict
-        Differences
-
-    See Also
-    --------
-    make_generic_plot
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
-    #.  Ported to Python by David C. Stauffer in December 2018.
-    #.  Made fully functional by David C. Stauffer in March 2019.
-    #.  Wrapped to the generic do everything version by David C. Stauffer in March 2021.
-
-    Examples
-    --------
-    >>> from dstauffman.plotting import make_quaternion_plot
-    >>> from dstauffman.aerospace import quat_norm
-    >>> import numpy as np
-    >>> from datetime import datetime
-    >>> prng = np.random.default_rng()
-    >>> description      = "example"
-    >>> time_one         = np.arange(11)
-    >>> time_two         = np.arange(2, 13)
-    >>> quat_one         = quat_norm(prng.random((4, 11)))
-    >>> quat_two         = quat_norm(quat_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] + 1e-5 * prng.random((4, 11)))
-    >>> name_one         = "test1"
-    >>> name_two         = "test2"
-    >>> time_units       = "sec"
-    >>> start_date       = str(datetime.now())
-    >>> rms_xmin         = 1
-    >>> rms_xmax         = 10
-    >>> disp_xmin        = -2
-    >>> disp_xmax        = np.inf
-    >>> make_subplots    = True
-    >>> single_lines     = False
-    >>> use_mean         = False
-    >>> plot_zero        = False
-    >>> show_rms         = True
-    >>> legend_loc       = "best"
-    >>> show_extra       = True
-    >>> plot_components  = True
-    >>> second_units     = ("µrad", 1e6)
-    >>> leg_scale        = None
-    >>> data_as_rows     = True
-    >>> tolerance        = 0
-    >>> return_err       = False
-    >>> use_zoh          = False
-    >>> label_vert_lines = True
-    >>> extra_plotter    = None
-    >>> use_datashader   = False
-    >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
-    ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
-    ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-    ...     make_subplots=make_subplots, single_lines=single_lines, use_mean=use_mean, \
-    ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
-    ...     plot_components=plot_components, second_units=second_units, leg_scale=leg_scale, \
-    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter, use_datashader=use_datashader)
-
-    Close plots
-    >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
-    ...     plt.close(fig)
-
-    """
-    colormap = ColorMap(COLOR_LISTS["quat_comp"])
-    return make_generic_plot(  # type: ignore[return-value]
-        "quat",
-        description=description,
-        time_one=time_one,
-        data_one=quat_one,
-        time_two=time_two,
-        data_two=quat_two,
-        name_one=name_one,
-        name_two=name_two,
-        elements=("X", "Y", "Z", "S"),
-        units="rad",
-        time_units=time_units,
-        start_date=start_date,
-        rms_xmin=rms_xmin,
-        rms_xmax=rms_xmax,
-        disp_xmin=disp_xmin,
-        disp_xmax=disp_xmax,
-        single_lines=single_lines,
-        make_subplots=make_subplots,
-        colormap=colormap,
-        use_mean=use_mean,
-        plot_zero=plot_zero,
-        show_rms=show_rms,
-        legend_loc=legend_loc,
-        show_extra=show_extra,
-        plot_components=plot_components,
-        second_units=second_units,
-        leg_scale=leg_scale,
-        tolerance=tolerance,
-        return_err=return_err,
-        data_as_rows=data_as_rows,
-        extra_plotter=extra_plotter,
-        use_zoh=use_zoh,
-        label_vert_lines=label_vert_lines,
-        use_datashader=use_datashader,
-    )
 
 
 # %% plot_quaternion

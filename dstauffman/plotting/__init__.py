@@ -16,8 +16,8 @@ from .aerospace import minimize_names, make_quaternion_plot, plot_quaternion, pl
                            plot_innov_fplocs, plot_innov_hist, plot_covariance, plot_states, \
                            plot_tci, plot_kp
 from .batch     import plot_bpe_convergence, plot_bpe_results
-from .generic   import make_generic_plot, make_time_plot, make_error_bar_plot, \
-                           make_difference_plot, make_categories_plot, make_bar_plot, \
+from .generic   import make_time_plot, make_difference_plot, make_quaternion_plot, \
+                           make_error_bar_plot, make_bar_plot, make_categories_plot, \
                            make_connected_sets
 from .maps      import get_map_data, plot_map, plot_map_3d
 from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history, \
