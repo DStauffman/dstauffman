@@ -1,9 +1,9 @@
 r"""
-Contains generic quaternion utilities that are optimized for runtime performance.
+Contains generic quaternion utilities optimized for use by keras (tensorflow, torch and/or jax).
 
 Notes
 -----
-#.  Written by David C. Stauffer in February 2021.
+#.  Written by David C. Stauffer in November 2024.
 
 """
 

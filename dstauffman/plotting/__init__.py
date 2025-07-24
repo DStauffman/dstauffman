@@ -11,7 +11,7 @@ Notes
 
 # %% Imports
 # fmt: off
-from .aerospace import minimize_names, make_quaternion_plot, plot_quaternion, plot_attitude, \
+from .aerospace import minimize_names, plot_quaternion, plot_attitude, \
                            plot_los, plot_position, plot_velocity, plot_innovations, \
                            plot_innov_fplocs, plot_innov_hist, plot_covariance, plot_states, \
                            plot_tci, plot_kp

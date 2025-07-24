@@ -99,7 +99,7 @@ def _is_a_list(time: _Times | None, data: _Data | None) -> tuple[bool, bool]:
         time = np.atleast_1d(time)  # type: ignore[arg-type, assignment]
     if not data_is_list and data is not None:
         data = np.atleast_2d(data)
-        if data.ndim >= 3:  # pyright: ignore[reportOptionalMemberAccess]
+        if data.ndim >= 3:
             raise AssertionError("data_one must be 0d, 1d or 2d.")
     return (time_is_list, data_is_list)
 
@@ -150,7 +150,9 @@ def _build_indices(time_is_list, data_is_list, time, num_channels, rms_xmin, rms
 
 
 # %% Functions - _calc_rms
-def _calc_rms(data, ix, *, num_channels: int, use_mean: bool, data_is_list: bool, data_as_rows: bool):
+def _calc_rms(
+    data, ix, *, num_channels: int, use_mean: bool, data_is_list: bool, data_as_rows: bool
+) -> tuple[list[np.floating] | np.floating | _N, str]:
     """Calculates the RMS/mean."""
 
     # possible RMS/mean functions
@@ -169,7 +171,7 @@ def _calc_rms(data, ix, *, num_channels: int, use_mean: bool, data_is_list: bool
             return np.array(np.nan)
 
     func_lamb: _FuncLamb
-    data_func: _FuncLamb | list[_FuncLamb] | dict[Any, _N]
+    data_func: list[np.floating] | np.floating | _N
     if not use_mean:
         func_name = "RMS"
         func_lamb = _nan_rms
@@ -177,12 +179,12 @@ def _calc_rms(data, ix, *, num_channels: int, use_mean: bool, data_is_list: bool
         func_name = "Mean"
         func_lamb = _nan_mean
     if data_is_list:
-        data_func = [func_lamb(data[j][ix["one"][j]], None) for j in range(num_channels)]  # type: ignore[misc, index]
+        data_func = [func_lamb(data[j][ix[j]], None) for j in range(num_channels)]  # type: ignore[misc, index]
     elif data_as_rows:
-        data_func = func_lamb(data[:, ix["one"]], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[assignment, call-overload, index]
+        data_func = func_lamb(data[:, ix], 1) if np.any(ix) else np.full(num_channels, np.nan)  # type: ignore[assignment, call-overload, index]
     else:
-        data_func = func_lamb(data[ix["one"], :], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[assignment, call-overload, index]
-    return func_name, data_func
+        data_func = func_lamb(data[ix, :], 1) if np.any(ix) else np.full(num_channels, np.nan)  # type: ignore[assignment, call-overload, index]
+    return data_func, func_name
 
 
 # %% Functions - _get_units
@@ -275,6 +277,44 @@ def _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, st
     return xlim
 
 
+# %% Functions - _get_diff_flags
+def _get_diff_flags(
+    time_one, time_two, data_one, data_two, *, time_is_list, tim2_is_list, data_is_list, dat2_is_list, data_as_rows
+) -> tuple[bool, bool, bool, _N, _N]:
+    """Determine which data you have, and do some consistency checks."""
+    have_data_one = data_one is not None and np.any(~np.isnan(data_one))
+    have_data_two = data_two is not None and np.any(~np.isnan(data_two))
+    have_both = have_data_one and have_data_two
+    if have_data_one:
+        assert not data_is_list
+        # TODO: remove this following restriction
+        assert data_one.ndim == 2, f"Data must be 2D, not {data_one.ndim}"  # type: ignore[union-attr]
+    if have_data_two:
+        assert not dat2_is_list
+        # TODO: remove this following restriction
+        assert data_two.ndim == 2, f"Data must be 2D, not {data_two.ndim}"  # type: ignore[union-attr]
+    # convert rows/cols as necessary
+    if not data_as_rows:
+        # TODO: is this the best way or make branches lower?
+        if have_data_one:
+            data_one = data_one.T  # type: ignore[union-attr]
+        if have_data_two:
+            data_two = data_two.T  # type: ignore[union-attr]
+    if not time_is_list and time_one is not None:
+        time_one = np.atleast_1d(time_one)  # type: ignore[arg-type, assignment]
+    if not tim2_is_list and time_two is not None:
+        time_two = np.atleast_1d(time_two)  # type: ignore[arg-type, assignment]
+    if not data_is_list and data_one is not None:
+        data_one = np.atleast_2d(data_one)
+        if data_one.ndim >= 3:
+            raise AssertionError("data_one must be 0d, 1d or 2d.")
+    if not dat2_is_list and data_two is not None:
+        data_two = np.atleast_2d(data_two)
+        if data_two.ndim >= 3:
+            raise AssertionError("data_two must be 0d, 1d or 2d.")
+    return (have_data_one, have_data_two, have_both, data_one, data_two)
+
+
 # %% Functions - make_time_plot
 def make_time_plot(
     description: str,
@@ -362,39 +402,127 @@ def make_time_plot(
     >>> plt.close(fig)
 
     """
-    return None
-    # return make_generic_plot(  # type: ignore[return-value]
-    #     plot_type=plot_type,
-    #     description=description,
-    #     time_one=time,
-    #     data_one=data,
-    #     name_one=name,
-    #     elements=elements,
-    #     units=units,
-    #     time_units=time_units,
-    #     start_date=start_date,
-    #     rms_xmin=rms_xmin,
-    #     rms_xmax=rms_xmax,
-    #     disp_xmin=disp_xmin,
-    #     disp_xmax=disp_xmax,
-    #     single_lines=single_lines,
-    #     colormap=colormap,
-    #     use_mean=use_mean,
-    #     plot_zero=plot_zero,
-    #     show_rms=show_rms,
-    #     ignore_empties=ignore_empties,
-    #     legend_loc=legend_loc,
-    #     second_units=second_units,
-    #     leg_scale=leg_scale,
-    #     ylabel=ylabel,
-    #     ylims=ylims,
-    #     data_as_rows=data_as_rows,
-    #     extra_plotter=extra_plotter,
-    #     use_zoh=use_zoh,
-    #     label_vert_lines=label_vert_lines,
-    #     use_datashader=use_datashader,
-    #     fig_ax=fig_ax,
-    # )
+    # hard-coded values
+    return_err = False  # TODO: remove this restriction
+    # get information on inputs
+    time_is_list, data_is_list = _is_a_list(time, data)
+    time_is_date = (time_is_list and len(time) > 0 and is_datetime(time[0]))
+
+    # check for valid data
+    # TODO: implement this
+    if ignore_plot_data(data, ignore_empties):
+        raise NotImplementedError("Not yet implemented.")
+
+    # force 2D data
+    if not data_is_list:
+        data = np.atleast_2d(data)
+        if data.ndim >= 3:
+            raise AssertionError("data_one must be 0d, 1d or 2d.")
+
+    # check sizing information
+    num_channels = _check_sizes(time, data, time_is_list, data_is_list, data_as_rows, num_channels=None if elements is None else len(elements))
+
+    # optional inputs
+    if elements is None:
+        elements = [f"Channel {i + 1}" for i in range(num_channels)]
+
+    # build RMS indices
+    if show_rms or return_err:
+        ix = _build_indices(time_is_list, data_is_list, time, num_channels, rms_xmin, rms_xmax)
+
+    # create a colormap
+    cm = ColorMap(colormap=colormap, num_colors=num_channels)
+
+    # calculate the rms (or mean) values
+    if show_rms or return_err:
+        data_func, func_name = _calc_rms(data, ix["one"], num_channels=num_channels, use_mean=use_mean, data_is_list=data_is_list, data_as_rows=data_as_rows)
+
+    # unit conversion value
+    (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
+
+    # plotting options
+    plot_func = _plot_zoh if use_zoh else _plot_linear
+    if plot_type == "time":
+        symbol = ".-"
+    elif plot_type == "scatter":
+        symbol = "."
+    else:
+        raise ValueError(f"Unexpected plot_type of {plot_type}.")
+
+    # build data
+    times = time if time_is_list else repeat(time, num_channels)
+    if data_is_list:
+        datum = data
+    elif data_as_rows:
+        datum = [data[i, :] for i in range(num_channels)]
+    else:
+        datum = [data[:, i] for i in range(num_channels)]
+
+    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)
+
+    if fig_ax is None:
+        # get the number of figures and axes to make
+        num_figs = 1
+        num_rows = num_channels if single_lines else 1
+        num_cols = 1
+        fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
+        if not single_lines:
+            fig_ax = fig_ax * num_channels
+    assert len(fig_ax) == num_channels, "Expecting a (figure, axes) pair for each channel in data."
+    fig = fig_ax[0][0]  # type: ignore[index]
+    ax = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
+
+    xlim: tuple[float, float] | None = None
+    for i, ((this_fig, this_axes), this_time, this_data, this_ylabel),  in enumerate(zip(fig_ax, times, datum, ylabels)):
+        this_label = str(elements[i])
+        if show_rms:
+            value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
+            if leg_units:
+                this_label += f" ({func_name}: {value} {leg_units})"
+            else:
+                this_label += f" ({func_name}: {value})"
+        this_color = cm.get_color(i)
+        plot_func(
+            this_axes,
+            this_time,
+            this_data,
+            symbol,
+            markersize=4,
+            label=this_label,
+            color=this_color,
+            zorder=9,
+        )
+        xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+        if plot_zero:
+            show_zero_ylim(this_axes)
+        if ylims is not None:
+            this_axes.set_ylims(ylims)
+        if i == 0:
+            this_axes.set_title(description)
+        if bool(this_ylabel):
+            this_axes.set_ylabel(this_ylabel)
+            this_axes.grid(True)
+            # optionally add second Y axis
+            plot_second_units_wrapper(this_axes, (new_units, unit_conv))
+            # plot RMS lines
+            if show_rms:
+                vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
+                plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
+
+    if single_lines:
+        fig.supylabel(description)
+
+    # plot any extra information through a generic callable
+    if extra_plotter is not None:
+        extra_plotter(fig=fig, ax=ax)
+
+    # add legend at the very end once everything has been done
+    if legend_loc.lower() != "none":
+        for this_axes in ax:
+            this_axes.legend(loc=legend_loc)
+
+    return fig  # type: ignore[no-any-return]
 
 
 # %% Functions - make_difference_plot
@@ -590,45 +718,95 @@ def make_difference_plot(
     ...     plt.close(fig)
 
     """
-    return None
-    # return make_generic_plot(  # type: ignore[return-value]
-    #     "diff",
-    #     description=description,
-    #     time_one=time_one,
-    #     data_one=data_one,
-    #     time_two=time_two,
-    #     data_two=data_two,
-    #     name_one=name_one,
-    #     name_two=name_two,
-    #     elements=elements,
-    #     units=units,
-    #     time_units=time_units,
-    #     start_date=start_date,
-    #     rms_xmin=rms_xmin,
-    #     rms_xmax=rms_xmax,
-    #     disp_xmin=disp_xmin,
-    #     disp_xmax=disp_xmax,
-    #     single_lines=single_lines,
-    #     make_subplots=make_subplots,
-    #     colormap=colormap,
-    #     use_mean=use_mean,
-    #     plot_zero=plot_zero,
-    #     show_rms=show_rms,
-    #     legend_loc=legend_loc,
-    #     show_extra=show_extra,
-    #     second_units=second_units,
-    #     leg_scale=leg_scale,
-    #     ylabel=ylabel,
-    #     ylims=ylims,
-    #     tolerance=tolerance,
-    #     return_err=return_err,
-    #     data_as_rows=data_as_rows,
-    #     extra_plotter=extra_plotter,
-    #     use_zoh=use_zoh,
-    #     label_vert_lines=label_vert_lines,
-    #     use_datashader=use_datashader,
-    #     fig_ax=fig_ax,
-    # )
+    # get information on inputs
+    time_is_list, data_is_list = _is_a_list(time_one, data_one)
+    time_is_date = (time_is_list and len(time_one) > 0 and is_datetime(time_one[0]))
+    tim2_is_list, dat2_is_list = _is_a_list(time_two, data_two)
+    tim2_is_date = (time_is_list and len(time_two) > 0 and is_datetime(time_two[0]))
+    assert not (time_is_list ^ tim2_is_list), "Both times must be lists if one is."
+    if data_is_list or dat2_is_list:
+        raise AssertionError("Data can't be lists for diffs right now.")  # TODO: remove this restriction
+    have_data_one, have_data_two, have_both, data_one, data_two = _get_diff_flags(
+        time_one,
+        time_two,
+        data_one,
+        data_two,
+        time_is_list=time_is_list,
+        tim2_is_list=tim2_is_list,
+        data_is_list=data_is_list,
+        dat2_is_list=dat2_is_list,
+        data_as_rows=data_as_rows,
+    )
+
+    # check for valid data
+    if not have_data_one and not have_data_two:
+        logger.log(LogLevel.L5, 'No differences data was provided, so no plot was generated for "%s".', description)
+        if not return_err:
+            return []
+        # TODO: return NaNs instead of None for this case?
+        out: tuple[_Figs, dict[str, float | None]] = ([], {"one": None, "two": None, "diff": None})
+        return out  # type: ignore[return-value]
+
+    # check sizing information
+    num_channels = _check_sizes(time_one, data_two, time_is_list, data_is_list, data_as_rows, num_channels=None if elements is None else len(elements))
+    num_channel2 = _check_sizes(time_two, data_two, tim2_is_list, dat2_is_list, data_as_rows, num_channels=None if elements is None else len(elements))
+    if num_channels != num_channel2:
+        raise AssertionError(f"The given elements need to match the data sizes, got {num_channels} and {num_channel2}.")
+
+    # optional inputs
+    if elements is None:
+        elements = [f"Channel {i + 1}" for i in range(num_channels)]
+
+    # build RMS indices
+    if show_rms or return_err:
+        if have_both:
+            # find overlapping times
+            (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)  # type: ignore[call-overload, misc]
+            # find differences
+            d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)  # type: ignore[arg-type]
+            d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)  # type: ignore[arg-type]
+            diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]  # type: ignore[call-overload, index]
+        else:
+            time_overlap = None
+        ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
+
+    # create a colormap
+    cm = ColorMap(colormap=colormap, num_colors=3 * num_channels)
+
+    # calculate the rms (or mean) values
+    if show_rms or return_err:
+        data_func, func_name = _calc_rms(data_one, ix["one"], num_channels=num_channels, use_mean=use_mean, data_is_list=data_is_list, data_as_rows=data_as_rows)
+        data2_func, _ = _calc_rms(data_two, ix["two"], num_channels=num_channels, use_mean=use_mean, data_is_list=dat2_is_list, data_as_rows=data_as_rows)
+        if np.any(ix["overlap"]):
+            nondeg_func, _ = _calc_rms(diffs, ix["overlap"], num_channels=num_channels, use_mean=use_mean, data_is_list=data_is_list, data_as_rows=data_as_rows)
+        else:
+            nondeg_func = np.full(num_channels, np.nan)
+        # output errors
+        err = {"one": data_func, "two": data2_func, "diff": nondeg_func}
+
+    # unit conversion value
+    (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
+
+    # plotting options
+    plot_func = _plot_zoh if use_zoh else _plot_linear
+
+    # build data
+    times1 = time_one if time_is_list else repeat(time_one, num_channels)
+    times2 = time_two if time_is_list else repeat(time_two, num_channels)
+    if data_is_list:
+        datum1 = data_one
+    elif data_as_rows:
+        datum1 = [data_one[i, :] for i in range(num_channels)]
+    else:
+        datum1 = [data_one[:, i] for i in range(num_channels)]  # TODO: eliminates earlier transpose!!
+    if dat2_is_list:
+        datum2 = data_two
+    elif data_as_rows:
+        datum2 = [data_two[i, :] for i in range(num_channels)]
+    else:
+        datum2 = [data_two[:, i] for i in range(num_channels)]  # TODO: eliminates earlier transpose!!
+
+    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)
 
 
 # %% Functions - make_quaternion_plot
@@ -966,13 +1144,14 @@ def make_error_bar_plot(
 
     # calculate the rms (or mean) values
     if show_rms or return_err:
-        func_name, data_func = _calc_rms(data, ix, num_channels=num_channels, use_mean=use_mean, data_is_list=data_is_list, data_as_rows=data_as_rows)
+        data_func, func_name = _calc_rms(data, ix["one"], num_channels=num_channels, use_mean=use_mean, data_is_list=data_is_list, data_as_rows=data_as_rows)
 
     # unit conversion value
     (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
 
     # plotting options
     plot_func = _plot_zoh if use_zoh else _plot_linear
+    symbol = ".-"
 
     # extra errorbar calculations
     assert not data_is_list  # TODO: handle data_is_list and rows cases
@@ -1022,7 +1201,7 @@ def make_error_bar_plot(
             this_axes,
             this_time,
             this_data,
-            ".-",
+            symbol,
             markersize=4,
             label=this_label,
             color=this_color,
@@ -1195,7 +1374,7 @@ def make_bar_plot(
 
     # calculate the rms (or mean) values
     if show_rms or return_err:
-        func_name, data_func = _calc_rms(data, ix, num_channels=num_channels, use_mean=use_mean, data_is_list=data_is_list, data_as_rows=data_as_rows)
+        data_func, func_name = _calc_rms(data, ix["one"], num_channels=num_channels, use_mean=use_mean, data_is_list=data_is_list, data_as_rows=data_as_rows)
 
     # unit conversion value
     (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
@@ -1210,6 +1389,8 @@ def make_bar_plot(
         bottoms = np.concatenate((np.zeros((len(time), 1)), np.cumsum(np.ma.masked_invalid(data), axis=1)), axis=1)  # type: ignore[arg-type, no-untyped-call]
 
     ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)
+    if not single_lines:
+        ylabels = ylabels[::-1]
 
     if fig_ax is None:
         # get the number of axes to make
@@ -1251,12 +1432,12 @@ def make_bar_plot(
                 edgecolor="none",
             )
         xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
-        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+        this_axes.set_ylim(0, 100)
         if plot_zero:
             show_zero_ylim(this_axes)
         if ylims is not None:
             this_axes.set_ylims(ylims)
-        if i == 0:
+        if i == num_channels - 1:
             this_axes.set_title(description)
         if bool(this_ylabel):
             this_axes.set_ylabel(this_ylabel)

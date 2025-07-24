@@ -15,6 +15,7 @@ from unittest.mock import Mock, patch
 from slog import LogLevel
 
 from dstauffman import HAVE_DS, HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM
+from dstauffman.aerospace import quat_norm
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -193,79 +194,6 @@ class Test_plotting_make_time_plot(unittest.TestCase):
 
     def tearDown(self) -> None:
         if self.fig is not None:
-            plt.close(self.fig)
-
-
-# %% plotting.make_error_bar_plot
-@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
-class Test_plotting_make_error_bar_plot(unittest.TestCase):
-    r"""
-    Tests the plotting.make_error_bar_plot function with the following cases:
-        TBD
-    """
-
-    def setUp(self) -> None:
-        prng = np.random.default_rng()
-        # fmt: off
-        self.description      = "Random Data Error Bars"
-        self.time             = np.arange(11)
-        self.data             = np.array([[3.0], [-2.0], [5]]) + prng.random((3, 11))
-        self.mins             = self.data - 0.5 * prng.random((3, 11))
-        self.maxs             = self.data + 1.5 * prng.random((3, 11))
-        self.elements         = ["x", "y", "z"]
-        self.units            = "rad"
-        self.time_units       = "sec"
-        self.start_date       = "  t0 = " + str(datetime.datetime.now())
-        self.rms_xmin         = 1
-        self.rms_xmax         = 10
-        self.disp_xmin        = -2
-        self.disp_xmax        = np.inf
-        self.single_lines     = False
-        self.colormap         = "tab10"
-        self.use_mean         = False
-        self.plot_zero        = False
-        self.show_rms         = True
-        self.legend_loc       = "best"
-        self.second_units     = "milli"
-        self.ylabel           = None
-        self.data_as_rows     = True
-        self.label_vert_lines = True
-        self.fig: Figure | None = None
-        # fmt: on
-
-    def test_nominal(self) -> None:
-        self.fig = plot.make_error_bar_plot(
-            self.description,
-            self.time,
-            self.data,
-            self.mins,
-            self.maxs,
-            elements=self.elements,
-            units=self.units,
-            time_units=self.time_units,
-            start_date=self.start_date,
-            rms_xmin=self.rms_xmin,
-            rms_xmax=self.rms_xmax,
-            disp_xmin=self.disp_xmin,
-            disp_xmax=self.disp_xmax,
-            single_lines=self.single_lines,
-            colormap=self.colormap,
-            use_mean=self.use_mean,
-            plot_zero=self.plot_zero,
-            show_rms=self.show_rms,
-            legend_loc=self.legend_loc,
-            second_units=self.second_units,
-            ylabel=self.ylabel,
-            data_as_rows=self.data_as_rows,
-            label_vert_lines=self.label_vert_lines,
-        )
-
-    def test_bad_data(self) -> None:
-        with self.assertRaises(AssertionError):
-            plot.make_error_bar_plot(None, self.time, self.data, self.mins, self.maxs)  # type: ignore[arg-type]
-
-    def tearDown(self) -> None:
-        if self.fig:
             plt.close(self.fig)
 
 
@@ -706,6 +634,412 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
                 plt.close(this_fig)
 
 
+# %% plotting.make_quaternion_plot
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
+class Test_plotting_make_quaternion_plot(unittest.TestCase):
+    r"""
+    Tests the plotting.make_quaternion_plot function with the following cases:
+        TBD
+    """
+
+    def setUp(self) -> None:
+        prng = np.random.default_rng()
+        # fmt: off
+        self.description      = "example"
+        self.time_one         = np.arange(11)
+        self.time_two         = np.arange(2, 13)
+        self.quat_one         = quat_norm(prng.random((4, 11)))
+        self.quat_two         = quat_norm(prng.random((4, 11)))
+        self.name_one         = "test1"
+        self.name_two         = "test2"
+        self.time_units       = "sec"
+        self.start_date       = str(datetime.datetime.now())
+        self.plot_components  = True
+        self.rms_xmin         = 0
+        self.rms_xmax         = 10
+        self.disp_xmin        = -2
+        self.disp_xmax        = np.inf
+        self.make_subplots    = True
+        self.single_lines     = False
+        self.use_mean         = False
+        self.plot_zero        = False
+        self.show_rms         = True
+        self.legend_loc       = "best"
+        self.show_extra       = True
+        self.second_units     = ("µrad", 1e6)
+        self.data_as_rows     = True
+        self.tolerance        = 0
+        self.return_err       = False
+        self.use_zoh          = False
+        self.label_vert_lines = True
+        self.figs: list[Figure] | None = None
+        # fmt: on
+
+    def test_nominal(self) -> None:
+        self.return_err = True
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
+        for i in range(3):
+            self.assertLess(abs(err["diff"][i]), 3.15)
+
+    def test_no_subplots(self) -> None:
+        self.make_subplots = False
+        self.return_err = True
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
+        for i in range(3):
+            self.assertLess(abs(err["diff"][i]), 3.15)
+
+    def test_no_components(self) -> None:
+        self.plot_components = False
+        self.return_err = True
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
+        for i in range(3):
+            self.assertLess(abs(err["diff"][i]), 3.15)
+        self.assertLess(abs(err["mag"]), 3.15)
+
+    def test_no_start_date(self) -> None:
+        self.start_date = ""
+        self.return_err = True
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
+        for i in range(3):
+            self.assertLess(abs(err["diff"][i]), 3.15)
+
+    def test_only_quat_one(self) -> None:
+        self.quat_two.fill(np.nan)
+        self.name_two = ""
+        self.return_err = True
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
+        self.assertTrue(np.all(np.isnan(err["diff"])))
+
+    def test_only_quat_two(self) -> None:
+        self.name_one = ""
+        self.return_err = True
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description,
+            self.time_one,
+            self.time_two,
+            None,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
+        self.assertTrue(np.all(np.isnan(err["diff"])))
+
+    def test_rms_bounds(self) -> None:
+        self.rms_xmin = 5
+        self.rms_xmax = 7
+        self.return_err = True
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
+        for i in range(3):
+            self.assertLess(abs(err["diff"][i]), 3.15)
+
+    def test_use_mean(self) -> None:
+        self.figs = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, use_mean=True
+        )
+
+    def test_no_rms_in_legend(self) -> None:
+        self.figs = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, use_mean=True, show_rms=False
+        )
+
+    def test_plot_zero(self) -> None:
+        self.figs = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, plot_zero=True
+        )
+
+    def test_disp_bounds(self) -> None:
+        self.figs = plot.make_quaternion_plot(  # type: ignore[call-overload]
+            self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5
+        )
+
+    def test_no_overlap(self) -> None:
+        time_one = np.arange(11.0).astype(float)
+        time_two = np.arange(2.0, 13.0) + 0.5
+        self.figs = plot.make_quaternion_plot(self.description, time_one, time_two, self.quat_one, self.quat_two)  # type: ignore[call-overload]
+
+    def test_none1(self) -> None:
+        self.figs = plot.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)  # type: ignore[call-overload]
+
+    def test_none2(self) -> None:
+        self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)  # type: ignore[call-overload]
+
+    @patch("lmspace.plotting.generic.logger")
+    def test_none3(self, mock_logger: Mock) -> None:
+        self.figs = plot.make_quaternion_plot("", None, None, None, None)  # type: ignore[call-overload]
+        mock_logger.log.assert_called_once()
+        mock_logger.log.assert_called_with(
+            LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "quat", ""
+        )
+
+    def tearDown(self) -> None:
+        if self.figs:
+            plot.close_all(self.figs)
+
+
+# %% plotting.make_error_bar_plot
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
+class Test_plotting_make_error_bar_plot(unittest.TestCase):
+    r"""
+    Tests the plotting.make_error_bar_plot function with the following cases:
+        TBD
+    """
+
+    def setUp(self) -> None:
+        prng = np.random.default_rng()
+        # fmt: off
+        self.description      = "Random Data Error Bars"
+        self.time             = np.arange(11)
+        self.data             = np.array([[3.0], [-2.0], [5]]) + prng.random((3, 11))
+        self.mins             = self.data - 0.5 * prng.random((3, 11))
+        self.maxs             = self.data + 1.5 * prng.random((3, 11))
+        self.elements         = ["x", "y", "z"]
+        self.units            = "rad"
+        self.time_units       = "sec"
+        self.start_date       = "  t0 = " + str(datetime.datetime.now())
+        self.rms_xmin         = 1
+        self.rms_xmax         = 10
+        self.disp_xmin        = -2
+        self.disp_xmax        = np.inf
+        self.single_lines     = False
+        self.colormap         = "tab10"
+        self.use_mean         = False
+        self.plot_zero        = False
+        self.show_rms         = True
+        self.legend_loc       = "best"
+        self.second_units     = "milli"
+        self.ylabel           = None
+        self.data_as_rows     = True
+        self.label_vert_lines = True
+        self.fig: Figure | None = None
+        # fmt: on
+
+    def test_nominal(self) -> None:
+        self.fig = plot.make_error_bar_plot(
+            self.description,
+            self.time,
+            self.data,
+            self.mins,
+            self.maxs,
+            elements=self.elements,
+            units=self.units,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            single_lines=self.single_lines,
+            colormap=self.colormap,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            second_units=self.second_units,
+            ylabel=self.ylabel,
+            data_as_rows=self.data_as_rows,
+            label_vert_lines=self.label_vert_lines,
+        )
+
+    def test_bad_data(self) -> None:
+        with self.assertRaises(AssertionError):
+            plot.make_error_bar_plot(None, self.time, self.data, self.mins, self.maxs)  # type: ignore[arg-type]
+
+    def tearDown(self) -> None:
+        if self.fig:
+            plt.close(self.fig)
+
+
+# %% plotting.make_bar_plot
+class Test_plotting_make_bar_plot(unittest.TestCase):
+    r"""
+    Tests the plotting.make_bar_plot function with the following cases:
+        TBD
+    """
+
+    pass  # TODO: write this
+
+
 # %% plotting.make_categories_plot
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_categories_plot(unittest.TestCase):
@@ -798,16 +1132,6 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
-
-
-# %% plotting.make_bar_plot
-class Test_plotting_make_bar_plot(unittest.TestCase):
-    r"""
-    Tests the plotting.make_bar_plot function with the following cases:
-        TBD
-    """
-
-    pass  # TODO: write this
 
 
 # %% plotting.make_connected_sets
