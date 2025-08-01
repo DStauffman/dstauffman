@@ -56,12 +56,10 @@ dcs = "dstauffman.__main__:main"
 [tool.setuptools.package-data]
 dstauffman = ["CHANGELOG.md", "LICENSE.txt", "pyproject.toml", "README.rst", "*.png", "*.pdf", "*.rst", "*.tex", "*.bat", "*.sh"]
 
-[tool.bandit]
-skips = ["B101"]
-
 [tool.black]
 line-length = 128
 target_version = ["py313"]
+include = '\.pyi?$'
 
 [tool.coverage.run]
 branch = true
@@ -165,24 +163,6 @@ ignore-paths = "^(.*[/\\\\]|)tests[/\\\\]test_.*$"
 inherit = false
 convention = "numpy"
 add-ignore = ["D102", "D105", "D204"]
-
-[tool.pyright]
-include = ["dstauffman/**/*.py",
-    "scripts/*.py"]
-extraPaths = ["../nubs",
-    "../slog"]
-exclude = []
-venvPath = "C:\\Users\\DStauffman\\Documents\\venvs"
-venv = "everything"
-pythonVersion = "3.12"
-pythonPlatform = "Windows"  # "All"?
-typeCheckingMode = "basic"  # "strict"?
-deprecateTypingAliases = true
-reportGeneralTypeIssues = false
-reportUnboundVariable = false
-reportOptionalMemberAccess = true
-enableTypeIgnoreComments = true
-reportUnnecessaryTypeIgnoreComment = false
 
 [tool.ruff]
 include = ["pyproject.toml", "dstauffman/**/*.py", "scripts/**/*.py"]
