@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import datetime
 import doctest
-from itertools import repeat
 import logging
 from typing import Any, Callable, Iterable, Literal, overload, TYPE_CHECKING, TypedDict
 import unittest
@@ -88,9 +87,9 @@ if TYPE_CHECKING:
 
     class _RmsIndices(TypedDict):
         pts: list[int]
-        one: _B
-        two: _B
-        overlap: _B
+        one: list[_B]
+        two: list[_B]
+        overlap: list[_B]
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -124,22 +123,64 @@ def _make_time_and_data_lists(time: _Times, data: _Data, *, data_as_rows: bool, 
 
 
 # %% Functions - _build_indices
-def _build_indices(times: list[_N] | list[_D], rms_xmin: _Time, rms_xmax: _Time) -> _RmsIndices:
-    ix: _RmsIndices = {"one": [], "t_min": None, "t_max": None}
+def _build_indices(
+    times: list[_N] | list[_D],
+    rms_xmin: _Time,
+    rms_xmax: _Time,
+    *,
+    label: str = "one",
+) -> _RmsIndices:
+    ix: _RmsIndices = {"pts": [], label: []}
     if not bool(times):
         # no times given, so nothing to calculate
         return ix
     if len(set(id(time) for time in times)) == 1:
         # case where all the time vectors are exactly the same
-        get_rms_indices(times[0], xmin=rms_xmin, xmax=rms_xmax)
+        temp_ix = get_rms_indices(times[0], xmin=rms_xmin, xmax=rms_xmax)
+        ix["pts"] = temp_ix["pts"]
+        ix[label] = temp_ix["one"]
     for i, this_time in enumerate(times):
         # general case
         temp_ix = get_rms_indices(this_time, xmin=rms_xmin, xmax=rms_xmax)
-        ix["one"].append(temp_ix["one"])
         if i == 0:
             ix["pts"] = temp_ix["pts"]
         else:
             ix["pts"] = [min((ix["pts"][0], temp_ix["pts"][0])), max((ix["pts"][1], temp_ix["pts"][1]))]
+        ix[label].append(temp_ix["one"])
+    return ix
+
+
+# %% Functions - _build_diff_indices
+def _build_diff_indices(
+    times1: list[_N] | list[_D] | None,
+    times2: list[_N] | list[_D] | None,
+    time_overlap: list[_N] | list[_D] | None,
+    *,
+    rms_xmin: _Time,
+    rms_xmax: _Time,
+) -> _RmsIndices:
+    ix: _RmsIndices = {"pts": [], "one": [], "two": [], "overlap": []}
+    if times1 is None and times2 is None:
+        # have nothing
+        return ix
+    if times1 is not None and times2 is None:
+        # only have times
+        return _build_indices(times1, rms_xmin, rms_xmax, label="one")
+    if times1 is None and times2 is not None:
+        # only have times2
+        return _build_indices(times2, rms_xmin, rms_xmax, label="two")
+    # have both times and times2
+    same_time = len(set(id(time) for time in times1)) == 1 and len(set(id(time) for time in times2)) == 1
+    for i, (this_time1, this_time2, this_overlap) in enumerate(zip(times1, times2, time_overlap)):
+        if i == 0 or not same_time:
+            temp_ix = get_rms_indices(this_time1, this_time2, this_overlap, xmin=rms_xmin, xmax=rms_xmax)
+        if i == 0:
+            ix["pts"] = temp_ix["pts"]
+        else:
+            ix["pts"] = [min((ix["pts"][0], temp_ix["pts"][0])), max((ix["pts"][1], temp_ix["pts"][1]))]
+        ix["one"].append(temp_ix["one"])
+        ix["two"].append(temp_ix["two"])
+        ix["overlap"].append(temp_ix["overlap"])
     return ix
 
 
@@ -196,7 +237,7 @@ def _get_ylabels(
         else:
             ylabels = [""] * (num_channels - 1) + [f"{description} [{units}]"]
     else:
-        if isinstance(ylabels, list):
+        if isinstance(ylabel, list):
             ylabels = ylabel
         else:
             ylabels = [ylabel] * num_channels if single_lines else [""] * (num_channels - 1) + [ylabel]
@@ -693,15 +734,20 @@ def make_difference_plot(
     # build RMS indices
     if show_rms or return_err:
         if have_both:
-            # find overlapping times
-            (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)  # type: ignore[call-overload, misc]
-            # find differences
-            d1_miss_ix = np.setxor1d(np.arange(len(times1[0])), d1_diff_ix)  # type: ignore[arg-type]
-            d2_miss_ix = np.setxor1d(np.arange(len(times2[0])), d2_diff_ix)  # type: ignore[arg-type]
-            diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]  # type: ignore[call-overload, index]
+            if len(set(id(time) for time in times1)) == 1 and len(set(id(time) for time in times2)) == 1:
+                # find overlapping times
+                (time_overlap_single, d1_diff_ix, d2_diff_ix) = intersect(times1[0], times2[0], tolerance=tolerance, return_indices=True)
+                # find differences
+                d1_miss_ix = np.setxor1d(np.arange(len(times1[0])), d1_diff_ix)
+                d2_miss_ix = np.setxor1d(np.arange(len(times2[0])), d2_diff_ix)
+                diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
+                time_overlap = [time_overlap_single] * num_channels
+                diffs = [data_two[d2_diff_ix] - data_one[d1_diff_ix] for data_one, data_two in zip(datum1, datum2)]
+            else:
+                raise NotImplementedError("Non-same time vectors are not implemented for diff plots yet.")  # TODO: implement this
         else:
             time_overlap = None
-        ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
+        ix = _build_diff_indices(times1, times2, time_overlap, rms_xmin=rms_xmin, rms_xmax=rms_xmax)
 
     # create a colormap
     cm = ColorMap(colormap=colormap, num_colors=3 * num_channels)
@@ -760,6 +806,7 @@ def make_difference_plot(
         this_axes_id = id(this_axes)
         if this_fig_id not in id_figs:
             figs.append(this_fig)
+            id_figs |= {this_fig_id}
             axes[this_fig_id] = {this_axes_id}
         else:
             axes[this_fig_id] |= {this_axes_id}
@@ -770,7 +817,7 @@ def make_difference_plot(
     for i in range(num_channels):
         this_fig, this_axes = fig_ax[i]
         this_ylabel = ylabels[i]
-        this_label = str(elements[i])
+        this_label = f"{name_one} {elements[i]}" if name_one else str(elements[i])
         if have_data_one:
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
@@ -789,6 +836,7 @@ def make_difference_plot(
                 color=this_color,
                 zorder=9,
             )
+        this_label = f"{name_two} {elements[i]}" if name_two else str(elements[i])
         if have_data_two:
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv * data2_func[i])  # type: ignore[index, operator]
@@ -842,14 +890,35 @@ def make_difference_plot(
             this_color = cm.get_color(i + color_offset)
             plot_func(
                 this_axes,
-                time_overlap,
+                time_overlap[i],
                 diffs[i],
                 '.-',
                 markersize=4,
                 label=this_label,
                 color=this_color,
-                zorder=9,
+                zorder=5,
             )
+            if show_extra and i == num_channels - 1:
+                if d1_miss_ix.size > 0:
+                    this_axes.plot(
+                        times1[i][d1_miss_ix],
+                        np.zeros(len(d1_miss_ix)),
+                        "kx",
+                        markersize=8,
+                        markeredgewidth=2,
+                        markerfacecolor="None",
+                        label=name_one + " Extra",
+                    )
+                if d2_miss_ix.size > 0:
+                    this_axes.plot(
+                        times2[i][d2_miss_ix],
+                        np.zeros(len(d2_miss_ix)),
+                        "go",
+                        markersize=8,
+                        markeredgewidth=2,
+                        markerfacecolor="None",
+                        label=name_two + " Extra",
+                    )
             xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
             zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
             if plot_zero:
