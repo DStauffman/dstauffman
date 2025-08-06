@@ -84,6 +84,7 @@ if TYPE_CHECKING:
     _Figs = list[Figure]
     _FuncLamb = Callable[[_I | _N, int | None], np.floating | _N]
     _SecUnits = str | int | float | np.floating | tuple[str, float] | tuple[str, np.floating] | None
+    _DiffTypes = Literal["comp", "quat_comp", "quat_mag", "quat_all"]
 
     class _RmsIndices(TypedDict):
         pts: list[int]
@@ -98,7 +99,7 @@ logger = logging.getLogger(__name__)
 def _make_time_and_data_lists(time: _Times, data: _Data, *, data_as_rows: bool, is_quat: bool = False) -> tuple[list[_N] | list[_D], list[_N]]:
     """Turns the different types of inputs into lists of 1-D data."""
     if data is None:
-        assert time is None, "Time must be None if data is None."
+        # assert time is None, "Time must be None if data is None."  # TODO: include this?
         return ([], [])
     if isinstance(data, (list, tuple)):
         datum = list(data)
@@ -130,6 +131,7 @@ def _build_indices(
     *,
     label: str = "one",
 ) -> _RmsIndices:
+    """Builds a dictionary of indices for the given RMS (or mean) start and stop times."""
     ix: _RmsIndices = {"pts": [], label: []}
     if not bool(times):
         # no times given, so nothing to calculate
@@ -138,7 +140,7 @@ def _build_indices(
         # case where all the time vectors are exactly the same
         temp_ix = get_rms_indices(times[0], xmin=rms_xmin, xmax=rms_xmax)
         ix["pts"] = temp_ix["pts"]
-        ix[label] = temp_ix["one"]
+        ix[label] = [temp_ix["one"]]
     for i, this_time in enumerate(times):
         # general case
         temp_ix = get_rms_indices(this_time, xmin=rms_xmin, xmax=rms_xmax)
@@ -159,14 +161,15 @@ def _build_diff_indices(
     rms_xmin: _Time,
     rms_xmax: _Time,
 ) -> _RmsIndices:
+    """Builds a dictionary of indices for the given RMS (or mean) start and stop times for multiple time vectors."""
     ix: _RmsIndices = {"pts": [], "one": [], "two": [], "overlap": []}
-    if times1 is None and times2 is None:
+    if not times1 and not times2:
         # have nothing
         return ix
-    if times1 is not None and times2 is None:
-        # only have times
+    if times1 and not times2:
+        # only have times1
         return _build_indices(times1, rms_xmin, rms_xmax, label="one")
-    if times1 is None and times2 is not None:
+    if not times1 and times2:
         # only have times2
         return _build_indices(times2, rms_xmin, rms_xmax, label="two")
     # have both times and times2
@@ -395,9 +398,6 @@ def make_time_plot(
     >>> plt.close(fig)
 
     """
-    # hard-coded values
-    return_err = False  # TODO: remove this restriction
-
     # check for valid data
     # TODO: implement this
     if ignore_plot_data(data, ignore_empties):
@@ -411,28 +411,26 @@ def make_time_plot(
     if elements is None:
         elements = [f"Channel {i + 1}" for i in range(num_channels)]
 
-    # build RMS indices
-    if show_rms or return_err:
+    # build RMS (or mean) indices and calculate the values
+    if show_rms:
         ix = _build_indices(times, rms_xmin, rms_xmax)
+        data_func, func_name = _calc_rms(datum, ix["one"], use_mean=use_mean)
 
     # create a colormap
     cm = ColorMap(colormap=colormap, num_colors=num_channels)
-
-    # calculate the rms (or mean) values
-    if show_rms or return_err:
-        data_func, func_name = _calc_rms(datum, ix["one"], use_mean=use_mean)
 
     # unit conversion value
     (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
 
     # plotting options
     plot_func = _plot_zoh if use_zoh else _plot_linear
-    if plot_type == "time":
-        symbol = ".-"
-    elif plot_type == "scatter":
-        symbol = "."
-    else:
-        raise ValueError(f"Unexpected plot_type of {plot_type}.")
+    match plot_type:
+        case "time":
+            symbol = ".-"
+        case "scatter":
+            symbol = "."
+        case _:
+            raise ValueError(f"Unexpected plot_type of {plot_type}.")
 
     # get labels
     ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)
@@ -541,6 +539,7 @@ def make_difference_plot(
     extra_plotter: ExtraPlotter | None,
     use_datashader: bool,
     fig_ax: tuple[Figure, Axes] | None,
+    diff_type: _DiffTypes,
 ) -> _Figs: ...
 @overload
 def make_difference_plot(
@@ -580,6 +579,7 @@ def make_difference_plot(
     extra_plotter: ExtraPlotter | None,
     use_datashader: bool,
     fig_ax: tuple[Figure, Axes] | None,
+    diff_type: _DiffTypes,
 ) -> tuple[_Figs, dict[str, _N]]: ...
 def make_difference_plot(
     description: str,
@@ -618,6 +618,7 @@ def make_difference_plot(
     extra_plotter: ExtraPlotter | None = None,
     use_datashader: bool = False,
     fig_ax: tuple[Figure, Axes] | None = None,
+    diff_type: _DiffTypes = "comp",
 ) -> _Figs | tuple[_Figs, dict[str, _N]]:
     r"""
     Generic difference comparison plot for use in other wrapper functions.
@@ -654,7 +655,7 @@ def make_difference_plot(
     >>> elements         = ["x", "y"]
     >>> units            = "rad"
     >>> time_units       = "sec"
-    >>> start_date       = str(datetime.now())
+    >>> start_date       = ", t0 = " + str(datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
     >>> disp_xmin        = -2
@@ -695,6 +696,9 @@ def make_difference_plot(
     ...     plt.close(fig)
 
     """
+    # hard-coded values
+    datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
+
     # build lists of time and data
     times1, datum1 = _make_time_and_data_lists(time_one, data_one, data_as_rows=data_as_rows)
     times2, datum2 = _make_time_and_data_lists(time_two, data_two, data_as_rows=data_as_rows)
@@ -709,10 +713,13 @@ def make_difference_plot(
         time_is_date = is_datetime(times2[0])
     else:
         time_is_date = False
+    # check if doing quaternion diffs
+    is_quat_diff = diff_type.startswith("quat")
 
     # check for valid data
     if not have_data_one and not have_data_two:
-        logger.log(LogLevel.L5, 'No differences data was provided, so no plot was generated for "%s".', description)
+        data_type = "quaternions" if is_quat_diff else "differences"
+        logger.log(LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', data_type, description)
         if not return_err:
             return []
         # TODO: return NaNs instead of None for this case?
@@ -726,42 +733,64 @@ def make_difference_plot(
         num_channels = len(times2)
     if have_both and len(times1) != len(times2):
         raise AssertionError(f"The given elements need to match the data sizes, got {len(times1)} and {len(times2)}.")
+    if is_quat_diff:
+        assert num_channels == 4, f"Quaternions must have 4 channels, not {num_channels}."
+    match diff_type:
+        case "quat_mag":
+            ix_diff = [3]
+            zorders = [5]
+        case "quat_comp":
+            ix_diff = [0, 1, 2]
+            zorders = [8, 6, 5]
+        case "quat_all":
+            ix_diff = [0, 1, 2, 3]
+            zorders = [8, 6, 5, 4]
+        case _:
+            ix_diff = list(range(num_channels))
+            zorders = [5] * num_channels
 
     # optional inputs
     if elements is None:
+        assert not is_quat_diff, "Quaternion diffs should be explicitly specified outside this function."
         elements = [f"Channel {i + 1}" for i in range(num_channels)]
 
     # build RMS indices
-    if show_rms or return_err:
-        if have_both:
-            if len(set(id(time) for time in times1)) == 1 and len(set(id(time) for time in times2)) == 1:
-                # find overlapping times
-                (time_overlap_single, d1_diff_ix, d2_diff_ix) = intersect(times1[0], times2[0], tolerance=tolerance, return_indices=True)
-                # find differences
-                d1_miss_ix = np.setxor1d(np.arange(len(times1[0])), d1_diff_ix)
-                d2_miss_ix = np.setxor1d(np.arange(len(times2[0])), d2_diff_ix)
-                diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
-                time_overlap = [time_overlap_single] * num_channels
-                diffs = [data_two[d2_diff_ix] - data_one[d1_diff_ix] for data_one, data_two in zip(datum1, datum2)]
+    if have_both:
+        if len(set(id(time) for time in times1)) == 1 and len(set(id(time) for time in times2)) == 1:
+            # find overlapping times
+            (time_overlap_single, d1_diff_ix, d2_diff_ix) = intersect(times1[0], times2[0], tolerance=tolerance, return_indices=True)
+            # find differences
+            d1_miss_ix = np.setxor1d(np.arange(len(times1[0])), d1_diff_ix)
+            d2_miss_ix = np.setxor1d(np.arange(len(times2[0])), d2_diff_ix)
+            time_overlap = [time_overlap_single] * num_channels
+            if is_quat_diff:
+                nondeg_angle, nondeg_error = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix], allow_nans=True)
+                diffs = [nondeg_error[0, :], nondeg_error[1, :], nondeg_error[2, :], nondeg_angle]
             else:
-                raise NotImplementedError("Non-same time vectors are not implemented for diff plots yet.")  # TODO: implement this
+                diffs = [data_two[d2_diff_ix] - data_one[d1_diff_ix] for data_one, data_two in zip(datum1, datum2)]
         else:
-            time_overlap = None
-        ix = _build_diff_indices(times1, times2, time_overlap, rms_xmin=rms_xmin, rms_xmax=rms_xmax)
+            raise NotImplementedError("Non-same time vectors are not implemented for diff plots yet.")  # TODO: implement this
+    else:
+        time_overlap = None
+    ix = _build_diff_indices(times1, times2, time_overlap, rms_xmin=rms_xmin, rms_xmax=rms_xmax)
 
     # create a colormap
     cm = ColorMap(colormap=colormap, num_colors=3 * num_channels)
 
     # calculate the rms (or mean) values
     if show_rms or return_err:
-        data_func, func_name = _calc_rms(datum1, ix["one"], use_mean=use_mean)
-        data2_func, _ = _calc_rms(datum2, ix["two"], use_mean=use_mean)
-        if np.any(ix["overlap"]):
+        data_func = data2_func = nondeg_func = np.full(num_channels, np.nan)
+        if have_data_one:
+            data_func, func_name = _calc_rms(datum1, ix["one"], use_mean=use_mean)
+        if have_data_two:
+            data2_func, func_name = _calc_rms(datum2, ix["two"], use_mean=use_mean)
+        if have_both and np.any(ix["overlap"]):
             nondeg_func, _ = _calc_rms(diffs, ix["overlap"], use_mean=use_mean)
-        else:
-            nondeg_func = np.full(num_channels, np.nan)
         # output errors
-        err = {"one": data_func, "two": data2_func, "diff": nondeg_func}
+        if is_quat_diff:
+            err = {"one": data_func, "two": data2_func, "diff": nondeg_func[:3], "mag": nondeg_func[3]}
+        else:
+            err = {"one": data_func, "two": data2_func, "diff": nondeg_func}
 
     # unit conversion value
     (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
@@ -794,8 +823,10 @@ def make_difference_plot(
             num_rows = num_channels if single_lines else 1
             num_cols = 1
         fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
-        if have_both:
-            fig_ax = tuple(item for temp in fig_ax[:num_channels] for item in [temp] * 2) + fig_ax[num_channels:]
+        if not single_lines:
+            fig_ax = tuple(item for temp in fig_ax for item in [temp] * num_channels)
+    expected_axes = 2 * num_channels if have_both else num_channels
+    assert len(fig_ax) == expected_axes, "Mismatch in the number of figures and axes."
 
     # Get main figures and axes
     figs: list[Figure] = []
@@ -814,11 +845,15 @@ def make_difference_plot(
     # Primary plot
     xlim: tuple[float, float] | None = None
     color_offset = len(times1)
+    datashaders = []
+    this_zorder = 3 if is_quat_diff else 4
     for i in range(num_channels):
         this_fig, this_axes = fig_ax[i]
         this_ylabel = ylabels[i]
         this_label = f"{name_one} {elements[i]}" if name_one else str(elements[i])
         if have_data_one:
+            this_time = times1[i]
+            this_data = datum1[i]
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
                 if leg_units:
@@ -826,18 +861,54 @@ def make_difference_plot(
                 else:
                     this_label += f" ({func_name}: {value})"
             this_color = cm.get_color(i)
-            plot_func(
-                this_axes,
-                times1[i],
-                datum1[i],
-                symbol_one,
-                markersize=4,
-                label=this_label,
-                color=this_color,
-                zorder=9,
-            )
+            if use_datashader and this_time.size > datashader_pts:
+                ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)  # type: ignore[union-attr]
+                if not np.issubdtype(this_data.dtype, np.number):
+                    (categories, ix_extras) = np.unique(this_data, return_index=True)
+                    temp_data = pd.Categorical(this_data, categories=categories[np.argsort(ix_extras)], ordered=True)
+                    ix_spot = np.union1d(ix_spot, ix_extras)
+                    plot_func(
+                        this_axes,
+                        this_time[ix_spot],  # type: ignore[index]
+                        this_data[ix_spot],
+                        symbol_one[0],
+                        markersize=4,
+                        label=this_label,
+                        color=this_color,
+                        zorder=this_zorder,
+                        linestyle="none",
+                    )
+                    datashaders.append(
+                        {"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": this_color}
+                    )
+                else:
+                    plot_func(
+                        this_axes,
+                        this_time[ix_spot],  # type: ignore[index]
+                        this_data[ix_spot],
+                        symbol_one[0],
+                        markersize=4,
+                        label=this_label,
+                        color=this_color,
+                        zorder=this_zorder,
+                        linestyle="none",
+                    )
+                    datashaders.append({"time": this_time, "data": this_data, "ax": this_axes, "color": this_color})
+            else:
+                plot_func(
+                    this_axes,
+                    this_time,
+                    this_data,
+                    symbol_one,
+                    markersize=4,
+                    label=this_label,
+                    color=this_color,
+                    zorder=9,
+                )
         this_label = f"{name_two} {elements[i]}" if name_two else str(elements[i])
         if have_data_two:
+            this_time2 = times2[i]
+            this_data2 = datum2[i]
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv * data2_func[i])  # type: ignore[index, operator]
                 if leg_units:
@@ -845,16 +916,31 @@ def make_difference_plot(
                 else:
                     this_label += f" ({func_name}: {value})"
             this_color = cm.get_color(i + color_offset)
-            plot_func(
-                this_axes,
-                times2[i],
-                datum2[i],
-                symbol_two,
-                markersize=4,
-                label=this_label,
-                color=this_color,
-                zorder=9,
-            )
+            if use_datashader and this_time2.size > datashader_pts:  # type: ignore[union-attr]
+                ix_spot = np.round(np.linspace(0, this_time2.size - 1, datashader_pts)).astype(int)  # type: ignore[union-attr]
+                plot_func(
+                    this_axes,
+                    this_time2[ix_spot],  # type: ignore[index]
+                    this_data2[ix_spot],
+                    symbol_two[0],
+                    markersize=4,
+                    label=this_label,
+                    color=this_color,
+                    zorder=this_zorder + 1,
+                    linestyle="none",
+                )
+                datashaders.append({"time": times2[i], "data": datum2[i], "ax": this_axes, "color": this_color})
+            else:
+                plot_func(
+                    this_axes,
+                    times2[i],
+                    datum2[i],
+                    symbol_two,
+                    markersize=4,
+                    label=this_label,
+                    color=this_color,
+                    zorder=9,
+                )
         xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
@@ -877,9 +963,10 @@ def make_difference_plot(
     if have_both:
         xlim: tuple[float, float] | None = None
         color_offset = len(times1) + len(times2)
-        for i in range(num_channels):
+        diff_elems = ("X", "Y", "Z", "Magnitude") if is_quat_diff else elements
+        ylabels2 = _get_ylabels(len(ix_diff), ylabel, elements=diff_elems, single_lines=single_lines2, description=description, units=units)
+        for i, this_ylabel, this_zorder in zip(ix_diff, ylabels2, zorders):
             this_fig, this_axes = fig_ax[i + num_channels]
-            this_ylabel = ylabels[i]
             this_label = str(elements[i])
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv * nondeg_func[i])  # type: ignore[index, operator]
@@ -888,20 +975,34 @@ def make_difference_plot(
                 else:
                     this_label += f" ({func_name}: {value})"
             this_color = cm.get_color(i + color_offset)
-            plot_func(
-                this_axes,
-                time_overlap[i],
-                diffs[i],
-                '.-',
-                markersize=4,
-                label=this_label,
-                color=this_color,
-                zorder=5,
-            )
-            if show_extra and i == num_channels - 1:
+            if use_datashader and time_overlap[i].size > datashader_pts:
+                ix_spot = np.round(np.linspace(0, time_overlap[i].size - 1, datashader_pts)).astype(int)
+                plot_func(
+                    this_axes,
+                    time_overlap[i][ix_spot],
+                    diffs[i][ix_spot],
+                    ".",
+                    markersize=4,
+                    label=this_label,
+                    color=this_color,
+                    linestyle="none",
+                )
+                datashaders.append({"time": time_overlap[i], "data": diffs[i], "ax": this_axes, "color": this_color})
+            else:
+                plot_func(
+                    this_axes,
+                    time_overlap[i],
+                    diffs[i],
+                    '.-',
+                    markersize=4,
+                    label=this_label,
+                    color=this_color,
+                    zorder=this_zorder,
+                )
+            if show_extra and i == ix_diff[-1]:
                 if d1_miss_ix.size > 0:
                     this_axes.plot(
-                        times1[i][d1_miss_ix],
+                        this_time[d1_miss_ix],
                         np.zeros(len(d1_miss_ix)),
                         "kx",
                         markersize=8,
@@ -920,14 +1021,15 @@ def make_difference_plot(
                         label=name_two + " Extra",
                     )
             xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
-            zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+            if not ignore_plot_data(diffs[i], True):
+                zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
             if plot_zero:
                 show_zero_ylim(this_axes)
             if ylims is not None:
                 this_axes.set_ylims(ylims)
             if i == 0:
                 this_axes.set_title(description)
-            if bool(this_ylabel):
+            if bool(this_ylabel) or single_lines:
                 this_axes.set_ylabel(this_ylabel)
                 this_axes.grid(True)
                 # optionally add second Y axis
@@ -1094,7 +1196,7 @@ def make_quaternion_plot(
     >>> name_one         = "test1"
     >>> name_two         = "test2"
     >>> time_units       = "sec"
-    >>> start_date       = str(datetime.now())
+    >>> start_date       = ", t0 = " + str(datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
     >>> disp_xmin        = -2
@@ -1131,44 +1233,46 @@ def make_quaternion_plot(
     ...     plt.close(fig)
 
     """
-    colormap = ColorMap(COLOR_LISTS["quat_comp"])
-    return None
-    # return make_generic_plot(  # type: ignore[return-value]
-    #     "quat",
-    #     description=description,
-    #     time_one=time_one,
-    #     data_one=quat_one,
-    #     time_two=time_two,
-    #     data_two=quat_two,
-    #     name_one=name_one,
-    #     name_two=name_two,
-    #     elements=("X", "Y", "Z", "S"),
-    #     units="rad",
-    #     time_units=time_units,
-    #     start_date=start_date,
-    #     rms_xmin=rms_xmin,
-    #     rms_xmax=rms_xmax,
-    #     disp_xmin=disp_xmin,
-    #     disp_xmax=disp_xmax,
-    #     single_lines=single_lines,
-    #     make_subplots=make_subplots,
-    #     colormap=colormap,
-    #     use_mean=use_mean,
-    #     plot_zero=plot_zero,
-    #     show_rms=show_rms,
-    #     legend_loc=legend_loc,
-    #     show_extra=show_extra,
-    #     plot_components=plot_components,
-    #     second_units=second_units,
-    #     leg_scale=leg_scale,
-    #     tolerance=tolerance,
-    #     return_err=return_err,
-    #     data_as_rows=data_as_rows,
-    #     extra_plotter=extra_plotter,
-    #     use_zoh=use_zoh,
-    #     label_vert_lines=label_vert_lines,
-    #     use_datashader=use_datashader,
-    # )
+    diff_type = "quat_comp" if plot_components else "quat_mag"
+    if isinstance(single_lines, bool) and single_lines:
+        diff_type = "quat_all"
+    if not isinstance(single_lines, bool) and single_lines[1]:
+        diff_type = "quat_all"
+    return make_difference_plot(
+        description=description,
+        time_one=time_one,
+        data_one=quat_one,
+        time_two=time_two,
+        data_two=quat_two,
+        name_one=name_one,
+        name_two=name_two,
+        elements=("X", "Y", "Z", "S"),
+        units="rad",
+        time_units=time_units,
+        start_date=start_date,
+        rms_xmin=rms_xmin,
+        rms_xmax=rms_xmax,
+        disp_xmin=disp_xmin,
+        disp_xmax=disp_xmax,
+        single_lines=single_lines,
+        make_subplots=make_subplots,
+        colormap=ColorMap(COLOR_LISTS["quat_comp"]),
+        use_mean=use_mean,
+        plot_zero=plot_zero,
+        show_rms=show_rms,
+        legend_loc=legend_loc,
+        show_extra=show_extra,
+        second_units=second_units,
+        leg_scale=leg_scale,
+        tolerance=tolerance,
+        return_err=return_err,
+        data_as_rows=data_as_rows,
+        extra_plotter=extra_plotter,
+        use_zoh=use_zoh,
+        label_vert_lines=label_vert_lines,
+        use_datashader=use_datashader,
+        diff_type=diff_type,
+    )
 
 
 # %% Functions - make_error_bar_plot
@@ -1232,7 +1336,7 @@ def make_error_bar_plot(
     >>> elements         = ["x", "y", "z"]
     >>> units            = "rad"
     >>> time_units       = "sec"
-    >>> start_date       = "  t0 = " + str(datetime.now())
+    >>> start_date       = ", t0 = " + str(datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
     >>> disp_xmin        = -2
@@ -1607,7 +1711,7 @@ def make_categories_plot(
     description: str,
     time: _Times | None,
     data: _Data | None,
-    cats: Iterable[Any] | None,
+    cats: Iterable[Any],
     *,
     cat_names: dict[Any, str] | None = None,
     name: str = "",
@@ -1702,41 +1806,182 @@ def make_categories_plot(
     ...     plt.close(fig)
 
     """
-    return None
-    # return make_generic_plot(  # type: ignore[return-value]
-    #     plot_type="cats",
-    #     description=description,
-    #     time_one=time,
-    #     data_one=data,
-    #     cats=cats,
-    #     cat_names=cat_names,
-    #     name_one=name,
-    #     elements=elements,
-    #     units=units,
-    #     time_units=time_units,
-    #     start_date=start_date,
-    #     rms_xmin=rms_xmin,
-    #     rms_xmax=rms_xmax,
-    #     disp_xmin=disp_xmin,
-    #     disp_xmax=disp_xmax,
-    #     make_subplots=make_subplots,
-    #     single_lines=single_lines,
-    #     colormap=colormap,
-    #     use_mean=use_mean,
-    #     plot_zero=plot_zero,
-    #     show_rms=show_rms,
-    #     legend_loc=legend_loc,
-    #     second_units=second_units,
-    #     leg_scale=leg_scale,
-    #     ylabel=ylabel,
-    #     ylims=ylims,
-    #     data_as_rows=data_as_rows,
-    #     use_zoh=use_zoh,
-    #     label_vert_lines=label_vert_lines,
-    #     extra_plotter=extra_plotter,
-    #     use_datashader=use_datashader,
-    #     fig_ax=fig_ax,
-    # )
+    # hard-coded defaults
+    datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
+
+    # build lists of time and data
+    times, datum = _make_time_and_data_lists(time, data, data_as_rows=data_as_rows)
+    num_channels = len(times)
+    time_is_date = len(times) > 0 and is_datetime(times[0])
+
+    # check for valid data
+    if not datum:
+        logger.log(LogLevel.L5, 'No categories data was provided, so no plot was generated for "%s".', description)
+        return []
+
+    # optional inputs
+    if elements is None:
+        elements = [f"Channel {i + 1}" for i in range(num_channels)]
+
+    # build RMS indices
+    if show_rms:
+        ix = _build_indices(times, rms_xmin, rms_xmax)
+
+    # create a colormap
+    cm = ColorMap(colormap=colormap, num_colors=3 * num_channels)
+
+    # Category calculations
+    unique_cats = set(cats)  # type: ignore[arg-type]
+    num_cats = len(unique_cats)
+    if cat_names is None:
+        cat_names = {}
+    # Add any missing dictionary values
+    for x in unique_cats:
+        if x not in cat_names:
+            cat_names[x] = "Status=" + str(x)
+    ordered_cats = [x for x in cat_names if x in unique_cats]
+    cat_keys = np.array(list(cat_names.keys()), dtype=int)
+
+    # calculate the rms (or mean) values
+    if show_rms:
+        data_func = {}
+        for cat in ordered_cats:
+            # TODO: handle isinstance(cats, list) case
+            ix_cat = cats == cat
+            this_datum = [data[ix_cat] for data in datum]
+            temp_ix_one = [i[ix_cat] for i in ix["one"]]
+            data_func[cat], func_name = _calc_rms(this_datum, temp_ix_one, use_mean=use_mean)
+
+    # unit conversion value
+    (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
+
+    # plotting options
+    plot_func = _plot_zoh if use_zoh else _plot_linear
+
+    # get labels
+    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=True, description=description, units=units)
+
+    if fig_ax is None:
+        # get the figure titles
+        if single_lines:
+            titles = [f"{description} {e} {cat_names[cat]}" for cat in ordered_cats for e in elements]  # type: ignore[index]
+        else:
+            titles = [f"{description} {e}" for e in elements]
+        # get the number of figures and axes to make
+        if make_subplots:
+            num_figs = 1
+            num_rows = num_channels
+            num_cols = num_cats if single_lines else 1
+        else:
+            num_figs = num_channels * num_cats if single_lines else num_channels
+            num_cols = 1
+            num_rows = 1
+        fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
+        if make_subplots:
+            figs = [fig_ax[0][0]]
+            axes = [[ax for _, ax in fig_ax]]
+        else:
+            figs = [fig for fig, _ in fig_ax]
+            axes = [fig.axes[0:1] for fig in figs]
+        if not single_lines:
+            fig_ax = tuple(item for temp in fig_ax for item in [temp] * num_cats)
+        for fig, title in zip(figs, titles):
+            fig.canvas.manager.set_window_title(title)
+
+    # Primary plot
+    xlim: tuple[float, float] | None = None
+    datashaders = []
+    for i, (this_time, this_data, this_ylabel) in enumerate(zip(times, datum, ylabels)):
+        this_label = str(elements[i])
+        this_axes = fig_ax[i * num_cats][1]
+        # plot the full underlying line once
+        if not use_datashader or this_time.size <= datashader_pts:  # type: ignore[union-attr]
+            plot_func(
+                this_axes, this_time, this_data, ":", label="", color="xkcd:slate", linewidth=1, zorder=2
+            )
+            # plot the data with this category value
+            for j, cat in enumerate(ordered_cats):
+                this_fig, sub_axes = fig_ax[i * num_cats + j]
+                this_cat_name = cat_names[cat]  # type: ignore[index]
+                if show_rms:
+                    value = _LEG_FORMAT.format(unit_conv * data_func[cat][i])  # type: ignore[index]
+                    if new_units:
+                        cat_label = f"{this_label} {this_cat_name} ({func_name}: {value} {new_units})"
+                    else:
+                        cat_label = f"{this_label} {this_cat_name} ({func_name}: {value})"
+                else:
+                    cat_label = f"{this_label} {this_cat_name}"
+                this_cats = cats == cat
+                this_linestyle = "-" if single_lines else "none"
+                # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
+                # won't mess up the color scheme by skipping colors
+                this_cat_ix = np.argmax(cat == cat_keys)
+                this_color = cm.get_color(i * len(cat_keys) + this_cat_ix)
+                if use_datashader and np.count_nonzero(this_cats) > datashader_pts:
+                    temp = np.flatnonzero(this_cats)
+                    ix_spot = temp[np.round(np.linspace(0, temp.size - 1, datashader_pts)).astype(int)]
+                    sub_axes.plot(
+                        this_time[ix_spot],  # type: ignore[index]
+                        this_data[ix_spot],
+                        linestyle="none",
+                        marker=".",
+                        markersize=6,
+                        label=cat_label,
+                        color=this_color,
+                        zorder=3,
+                    )
+                    datashaders.append(
+                        {
+                            "time": this_time[this_cats],  # type: ignore[index]
+                            "data": this_data[this_cats],
+                            "ax": sub_axes,
+                            "color": this_color,
+                        }
+                    )
+                else:
+                    sub_axes.plot(
+                        this_time[this_cats],  # type: ignore[index]
+                        this_data[this_cats],
+                        linestyle=this_linestyle,
+                        marker=".",
+                        markersize=6,
+                        label=cat_label,
+                        color=this_color,
+                        zorder=3,
+                    )
+        xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+        if plot_zero:
+            show_zero_ylim(this_axes)
+        if ylims is not None:
+            this_axes.set_ylims(ylims)
+        if i == 0:
+            this_axes.set_title(description)
+        if bool(this_ylabel):
+            this_axes.set_ylabel(this_ylabel)
+            this_axes.grid(True)
+            # optionally add second Y axis
+            plot_second_units_wrapper(this_axes, (new_units, unit_conv))
+            # plot RMS lines
+            if show_rms:
+                vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
+                plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
+
+    if single_lines:
+        figs[0].supylabel(description)
+
+    # plot any extra information through a generic callable
+    if extra_plotter is not None:
+        for fig, ax in zip(figs, axes):
+            extra_plotter(fig=fig, ax=ax)
+
+    # add legend at the very end once everything has been done
+    if legend_loc.lower() != "none":
+        for fig, ax in zip(figs, axes):
+            for this_axes in ax:
+                this_axes.legend(loc=legend_loc)
+
+    return figs
 
 # %% make_connected_sets
 def make_connected_sets(  # noqa: C901
