@@ -33,8 +33,8 @@ from dstauffman import (
 from dstauffman.aerospace import quat_angle_diff
 from dstauffman.plotting.support import (
     add_datashaders,
-    ColorMap,
     COLOR_LISTS,
+    ColorMap,
     DEFAULT_COLORMAP,
     disp_xlimits,
     ExtraPlotter,
@@ -92,11 +92,15 @@ if TYPE_CHECKING:
         two: list[_B]
         overlap: list[_B]
 
+
 # %% Globals
 logger = logging.getLogger(__name__)
 
+
 # %% Functions - _make_time_and_data_lists
-def _make_time_and_data_lists(time: _Times, data: _Data, *, data_as_rows: bool, is_quat: bool = False) -> tuple[list[_N] | list[_D], list[_N]]:
+def _make_time_and_data_lists(
+    time: _Times, data: _Data, *, data_as_rows: bool, is_quat: bool = False
+) -> tuple[list[_N] | list[_D], list[_N]]:
     """Turns the different types of inputs into lists of 1-D data."""
     if data is None:
         # assert time is None, "Time must be None if data is None."  # TODO: include this?
@@ -115,7 +119,9 @@ def _make_time_and_data_lists(time: _Times, data: _Data, *, data_as_rows: bool, 
     if is_quat and num_chan != 4:
         raise AssertionError("Must be a 4-element quaternion")
     if isinstance(time, (list, tuple)):
-        assert len(time) == num_chan, f"The number of time channels must match the number of data channels, not {len(time)} and {num_chan}."
+        assert (
+            len(time) == num_chan
+        ), f"The number of time channels must match the number of data channels, not {len(time)} and {num_chan}."
         times = list(time)
     else:
         this_time = np.atleast_1d(time)
@@ -136,7 +142,7 @@ def _build_indices(
     if not bool(times):
         # no times given, so nothing to calculate
         return ix
-    if len(set(id(time) for time in times)) == 1:
+    if len({id(time) for time in times}) == 1:
         # case where all the time vectors are exactly the same
         temp_ix = get_rms_indices(times[0], xmin=rms_xmin, xmax=rms_xmax)
         ix["pts"] = temp_ix["pts"]
@@ -173,7 +179,7 @@ def _build_diff_indices(
         # only have times2
         return _build_indices(times2, rms_xmin, rms_xmax, label="two")
     # have both times and times2
-    same_time = len(set(id(time) for time in times1)) == 1 and len(set(id(time) for time in times2)) == 1
+    same_time = len({id(time) for time in times1}) == 1 and len({id(time) for time in times2}) == 1
     for i, (this_time1, this_time2, this_overlap) in enumerate(zip(times1, times2, time_overlap)):
         if i == 0 or not same_time:
             temp_ix = get_rms_indices(this_time1, this_time2, this_overlap, xmin=rms_xmin, xmax=rms_xmax)
@@ -248,9 +254,7 @@ def _get_ylabels(
 
 
 # %% Functions - _create_figure
-def _create_figure(
-    num_figs: int, num_rows: int, num_cols: int, *, description: str = ""
-) -> tuple[tuple[Figure, Axes], ...]:
+def _create_figure(num_figs: int, num_rows: int, num_cols: int, *, description: str = "") -> tuple[tuple[Figure, Axes], ...]:
     """Create or passthrough the given figures."""
     # % Create plots
     if num_cols == 1:
@@ -297,7 +301,13 @@ def _plot_zoh(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *a
 
 # %% Functions - _label_x
 def _label_x(
-    this_axes: Axes, xlim: tuple[float, float] | None, disp_xmin: _Time, disp_xmax: _Time, time_is_date: bool, time_units: str, start_date: str
+    this_axes: Axes,
+    xlim: tuple[float, float] | None,
+    disp_xmin: _Time,
+    disp_xmax: _Time,
+    time_is_date: bool,
+    time_units: str,
+    start_date: str,
 ) -> tuple[float, float]:
     """Build the list of x-labels."""
     if xlim is None:
@@ -410,6 +420,8 @@ def make_time_plot(
     # optional inputs
     if elements is None:
         elements = [f"Channel {i + 1}" for i in range(num_channels)]
+    if len(elements) != num_channels:
+        raise AssertionError(f"The given elements need to match the data sizes, got {num_channels} and {len(elements)}.")
 
     # build RMS (or mean) indices and calculate the values
     if show_rms:
@@ -433,7 +445,7 @@ def make_time_plot(
             raise ValueError(f"Unexpected plot_type of {plot_type}.")
 
     # get labels
-    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)
+    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)  # fmt: skip
 
     if fig_ax is None:
         # get the number of figures and axes to make
@@ -443,12 +455,17 @@ def make_time_plot(
         fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
         if not single_lines:
             fig_ax = fig_ax * num_channels
+    else:
+        # check for single instance case and make it a tuple of tuples
+        if len(fig_ax) == 2:
+            if isinstance(fig_ax[0], Figure):
+                fig_ax = (fig_ax,)  # type: ignore[assignment]
     assert len(fig_ax) == num_channels, "Expecting a (figure, axes) pair for each channel in data."
     fig = fig_ax[0][0]  # type: ignore[index]
     ax = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
-    for i, ((this_fig, this_axes), this_time, this_data, this_ylabel),  in enumerate(zip(fig_ax, times, datum, ylabels)):
+    for i, ((this_fig, this_axes), this_time, this_data, this_ylabel) in enumerate(zip(fig_ax, times, datum, ylabels)):  # fmt: skip
         this_label = str(elements[i])
         if show_rms:
             value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
@@ -581,7 +598,7 @@ def make_difference_plot(
     fig_ax: tuple[Figure, Axes] | None,
     diff_type: _DiffTypes,
 ) -> tuple[_Figs, dict[str, _N]]: ...
-def make_difference_plot(
+def make_difference_plot(  # noqa: C901
     description: str,
     time_one: _Times | None,
     time_two: _Times | None,
@@ -753,12 +770,14 @@ def make_difference_plot(
     if elements is None:
         assert not is_quat_diff, "Quaternion diffs should be explicitly specified outside this function."
         elements = [f"Channel {i + 1}" for i in range(num_channels)]
+    if len(elements) != num_channels:
+        raise AssertionError(f"The given elements need to match the data sizes, got {num_channels} and {len(elements)}.")
 
     # build RMS indices
     if have_both:
-        if len(set(id(time) for time in times1)) == 1 and len(set(id(time) for time in times2)) == 1:
+        if len({id(time) for time in times1}) == 1 and len({id(time) for time in times2}) == 1:
             # find overlapping times
-            (time_overlap_single, d1_diff_ix, d2_diff_ix) = intersect(times1[0], times2[0], tolerance=tolerance, return_indices=True)
+            time_overlap_single, d1_diff_ix, d2_diff_ix = intersect(times1[0], times2[0], tolerance=tolerance, return_indices=True)  # fmt: skip
             # find differences
             d1_miss_ix = np.setxor1d(np.arange(len(times1[0])), d1_diff_ix)
             d2_miss_ix = np.setxor1d(np.arange(len(times2[0])), d2_diff_ix)
@@ -803,7 +822,7 @@ def make_difference_plot(
         single_lines2 = single_lines
     else:
         single_lines1, single_lines2 = single_lines
-    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines1, description=description, units=units)
+    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines1, description=description, units=units)  # fmt: skip
     symbol_one = "^-" if have_both else ".-"
     symbol_two = "v:" if have_both else ".-"
 
@@ -878,9 +897,7 @@ def make_difference_plot(
                         zorder=this_zorder,
                         linestyle="none",
                     )
-                    datashaders.append(
-                        {"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": this_color}
-                    )
+                    datashaders.append({"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": this_color})
                 else:
                     plot_func(
                         this_axes,
@@ -964,7 +981,7 @@ def make_difference_plot(
         xlim: tuple[float, float] | None = None
         color_offset = len(times1) + len(times2)
         diff_elems = ("X", "Y", "Z", "Magnitude") if is_quat_diff else elements
-        ylabels2 = _get_ylabels(len(ix_diff), ylabel, elements=diff_elems, single_lines=single_lines2, description=description, units=units)
+        ylabels2 = _get_ylabels(len(ix_diff), ylabel, elements=diff_elems, single_lines=single_lines2, description=description, units=units)  # fmt: skip
         for i, this_ylabel, this_zorder in zip(ix_diff, ylabels2, zorders):
             this_fig, this_axes = fig_ax[i + num_channels]
             this_label = str(elements[i])
@@ -993,7 +1010,7 @@ def make_difference_plot(
                     this_axes,
                     time_overlap[i],
                     diffs[i],
-                    '.-',
+                    ".-",
                     markersize=4,
                     label=this_label,
                     color=this_color,
@@ -1038,7 +1055,6 @@ def make_difference_plot(
                 if show_rms:
                     vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
                     plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
-
 
     if single_lines:
         figs[0].supylabel(description)
@@ -1386,6 +1402,8 @@ def make_error_bar_plot(
     # optional inputs
     if elements is None:
         elements = [f"Channel {i + 1}" for i in range(num_channels)]
+    if len(elements) != num_channels:
+        raise AssertionError(f"The given elements need to match the data sizes, got {num_channels} and {len(elements)}.")
 
     # build RMS indices
     if show_rms or return_err:
@@ -1420,7 +1438,7 @@ def make_error_bar_plot(
         err_pos = [maxs[:, i] - data for i, data in enumerate(datum)]
 
     # build labels
-    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)
+    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)  # fmt: skip
 
     if fig_ax is None:
         # get the number of figures and axes to make
@@ -1435,7 +1453,7 @@ def make_error_bar_plot(
     ax = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
-    for i, ((this_fig, this_axes), this_time, this_data, this_err_neg, this_err_pos, this_ylabel),  in enumerate(zip(fig_ax, times, datum, err_neg, err_pos, ylabels)):
+    for i, ((this_fig, this_axes), this_time, this_data, this_err_neg, this_err_pos, this_ylabel) in enumerate(zip(fig_ax, times, datum, err_neg, err_pos, ylabels)):  # fmt: skip
         this_label = str(elements[i])
         if show_rms:
             value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
@@ -1610,6 +1628,8 @@ def make_bar_plot(
     # optional inputs
     if elements is None:
         elements = [f"Channel {i + 1}" for i in range(num_channels)]
+    if len(elements) != num_channels:
+        raise AssertionError(f"The given elements need to match the data sizes, got {num_channels} and {len(elements)}.")
 
     # build RMS indices
     if show_rms or return_err:
@@ -1628,13 +1648,13 @@ def make_bar_plot(
     # extra bar calculations
     last = np.zeros_like(datum[0])
     bottoms = [last]
-    for data in datum:
+    for this_data in datum:
         # purposely don't modify last inplace, you want a copy to append to bottoms
-        last = last + np.ma.masked_invalid(data)
+        last = last + np.ma.masked_invalid(this_data)
         bottoms.append(last)
 
     # build labels
-    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)
+    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)  # fmt: skip
     if not single_lines:
         ylabels = ylabels[::-1]
 
@@ -1707,7 +1727,7 @@ def make_bar_plot(
 
 
 # %% Functions - make_categories_plot
-def make_categories_plot(
+def make_categories_plot(  # noqa: C901
     description: str,
     time: _Times | None,
     data: _Data | None,
@@ -1822,6 +1842,8 @@ def make_categories_plot(
     # optional inputs
     if elements is None:
         elements = [f"Channel {i + 1}" for i in range(num_channels)]
+    if len(elements) != num_channels:
+        raise AssertionError(f"The given elements need to match the data sizes, got {num_channels} and {len(elements)}.")
 
     # build RMS indices
     if show_rms:
@@ -1896,9 +1918,7 @@ def make_categories_plot(
         this_axes = fig_ax[i * num_cats][1]
         # plot the full underlying line once
         if not use_datashader or this_time.size <= datashader_pts:  # type: ignore[union-attr]
-            plot_func(
-                this_axes, this_time, this_data, ":", label="", color="xkcd:slate", linewidth=1, zorder=2
-            )
+            plot_func(this_axes, this_time, this_data, ":", label="", color="xkcd:slate", linewidth=1, zorder=2)
             # plot the data with this category value
             for j, cat in enumerate(ordered_cats):
                 this_fig, sub_axes = fig_ax[i * num_cats + j]
@@ -1982,6 +2002,7 @@ def make_categories_plot(
                 this_axes.legend(loc=legend_loc)
 
     return figs
+
 
 # %% make_connected_sets
 def make_connected_sets(  # noqa: C901

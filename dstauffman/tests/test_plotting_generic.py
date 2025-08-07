@@ -936,7 +936,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_none2(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)  # type: ignore[call-overload]
 
-    @patch("lmspace.plotting.generic.logger")
+    @patch("dstauffman.plotting.generic.logger")
     def test_none3(self, mock_logger: Mock) -> None:
         self.figs = plot.make_quaternion_plot("", None, None, None, None)  # type: ignore[call-overload]
         mock_logger.log.assert_called_once()
