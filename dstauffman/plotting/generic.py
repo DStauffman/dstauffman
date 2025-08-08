@@ -99,7 +99,7 @@ logger = logging.getLogger(__name__)
 
 # %% Functions - _make_time_and_data_lists
 def _make_time_and_data_lists(
-    time: _Times, data: _Data, *, data_as_rows: bool, is_quat: bool = False
+    time: _Times, data: _Data | None, *, data_as_rows: bool, is_quat: bool = False
 ) -> tuple[list[_N] | list[_D], list[_N]]:
     """Turns the different types of inputs into lists of 1-D data."""
     if data is None:
@@ -119,14 +119,12 @@ def _make_time_and_data_lists(
     if is_quat and num_chan != 4:
         raise AssertionError("Must be a 4-element quaternion")
     if isinstance(time, (list, tuple)):
-        assert (
-            len(time) == num_chan
-        ), f"The number of time channels must match the number of data channels, not {len(time)} and {num_chan}."
+        assert len(time) == num_chan, f"The number of time channels must match the number of data channels, not {len(time)} and {num_chan}."  # fmt: skip
         times = list(time)
     else:
-        this_time = np.atleast_1d(time)
+        this_time = np.atleast_1d(time)  # type: ignore[arg-type]
         times = [this_time] * num_chan
-    return times, datum
+    return times, datum  # type: ignore[return-type]
 
 
 # %% Functions - _build_indices
@@ -135,7 +133,7 @@ def _build_indices(
     rms_xmin: _Time,
     rms_xmax: _Time,
     *,
-    label: str = "one",
+    label: Literal["one", "two"] = "one",
 ) -> _RmsIndices:
     """Builds a dictionary of indices for the given RMS (or mean) start and stop times."""
     ix: _RmsIndices = {"pts": [], label: []}
@@ -149,7 +147,7 @@ def _build_indices(
         ix[label] = [temp_ix["one"]]
     for i, this_time in enumerate(times):
         # general case
-        temp_ix = get_rms_indices(this_time, xmin=rms_xmin, xmax=rms_xmax)
+        temp_ix = get_rms_indices(this_time, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[arg-type]
         if i == 0:
             ix["pts"] = temp_ix["pts"]
         else:
@@ -179,6 +177,8 @@ def _build_diff_indices(
         # only have times2
         return _build_indices(times2, rms_xmin, rms_xmax, label="two")
     # have both times and times2
+    assert times1 is not None and times2 is not None
+    assert time_overlap is not None, "Must have overlap time when you have both times1 and times2."
     same_time = len({id(time) for time in times1}) == 1 and len({id(time) for time in times2}) == 1
     for i, (this_time1, this_time2, this_overlap) in enumerate(zip(times1, times2, time_overlap)):
         if i == 0 or not same_time:
@@ -257,14 +257,16 @@ def _get_ylabels(
 def _create_figure(num_figs: int, num_rows: int, num_cols: int, *, description: str = "") -> tuple[tuple[Figure, Axes], ...]:
     """Create or passthrough the given figures."""
     # % Create plots
+    fig_ax: tuple[tuple[Figure, Axes]]
     if num_cols == 1:
-        fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=num_rows, layout="rows", sharex=True)
+        fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=num_rows, layout="rows", sharex=True)  # type: ignore[call-overload]
     elif num_rows == 1:
-        fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=num_cols, layout="cols", sharex=True)
+        fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=num_cols, layout="cols", sharex=True)  # type: ignore[call-overload]
     else:
         layout = "colwise"  # TODO: colwise or rowwise?
         fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=[num_rows, num_cols], layout=layout, sharex=True)  # type: ignore[call-overload]
     if description:
+        assert fig_ax[0][0].canvas.manager is not None
         fig_ax[0][0].canvas.manager.set_window_title(description)
     return fig_ax
 
@@ -313,7 +315,7 @@ def _label_x(
     if xlim is None:
         disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
         xlim = this_axes.get_xlim()
-    if time_is_date:  # type: ignore[arg-type, index]
+    if time_is_date:
         this_axes.set_xlabel("Date")
         assert time_units in {"datetime", "numpy"}, f'Expected time units of "datetime" or "numpy", not "{time_units}".'
     else:
@@ -462,13 +464,13 @@ def make_time_plot(
                 fig_ax = (fig_ax,)  # type: ignore[assignment]
     assert len(fig_ax) == num_channels, "Expecting a (figure, axes) pair for each channel in data."
     fig = fig_ax[0][0]  # type: ignore[index]
-    ax = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
+    ax: list[Axes] = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
     for i, ((this_fig, this_axes), this_time, this_data, this_ylabel) in enumerate(zip(fig_ax, times, datum, ylabels)):  # fmt: skip
         this_label = str(elements[i])
         if show_rms:
-            value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
+            value = _LEG_FORMAT.format(leg_conv * data_func[i])
             if leg_units:
                 this_label += f" ({func_name}: {value} {leg_units})"
             else:
@@ -777,7 +779,7 @@ def make_difference_plot(  # noqa: C901
     if have_both:
         if len({id(time) for time in times1}) == 1 and len({id(time) for time in times2}) == 1:
             # find overlapping times
-            time_overlap_single, d1_diff_ix, d2_diff_ix = intersect(times1[0], times2[0], tolerance=tolerance, return_indices=True)  # fmt: skip
+            time_overlap_single, d1_diff_ix, d2_diff_ix = intersect(times1[0], times2[0], tolerance=tolerance, return_indices=True)  # type: ignore[call-overload]  # fmt: skip
             # find differences
             d1_miss_ix = np.setxor1d(np.arange(len(times1[0])), d1_diff_ix)
             d2_miss_ix = np.setxor1d(np.arange(len(times2[0])), d2_diff_ix)
@@ -874,21 +876,21 @@ def make_difference_plot(  # noqa: C901
             this_time = times1[i]
             this_data = datum1[i]
             if show_rms:
-                value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
+                value = _LEG_FORMAT.format(leg_conv * data_func[i])
                 if leg_units:
                     this_label += f" ({func_name}: {value} {leg_units})"
                 else:
                     this_label += f" ({func_name}: {value})"
             this_color = cm.get_color(i)
             if use_datashader and this_time.size > datashader_pts:
-                ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)  # type: ignore[union-attr]
+                ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)
                 if not np.issubdtype(this_data.dtype, np.number):
                     (categories, ix_extras) = np.unique(this_data, return_index=True)
                     temp_data = pd.Categorical(this_data, categories=categories[np.argsort(ix_extras)], ordered=True)
                     ix_spot = np.union1d(ix_spot, ix_extras)
                     plot_func(
                         this_axes,
-                        this_time[ix_spot],  # type: ignore[index]
+                        this_time[ix_spot],
                         this_data[ix_spot],
                         symbol_one[0],
                         markersize=4,
@@ -901,7 +903,7 @@ def make_difference_plot(  # noqa: C901
                 else:
                     plot_func(
                         this_axes,
-                        this_time[ix_spot],  # type: ignore[index]
+                        this_time[ix_spot],
                         this_data[ix_spot],
                         symbol_one[0],
                         markersize=4,
@@ -927,17 +929,17 @@ def make_difference_plot(  # noqa: C901
             this_time2 = times2[i]
             this_data2 = datum2[i]
             if show_rms:
-                value = _LEG_FORMAT.format(leg_conv * data2_func[i])  # type: ignore[index, operator]
+                value = _LEG_FORMAT.format(leg_conv * data2_func[i])
                 if leg_units:
                     this_label += f" ({func_name}: {value} {leg_units})"
                 else:
                     this_label += f" ({func_name}: {value})"
             this_color = cm.get_color(i + color_offset)
-            if use_datashader and this_time2.size > datashader_pts:  # type: ignore[union-attr]
-                ix_spot = np.round(np.linspace(0, this_time2.size - 1, datashader_pts)).astype(int)  # type: ignore[union-attr]
+            if use_datashader and this_time2.size > datashader_pts:
+                ix_spot = np.round(np.linspace(0, this_time2.size - 1, datashader_pts)).astype(int)
                 plot_func(
                     this_axes,
-                    this_time2[ix_spot],  # type: ignore[index]
+                    this_time2[ix_spot],
                     this_data2[ix_spot],
                     symbol_two[0],
                     markersize=4,
@@ -986,7 +988,7 @@ def make_difference_plot(  # noqa: C901
             this_fig, this_axes = fig_ax[i + num_channels]
             this_label = str(elements[i])
             if show_rms:
-                value = _LEG_FORMAT.format(leg_conv * nondeg_func[i])  # type: ignore[index, operator]
+                value = _LEG_FORMAT.format(leg_conv * nondeg_func[i])
                 if leg_units:
                     this_label += f" ({func_name}: {value} {leg_units})"
                 else:
@@ -1254,7 +1256,7 @@ def make_quaternion_plot(
         diff_type = "quat_all"
     if not isinstance(single_lines, bool) and single_lines[1]:
         diff_type = "quat_all"
-    return make_difference_plot(
+    return make_difference_plot(  # type: ignore[call-overload]
         description=description,
         time_one=time_one,
         data_one=quat_one,
@@ -1393,6 +1395,7 @@ def make_error_bar_plot(
     # TODO: implement this
     if ignore_plot_data(data, ignore_empties):
         raise NotImplementedError("Not yet implemented.")
+    assert data is not None
 
     # build lists of time and data
     times, datum = _make_time_and_data_lists(time, data, data_as_rows=data_as_rows)
@@ -1899,6 +1902,7 @@ def make_categories_plot(  # noqa: C901
             num_cols = 1
             num_rows = 1
         fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
+        assert fig_ax is not None
         if make_subplots:
             figs = [fig_ax[0][0]]
             axes = [[ax for _, ax in fig_ax]]
@@ -1922,7 +1926,7 @@ def make_categories_plot(  # noqa: C901
             # plot the data with this category value
             for j, cat in enumerate(ordered_cats):
                 this_fig, sub_axes = fig_ax[i * num_cats + j]
-                this_cat_name = cat_names[cat]  # type: ignore[index]
+                this_cat_name = cat_names[cat]
                 if show_rms:
                     value = _LEG_FORMAT.format(unit_conv * data_func[cat][i])  # type: ignore[index]
                     if new_units:
@@ -1941,7 +1945,7 @@ def make_categories_plot(  # noqa: C901
                     temp = np.flatnonzero(this_cats)
                     ix_spot = temp[np.round(np.linspace(0, temp.size - 1, datashader_pts)).astype(int)]
                     sub_axes.plot(
-                        this_time[ix_spot],  # type: ignore[index]
+                        this_time[ix_spot],
                         this_data[ix_spot],
                         linestyle="none",
                         marker=".",
@@ -1952,7 +1956,7 @@ def make_categories_plot(  # noqa: C901
                     )
                     datashaders.append(
                         {
-                            "time": this_time[this_cats],  # type: ignore[index]
+                            "time": this_time[this_cats],
                             "data": this_data[this_cats],
                             "ax": sub_axes,
                             "color": this_color,
@@ -1960,7 +1964,7 @@ def make_categories_plot(  # noqa: C901
                     )
                 else:
                     sub_axes.plot(
-                        this_time[this_cats],  # type: ignore[index]
+                        this_time[this_cats],
                         this_data[this_cats],
                         linestyle=this_linestyle,
                         marker=".",

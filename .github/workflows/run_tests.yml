@@ -51,7 +51,7 @@ jobs:
         deactivate
         uv venv everything
         source $VENV_ROOT_DIR/everything/bin/activate
-        uv pip install dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest-cov qtpy scipy tblib
+        uv pip install dask[dataframe] datashader h5py matplotlib numba numpy pandas pyarrow PyQt5 pytest-cov qtpy scipy tblib
         deactivate
 
     - name: Test core_only with unittest
@@ -99,7 +99,7 @@ jobs:
       run: |
         uv venv static
         source $VENV_ROOT_DIR/static/bin/activate
-        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy scipy tblib
+        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy tblib
         deactivate
 
     - name: Mypy static analysis
@@ -110,6 +110,15 @@ jobs:
         python --version
         mypy --version
         mypy
+
+    - name: Ruff static analysis
+      working-directory: ${{ env.DCS_ROOT_DIR }}
+      if: always()
+      run: |
+        source $VENV_ROOT_DIR/static/bin/activate
+        python --version
+        ruff --version
+        ruff check
 
     - name: Flake8 static analysis
       working-directory: ${{ env.DCS_ROOT_DIR }}
@@ -189,11 +198,11 @@ jobs:
         deactivate
         uv venv static
         source $VENV_ROOT_DIR/static/bin/activate
-        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy scipy tblib
+        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy tblib
         deactivate
         uv venv everything
         source $VENV_ROOT_DIR/everything/bin/activate
-        uv pip install dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest-cov qtpy scipy tblib
+        uv pip install dask[dataframe] datashader h5py matplotlib numba numpy pandas pyarrow PyQt5 pytest-cov qtpy scipy tblib
         deactivate
 
     - name: Test core_only with pytest
