@@ -625,7 +625,7 @@ def gps_to_utc_datetime(
                 date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
         # fmt: on
     elif form == "numpy":
-        start_week_np = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY  # pyright: ignore[reportOptionalOperand]
+        start_week_np = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
         date_utc = start_week_np + (time + gps_to_utc_offset) * NP_ONE_SECOND
     else:
         raise ValueError(f'Unexpected value for form: "{form}".')

@@ -132,7 +132,7 @@ if TYPE_CHECKING:
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[tuple[Figure, Axes] | None]
+        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
         plot_type: NotRequired[str]
         classify: NotRequired[str]
 
@@ -165,7 +165,7 @@ if TYPE_CHECKING:
         use_zoh: NotRequired[bool]
         extra_plotter: NotRequired[ExtraPlotter | None]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[tuple[Figure, Axes] | None]
+        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
         classify: NotRequired[str]
 
     class _BarKwargs(TypedDict):
@@ -192,7 +192,7 @@ if TYPE_CHECKING:
         extra_plotter: NotRequired[ExtraPlotter | None]
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
-        fig_ax: NotRequired[tuple[Figure, Axes] | None]
+        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
         classify: NotRequired[str]
 
     class _HistKwargs(TypedDict):

@@ -123,7 +123,7 @@ if TYPE_CHECKING:
         use_zoh: NotRequired[bool]
         extra_plotter: NotRequired[ExtraPlotter | None]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[tuple[Figure, Axes] | None]  # diff-only
+        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]  # diff-only
         classify: NotRequired[str]
 
     class _SetsKwargs(TypedDict):
@@ -139,7 +139,7 @@ if TYPE_CHECKING:
         use_datashader: NotRequired[bool]
         add_quiver: NotRequired[bool]
         quiver_scale: NotRequired[float | None]
-        fig_ax: NotRequired[tuple[Figure, Axes] | None]
+        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
 
 
 # %% Globals
@@ -1831,7 +1831,7 @@ def plot_tci(
     # fmt: off
     make_time_plot(
         title, time, data, units="W", second_units=("10^11 W", 1e-11), time_units="numpy",
-        fig_ax=fig_ax[0], show_rms=False, legend_loc="none", ylabel="Power [W]",
+        fig_ax=fig_ax, show_rms=False, legend_loc="none", ylabel="Power [W]",
     )
     # fmt: on
     # ax.set_xlabel("Year")

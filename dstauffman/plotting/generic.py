@@ -13,7 +13,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import logging
-from typing import Any, Callable, Iterable, Literal, overload, TYPE_CHECKING, TypedDict
+from typing import Any, Iterable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
 import unittest
 
 from slog import LogLevel
@@ -82,9 +82,11 @@ if TYPE_CHECKING:
     _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.floating | np.timedelta64
     _Figs = list[Figure]
-    _FuncLamb = Callable[[_I | _N, int | None], np.floating | _N]
     _SecUnits = str | int | float | np.floating | tuple[str, float] | tuple[str, np.floating] | None
     _DiffTypes = Literal["comp", "quat_comp", "quat_mag", "quat_all"]
+
+    class _FuncLamb(Protocol):
+        def __call__(self, x: _I | _N, *, axis: int | None) -> list[np.floating]: ...
 
     class _RmsIndices(TypedDict):
         pts: list[int]
@@ -99,7 +101,7 @@ logger = logging.getLogger(__name__)
 
 # %% Functions - _make_time_and_data_lists
 def _make_time_and_data_lists(
-    time: _Times, data: _Data | None, *, data_as_rows: bool, is_quat: bool = False
+    time: _Times | None, data: _Data | None, *, data_as_rows: bool, is_quat: bool = False
 ) -> tuple[list[_N] | list[_D], list[_N]]:
     """Turns the different types of inputs into lists of 1-D data."""
     if data is None:
@@ -124,7 +126,7 @@ def _make_time_and_data_lists(
     else:
         this_time = np.atleast_1d(time)  # type: ignore[arg-type]
         times = [this_time] * num_chan
-    return times, datum  # type: ignore[return-type]
+    return times, datum  # type: ignore[return-value]
 
 
 # %% Functions - _build_indices
@@ -136,7 +138,7 @@ def _build_indices(
     label: Literal["one", "two"] = "one",
 ) -> _RmsIndices:
     """Builds a dictionary of indices for the given RMS (or mean) start and stop times."""
-    ix: _RmsIndices = {"pts": [], label: []}
+    ix: _RmsIndices = {"pts": [], label: []}  # type: ignore[misc]
     if not bool(times):
         # no times given, so nothing to calculate
         return ix
@@ -182,7 +184,7 @@ def _build_diff_indices(
     same_time = len({id(time) for time in times1}) == 1 and len({id(time) for time in times2}) == 1
     for i, (this_time1, this_time2, this_overlap) in enumerate(zip(times1, times2, time_overlap)):
         if i == 0 or not same_time:
-            temp_ix = get_rms_indices(this_time1, this_time2, this_overlap, xmin=rms_xmin, xmax=rms_xmax)
+            temp_ix = get_rms_indices(this_time1, this_time2, this_overlap, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[arg-type]
         if i == 0:
             ix["pts"] = temp_ix["pts"]
         else:
@@ -194,33 +196,33 @@ def _build_diff_indices(
 
 
 # %% Functions - _calc_rms
-def _calc_rms(datum: list[_N], ix: _RmsIndices, *, use_mean: bool) -> tuple[list[np.floating] | np.floating | _N, str]:
+def _calc_rms(datum: list[_N], ix: list[_B], *, use_mean: bool) -> tuple[list[np.floating], str]:
     """Calculates the RMS/mean."""
 
     # possible RMS/mean functions
-    def _nan_rms(x: _I | _N, axis: int | None) -> np.floating | _N:
+    def _nan_rms(x: _I | _N, *, axis: int | None) -> np.floating | _N:
         """Calculate the RMS while ignoring NaNs."""
         try:
             return rms(x, axis=axis, ignore_nans=True)
         except TypeError:
             return np.array(np.nan)
 
-    def _nan_mean(x: _I | _N, axis: int | None) -> np.floating | _N:
+    def _nan_mean(x: _I | _N, *, axis: int | None) -> np.floating | _N:
         """Calculate the mean while ignoring NaNs."""
         try:
             return np.nanmean(x, axis=axis)
         except TypeError:
             return np.array(np.nan)
 
-    func_lamb: _FuncLamb
+    func_lamb: _FuncLamb  # TODO: this should work, but isn't typing correctly
     if not use_mean:
         func_name = "RMS"
-        func_lamb = _nan_rms
+        func_lamb = _nan_rms  # type: ignore[assignment]
     else:
         func_name = "Mean"
-        func_lamb = _nan_mean
-    data_func = [func_lamb(data[ix[j]], None) for j, data in enumerate(datum)]
-    return data_func, func_name
+        func_lamb = _nan_mean  # type: ignore[assignment]
+    data_func = [func_lamb(data[ix[j]], axis=None) for j, data in enumerate(datum)]
+    return data_func, func_name  # type: ignore[return-value]
 
 
 # %% Functions - _get_units
@@ -237,7 +239,7 @@ def _get_units(units: str, second_units: _SecUnits, leg_scale: _SecUnits) -> tup
 
 # %% Functions - _get_ylabels
 def _get_ylabels(
-    num_channels: int, ylabel: list[str] | str | None, elements: list[str], *, single_lines: bool, description: str, units: str
+    num_channels: int, ylabel: list[str] | str | None, elements: list[str] | tuple[str, ...], *, single_lines: bool, description: str, units: str
 ) -> list[str]:
     """Build the list of y-labels."""
     if ylabel is None:
@@ -257,7 +259,7 @@ def _get_ylabels(
 def _create_figure(num_figs: int, num_rows: int, num_cols: int, *, description: str = "") -> tuple[tuple[Figure, Axes], ...]:
     """Create or passthrough the given figures."""
     # % Create plots
-    fig_ax: tuple[tuple[Figure, Axes]]
+    fig_ax: tuple[tuple[Figure, Axes], ...]
     if num_cols == 1:
         fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=num_rows, layout="rows", sharex=True)  # type: ignore[call-overload]
     elif num_rows == 1:
@@ -272,12 +274,10 @@ def _create_figure(num_figs: int, num_rows: int, num_cols: int, *, description: 
 
 
 # %% Functions - _plot_linear
-def _plot_linear(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *args: Any, **kwargs: Any) -> None:
+def _plot_linear(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kwargs: Any) -> None:
     """Plots a normal linear plot with passthrough options."""
     if len(args) != 0:
         raise AssertionError("Unexpected positional arguments.")
-    assert time is not None
-    assert data is not None
     try:
         if np.all(np.isnan(data)):
             return
@@ -287,12 +287,10 @@ def _plot_linear(ax: Axes, time: _Times | None, data: _Data | None, symbol: str,
 
 
 # %% Functions - _plot_zoh
-def _plot_zoh(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *args: Any, **kwargs: Any) -> None:
+def _plot_zoh(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kwargs: Any) -> None:
     """Plots a zero-order hold step plot with passthrough options."""
     if len(args) != 0:
         raise AssertionError("Unexpected positional arguments.")
-    assert time is not None
-    assert data is not None
     try:
         if np.all(np.isnan(data)):
             return
@@ -354,7 +352,7 @@ def make_time_plot(
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax: tuple[Figure, Axes] | None = None,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
     plot_type: str = "time",  # {"time", "scatter"}
 ) -> Figure:
     r"""
@@ -457,13 +455,9 @@ def make_time_plot(
         fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
         if not single_lines:
             fig_ax = fig_ax * num_channels
-    else:
-        # check for single instance case and make it a tuple of tuples
-        if len(fig_ax) == 2:
-            if isinstance(fig_ax[0], Figure):
-                fig_ax = (fig_ax,)  # type: ignore[assignment]
+    assert fig_ax is not None
     assert len(fig_ax) == num_channels, "Expecting a (figure, axes) pair for each channel in data."
-    fig = fig_ax[0][0]  # type: ignore[index]
+    fig = fig_ax[0][0]
     ax: list[Axes] = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
@@ -478,7 +472,7 @@ def make_time_plot(
         this_color = cm.get_color(i)
         plot_func(
             this_axes,
-            this_time,
+            this_time,  # type: ignore[arg-type]
             this_data,
             symbol,
             markersize=4,
@@ -491,7 +485,7 @@ def make_time_plot(
         if plot_zero:
             show_zero_ylim(this_axes)
         if ylims is not None:
-            this_axes.set_ylims(ylims)
+            this_axes.set_ylim(ylims)
         if i == 0:
             this_axes.set_title(description)
         if bool(this_ylabel):
@@ -516,7 +510,7 @@ def make_time_plot(
         for this_axes in ax:
             this_axes.legend(loc=legend_loc)
 
-    return fig  # type: ignore[no-any-return]
+    return fig
 
 
 # %% Functions - make_difference_plot
@@ -557,7 +551,7 @@ def make_difference_plot(
     label_vert_lines: bool,
     extra_plotter: ExtraPlotter | None,
     use_datashader: bool,
-    fig_ax: tuple[Figure, Axes] | None,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None,
     diff_type: _DiffTypes,
 ) -> _Figs: ...
 @overload
@@ -597,7 +591,7 @@ def make_difference_plot(
     label_vert_lines: bool,
     extra_plotter: ExtraPlotter | None,
     use_datashader: bool,
-    fig_ax: tuple[Figure, Axes] | None,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None,
     diff_type: _DiffTypes,
 ) -> tuple[_Figs, dict[str, _N]]: ...
 def make_difference_plot(  # noqa: C901
@@ -636,7 +630,7 @@ def make_difference_plot(  # noqa: C901
     label_vert_lines: bool = True,
     extra_plotter: ExtraPlotter | None = None,
     use_datashader: bool = False,
-    fig_ax: tuple[Figure, Axes] | None = None,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
     diff_type: _DiffTypes = "comp",
 ) -> _Figs | tuple[_Figs, dict[str, _N]]:
     r"""
@@ -785,7 +779,7 @@ def make_difference_plot(  # noqa: C901
             d2_miss_ix = np.setxor1d(np.arange(len(times2[0])), d2_diff_ix)
             time_overlap = [time_overlap_single] * num_channels
             if is_quat_diff:
-                nondeg_angle, nondeg_error = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix], allow_nans=True)
+                nondeg_angle, nondeg_error = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix], allow_nans=True)  # type: ignore[arg-type, call-overload, index]
                 diffs = [nondeg_error[0, :], nondeg_error[1, :], nondeg_error[2, :], nondeg_angle]
             else:
                 diffs = [data_two[d2_diff_ix] - data_one[d1_diff_ix] for data_one, data_two in zip(datum1, datum2)]
@@ -800,18 +794,23 @@ def make_difference_plot(  # noqa: C901
 
     # calculate the rms (or mean) values
     if show_rms or return_err:
-        data_func = data2_func = nondeg_func = np.full(num_channels, np.nan)
         if have_data_one:
             data_func, func_name = _calc_rms(datum1, ix["one"], use_mean=use_mean)
+        else:
+            data_func = np.full(num_channels, np.nan)  # type: ignore[assignment]
         if have_data_two:
             data2_func, func_name = _calc_rms(datum2, ix["two"], use_mean=use_mean)
+        else:
+            data2_func = np.full(num_channels, np.nan)  # type: ignore[assignment]
         if have_both and np.any(ix["overlap"]):
             nondeg_func, _ = _calc_rms(diffs, ix["overlap"], use_mean=use_mean)
+        else:
+            nondeg_func = np.full(num_channels, np.nan)  # type: ignore[assignment]
         # output errors
         if is_quat_diff:
-            err = {"one": data_func, "two": data2_func, "diff": nondeg_func[:3], "mag": nondeg_func[3]}
+            err = {"one": np.hstack(data_func), "two": np.hstack(data2_func), "diff": np.hstack(nondeg_func[:3]), "mag": nondeg_func[3]}
         else:
-            err = {"one": data_func, "two": data2_func, "diff": nondeg_func}
+            err = {"one": np.hstack(data_func), "two": np.hstack(data2_func), "diff": np.hstack(nondeg_func)}
 
     # unit conversion value
     (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
@@ -965,7 +964,7 @@ def make_difference_plot(  # noqa: C901
         if plot_zero:
             show_zero_ylim(this_axes)
         if ylims is not None:
-            this_axes.set_ylims(ylims)
+            this_axes.set_ylim(ylims)
         if i == 0:
             this_axes.set_title(description)
         if bool(this_ylabel):
@@ -980,7 +979,8 @@ def make_difference_plot(  # noqa: C901
 
     # Difference plots
     if have_both:
-        xlim: tuple[float, float] | None = None
+        assert time_overlap is not None
+        xlim = None
         color_offset = len(times1) + len(times2)
         diff_elems = ("X", "Y", "Z", "Magnitude") if is_quat_diff else elements
         ylabels2 = _get_ylabels(len(ix_diff), ylabel, elements=diff_elems, single_lines=single_lines2, description=description, units=units)  # fmt: skip
@@ -1045,7 +1045,7 @@ def make_difference_plot(  # noqa: C901
             if plot_zero:
                 show_zero_ylim(this_axes)
             if ylims is not None:
-                this_axes.set_ylims(ylims)
+                this_axes.set_ylim(ylims)
             if i == 0:
                 this_axes.set_title(description)
             if bool(this_ylabel) or single_lines:
@@ -1065,6 +1065,12 @@ def make_difference_plot(  # noqa: C901
     if extra_plotter is not None:
         for fig in figs:
             extra_plotter(fig=fig, ax=[ax for ax in fig.axes if id(ax) in axes[id(fig)]])
+
+    # overlay the datashaders (with appropriate time units information)
+    if bool(datashaders):
+        for this_ds in datashaders:
+            this_ds["time_units"] = time_units
+        add_datashaders(datashaders)
 
     # add legend at the very end once everything has been done
     if legend_loc.lower() != "none":
@@ -1256,7 +1262,7 @@ def make_quaternion_plot(
         diff_type = "quat_all"
     if not isinstance(single_lines, bool) and single_lines[1]:
         diff_type = "quat_all"
-    return make_difference_plot(  # type: ignore[call-overload]
+    return make_difference_plot(  # type: ignore[call-overload, misc, no-any-return]
         description=description,
         time_one=time_one,
         data_one=quat_one,
@@ -1323,7 +1329,7 @@ def make_error_bar_plot(
     extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax: tuple[Figure, Axes] | None = None,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
 ) -> Figure:
     r"""
     Generic plotting routine to make error bars.
@@ -1417,7 +1423,7 @@ def make_error_bar_plot(
 
     # calculate the rms (or mean) values
     if show_rms or return_err:
-        data_func, func_name = _calc_rms(data, ix["one"], use_mean=use_mean)
+        data_func, func_name = _calc_rms(datum, ix["one"], use_mean=use_mean)
 
     # unit conversion value
     (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
@@ -1427,12 +1433,14 @@ def make_error_bar_plot(
     symbol = ".-"
 
     # extra errorbar calculations
+    assert mins is not None, "You must have mins data to call this plot."
     if mins.ndim == 1:
         err_neg = [data - mins for data in datum]
     elif data_as_rows:
         err_neg = [data - mins[i, :] for i, data in enumerate(datum)]
     else:
         err_neg = [data - mins[:, i] for i, data in enumerate(datum)]
+    assert maxs is not None, "You must have maxs data to call this plot."
     if maxs.ndim == 1:
         err_pos = [maxs - data for data in datum]
     elif data_as_rows:
@@ -1451,15 +1459,16 @@ def make_error_bar_plot(
         fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
         if not single_lines:
             fig_ax = fig_ax * num_channels
+    assert fig_ax is not None
     assert len(fig_ax) == num_channels, "Expecting a (figure, axes) pair for each channel in data."
-    fig = fig_ax[0][0]  # type: ignore[index]
+    fig = fig_ax[0][0]
     ax = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
     for i, ((this_fig, this_axes), this_time, this_data, this_err_neg, this_err_pos, this_ylabel) in enumerate(zip(fig_ax, times, datum, err_neg, err_pos, ylabels)):  # fmt: skip
         this_label = str(elements[i])
         if show_rms:
-            value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
+            value = _LEG_FORMAT.format(leg_conv * data_func[i])
             if leg_units:
                 this_label += f" ({func_name}: {value} {leg_units})"
             else:
@@ -1491,7 +1500,7 @@ def make_error_bar_plot(
         if plot_zero:
             show_zero_ylim(this_axes)
         if ylims is not None:
-            this_axes.set_ylims(ylims)
+            this_axes.set_ylim(ylims)
         if i == 0:
             this_axes.set_title(description)
         if bool(this_ylabel):
@@ -1516,7 +1525,7 @@ def make_error_bar_plot(
         for this_axes in ax:
             this_axes.legend(loc=legend_loc)
 
-    return fig  # type: ignore[no-any-return]
+    return fig
 
 
 # %% Functions - make_bar_plot
@@ -1548,7 +1557,7 @@ def make_bar_plot(
     extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax: tuple[Figure, Axes] | None = None,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
 ) -> Figure:
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
@@ -1653,7 +1662,7 @@ def make_bar_plot(
     bottoms = [last]
     for this_data in datum:
         # purposely don't modify last inplace, you want a copy to append to bottoms
-        last = last + np.ma.masked_invalid(this_data)
+        last = last + np.ma.masked_invalid(this_data)  # type: ignore[no-untyped-call]
         bottoms.append(last)
 
     # build labels
@@ -1669,8 +1678,9 @@ def make_bar_plot(
         fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
         if not single_lines:
             fig_ax = fig_ax * num_channels
+    assert fig_ax is not None
     assert len(fig_ax) == num_channels, "Expecting a (figure, axes) pair for each channel in data."
-    fig = fig_ax[0][0]  # type: ignore[index]
+    fig = fig_ax[0][0]
     ax = [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
@@ -1679,7 +1689,7 @@ def make_bar_plot(
         this_ylabel = ylabels[i]
         this_label = str(elements[i])
         if show_rms:
-            value = _LEG_FORMAT.format(leg_conv * data_func[i])  # type: ignore[index, operator]
+            value = _LEG_FORMAT.format(leg_conv * data_func[i])
             if leg_units:
                 this_label += f" ({func_name}: {value} {leg_units})"
             else:
@@ -1701,7 +1711,7 @@ def make_bar_plot(
         if plot_zero:
             show_zero_ylim(this_axes)
         if ylims is not None:
-            this_axes.set_ylims(ylims)
+            this_axes.set_ylim(ylims)
         if i == num_channels - 1:
             this_axes.set_title(description)
         if bool(this_ylabel):
@@ -1714,8 +1724,8 @@ def make_bar_plot(
                 vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
                 plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
 
-    if single_lines:
-        fig.supylabel(description)
+    if single_lines:  # TODO: what was intended here?
+        fig.supylabel(description)  # type: ignore[unreachable]
 
     # plot any extra information through a generic callable
     if extra_plotter is not None:
@@ -1726,7 +1736,7 @@ def make_bar_plot(
         for this_axes in ax:
             this_axes.legend(loc=legend_loc)
 
-    return fig  # type: ignore[no-any-return]
+    return fig
 
 
 # %% Functions - make_categories_plot
@@ -1762,7 +1772,7 @@ def make_categories_plot(  # noqa: C901
     label_vert_lines: bool = True,
     extra_plotter: ExtraPlotter | None = None,
     use_datashader: bool = False,
-    fig_ax: tuple[Figure, Axes] | None = None,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
 ) -> _Figs:
     r"""
     Data versus time plotting routine when grouped into categories.
@@ -1856,7 +1866,7 @@ def make_categories_plot(  # noqa: C901
     cm = ColorMap(colormap=colormap, num_colors=3 * num_channels)
 
     # Category calculations
-    unique_cats = set(cats)  # type: ignore[arg-type]
+    unique_cats = set(cats)
     num_cats = len(unique_cats)
     if cat_names is None:
         cat_names = {}
@@ -1889,7 +1899,7 @@ def make_categories_plot(  # noqa: C901
     if fig_ax is None:
         # get the figure titles
         if single_lines:
-            titles = [f"{description} {e} {cat_names[cat]}" for cat in ordered_cats for e in elements]  # type: ignore[index]
+            titles = [f"{description} {e} {cat_names[cat]}" for cat in ordered_cats for e in elements]
         else:
             titles = [f"{description} {e}" for e in elements]
         # get the number of figures and axes to make
@@ -1912,6 +1922,7 @@ def make_categories_plot(  # noqa: C901
         if not single_lines:
             fig_ax = tuple(item for temp in fig_ax for item in [temp] * num_cats)
         for fig, title in zip(figs, titles):
+            assert fig.canvas.manager is not None
             fig.canvas.manager.set_window_title(title)
 
     # Primary plot
@@ -1921,14 +1932,14 @@ def make_categories_plot(  # noqa: C901
         this_label = str(elements[i])
         this_axes = fig_ax[i * num_cats][1]
         # plot the full underlying line once
-        if not use_datashader or this_time.size <= datashader_pts:  # type: ignore[union-attr]
-            plot_func(this_axes, this_time, this_data, ":", label="", color="xkcd:slate", linewidth=1, zorder=2)
+        if not use_datashader or this_time.size <= datashader_pts:
+            plot_func(this_axes, this_time, this_data, ":", label="", color="xkcd:slate", linewidth=1, zorder=2)  # type: ignore[arg-type]
             # plot the data with this category value
             for j, cat in enumerate(ordered_cats):
                 this_fig, sub_axes = fig_ax[i * num_cats + j]
                 this_cat_name = cat_names[cat]
                 if show_rms:
-                    value = _LEG_FORMAT.format(unit_conv * data_func[cat][i])  # type: ignore[index]
+                    value = _LEG_FORMAT.format(unit_conv * data_func[cat][i])
                     if new_units:
                         cat_label = f"{this_label} {this_cat_name} ({func_name}: {value} {new_units})"
                     else:
@@ -1978,7 +1989,7 @@ def make_categories_plot(  # noqa: C901
         if plot_zero:
             show_zero_ylim(this_axes)
         if ylims is not None:
-            this_axes.set_ylims(ylims)
+            this_axes.set_ylim(ylims)
         if i == 0:
             this_axes.set_title(description)
         if bool(this_ylabel):
@@ -2025,7 +2036,7 @@ def make_connected_sets(  # noqa: C901
     use_datashader: bool = False,
     add_quiver: bool = False,
     quiver_scale: float | None = None,
-    fig_ax: tuple[Figure, Axes] | None = None,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
 ) -> Figure:
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
@@ -2181,7 +2192,7 @@ def make_connected_sets(  # noqa: C901
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
     else:
-        (fig, ax) = fig_ax
+        (fig, ax) = fig_ax[0]
     assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
         fig.canvas.manager.set_window_title(description + extra_text)

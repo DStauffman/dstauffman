@@ -60,7 +60,7 @@ if TYPE_CHECKING:
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[tuple[Figure, Axes] | None]
+        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
         plot_type: NotRequired[str]
 
 
