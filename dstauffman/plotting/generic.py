@@ -239,7 +239,13 @@ def _get_units(units: str, second_units: _SecUnits, leg_scale: _SecUnits) -> tup
 
 # %% Functions - _get_ylabels
 def _get_ylabels(
-    num_channels: int, ylabel: list[str] | str | None, elements: list[str] | tuple[str, ...], *, single_lines: bool, description: str, units: str
+    num_channels: int,
+    ylabel: list[str] | str | None,
+    elements: list[str] | tuple[str, ...],
+    *,
+    single_lines: bool,
+    description: str,
+    units: str,
 ) -> list[str]:
     """Build the list of y-labels."""
     if ylabel is None:
@@ -322,7 +328,7 @@ def _label_x(
 
 
 # %% Functions - make_time_plot
-def make_time_plot(
+def make_time_plot(  # noqa: C901
     description: str,
     time: _Times | None,
     data: _Data | None,
@@ -808,7 +814,7 @@ def make_difference_plot(  # noqa: C901
             nondeg_func = np.full(num_channels, np.nan)  # type: ignore[assignment]
         # output errors
         if is_quat_diff:
-            err = {"one": np.hstack(data_func), "two": np.hstack(data2_func), "diff": np.hstack(nondeg_func[:3]), "mag": nondeg_func[3]}
+            err = {"one": np.hstack(data_func), "two": np.hstack(data2_func), "diff": np.hstack(nondeg_func[:3]), "mag": np.hstack(nondeg_func[3:])}  # fmt: skip
         else:
             err = {"one": np.hstack(data_func), "two": np.hstack(data2_func), "diff": np.hstack(nondeg_func)}
 
@@ -1300,7 +1306,7 @@ def make_quaternion_plot(
 
 
 # %% Functions - make_error_bar_plot
-def make_error_bar_plot(
+def make_error_bar_plot(  # noqa: C901
     description: str,
     time: _Times | None,
     data: _Data | None,
@@ -1529,7 +1535,7 @@ def make_error_bar_plot(
 
 
 # %% Functions - make_bar_plot
-def make_bar_plot(
+def make_bar_plot(  # noqa: C901
     description: str,
     time: _Times | None,
     data: _Data | None,
