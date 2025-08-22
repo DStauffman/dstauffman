@@ -403,7 +403,7 @@ def plot_map_3d(  # noqa: C901
             indices = [(i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1), (i, j)]
             verts = np.array([[x[k], y[k], z[k]] for k in indices])  # type: ignore[index]
             poly = Poly3DCollection(verts[np.newaxis, :, :], facecolor=background, edgecolor="none", zorder=1)
-            ax.add_collection3d(poly)  # type: ignore[attr-defined]
+            ax.add_collection3d(poly)
 
     # Plot land borders
     colors = tuple(land_cmap.get_color(x) for x in range(len(land_names)))
@@ -411,13 +411,13 @@ def plot_map_3d(  # noqa: C901
         x, y, z = geod2ecf(la, lo, np.zeros_like(la), output="split")  # type: ignore[assignment]
         verts = [list(zip(x, y, z))]  # type: ignore[assignment, call-overload]
         poly = Poly3DCollection(verts, color=c, edgecolor=border, alpha=0.9, linewidth=linewidth, zorder=2)
-        ax.add_collection3d(poly)  # type: ignore[attr-defined]
+        ax.add_collection3d(poly)
     ax.set_title(title)
     ax.grid(True)
-    ax.set_box_aspect([1, 1, 1])  # type: ignore[arg-type]
+    ax.set_box_aspect([1, 1, 1])
     ax.set_xlabel(f"X [{earth_units}]")
     ax.set_ylabel(f"Y [{earth_units}]")
-    ax.set_zlabel(f"Z [{earth_units}]")  # type: ignore[attr-defined]
+    ax.set_zlabel(f"Z [{earth_units}]")
 
     # Plot ground/orbit track
     if lat is not None and lon is not None:
@@ -435,7 +435,7 @@ def plot_map_3d(  # noqa: C901
         if alt is None:
             alt = np.zeros_like(lat)
         x, y, z = geod2ecf(lat, lon, alt, output="split")  # type: ignore[assignment]
-        ax.scatter(x, y, z, s=10, c=colors, label="Trace", zorder=6)  # type: ignore[misc]
+        ax.scatter(x, y, z, s=10, c=colors, label="Trace", zorder=6)
         if dir_skip is not None:
             ang = unit(np.vstack([np.diff(lon), np.diff(lat), np.diff(alt) / earth_radius]), axis=0)
             ax.quiver(
@@ -460,11 +460,11 @@ def plot_map_3d(  # noqa: C901
             lla_annot = lla_annotations[i] if lla_annotations is not None else None
             ax.scatter(event_x, event_y, event_z, color=lla_color, sizes=[50], zorder=9)
             if lla_annot is not None:
-                ax.text(event_x, event_y, event_z, lla_annot, zdir="z", fontweight="bold", fontsize=12, zorder=9)  # type: ignore[arg-type]
+                ax.text(event_x, event_y, event_z, lla_annot, zdir="z", fontweight="bold", fontsize=12, zorder=9)
     if map_labels is not None:
         for map_label, map_latlon in map_labels.items():
             map_x, map_y, map_z = geod2ecf(DEG2RAD * map_latlon[0], DEG2RAD * map_latlon[1], 0.0, output="split")
-            ax.text(map_x, map_y, map_z, map_label, zdir="x", fontsize=8, horizontalalignment="center", zorder=3)  # type: ignore[arg-type]
+            ax.text(map_x, map_y, map_z, map_label, zdir="x", fontsize=8, horizontalalignment="center", zorder=3)
 
     # plot any extra information through a generic callable
     if extra_plotter is not None:
