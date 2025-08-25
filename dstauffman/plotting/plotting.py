@@ -522,6 +522,8 @@ def plot_time_history(
     if ignore_plot_data(data, ignore_empties):
         logger.log(LogLevel.L5, " %s plot skipped due to missing data.", description)
         return None
+    assert time is not None
+    assert data is not None
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
@@ -1049,6 +1051,8 @@ def plot_bar_breakdown(
     if ignore_plot_data(data, ignore_empties):
         logger.log(LogLevel.L5, " %s plot skipped due to missing data.", description)
         return None
+    assert time is not None
+    assert data is not None
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
@@ -1083,7 +1087,7 @@ def plot_bar_breakdown(
     fig = make_bar_plot(  # type: ignore[misc]
         description,
         time,
-        scale * data,  # type: ignore[operator]
+        scale * data,
         units=units,
         time_units=time_units,
         start_date=start_date,

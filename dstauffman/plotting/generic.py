@@ -306,7 +306,7 @@ def _plot_zoh(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kw
 
 
 # %% Functions - _label_x
-def _label_x(
+def _label_x(  # pylint: disable=too-many-positional-arguments
     this_axes: Axes,
     xlim: tuple[float, float] | None,
     disp_xmin: _Time,
@@ -330,8 +330,8 @@ def _label_x(
 # %% Functions - make_time_plot
 def make_time_plot(  # noqa: C901
     description: str,
-    time: _Times | None,
-    data: _Data | None,
+    time: _Times,
+    data: _Data,
     *,
     name: str = "",
     elements: list[str] | tuple[str, ...] | None = None,
@@ -347,7 +347,6 @@ def make_time_plot(  # noqa: C901
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
-    ignore_empties: bool = False,
     legend_loc: str = "best",
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
@@ -390,7 +389,6 @@ def make_time_plot(  # noqa: C901
     >>> use_mean         = False
     >>> plot_zero        = False
     >>> show_rms         = True
-    >>> ignore_empties   = False
     >>> legend_loc       = "best"
     >>> second_units     = None
     >>> leg_scale        = None
@@ -405,19 +403,17 @@ def make_time_plot(  # noqa: C901
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
     ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
-    ...     leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
-    ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
-    ...     use_datashader=use_datashader, fig_ax=fig_ax)
+    ...     legend_loc=legend_loc, second_units=second_units, leg_scale=leg_scale, \
+    ...     ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, use_datashader=use_datashader, \
+    ...     fig_ax=fig_ax)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
 
     """
-    # check for valid data
-    # TODO: implement this
-    if ignore_plot_data(data, ignore_empties):
-        raise NotImplementedError("Not yet implemented.")
+    # hard-coded values
+    datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
 
     times, datum = _make_time_and_data_lists(time, data, data_as_rows=data_as_rows)
     num_channels = len(times)
@@ -467,8 +463,9 @@ def make_time_plot(  # noqa: C901
     ax: list[Axes] = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
-    for i, ((this_fig, this_axes), this_time, this_data, this_ylabel) in enumerate(zip(fig_ax, times, datum, ylabels)):  # fmt: skip
-        this_label = str(elements[i])
+    datashaders = []
+    for i, ((_, this_axes), this_time, this_data, this_ylabel) in enumerate(zip(fig_ax, times, datum, ylabels)):  # fmt: skip
+        this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
         if show_rms:
             value = _LEG_FORMAT.format(leg_conv * data_func[i])
             if leg_units:
@@ -476,16 +473,49 @@ def make_time_plot(  # noqa: C901
             else:
                 this_label += f" ({func_name}: {value})"
         this_color = cm.get_color(i)
-        plot_func(
-            this_axes,
-            this_time,  # type: ignore[arg-type]
-            this_data,
-            symbol,
-            markersize=4,
-            label=this_label,
-            color=this_color,
-            zorder=9,
-        )
+        # TODO: functionalize this datashader part
+        if use_datashader and this_time.size > datashader_pts:
+            ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)
+            if not np.issubdtype(this_data.dtype, np.number):
+                (categories, ix_extras) = np.unique(this_data, return_index=True)
+                temp_data = pd.Categorical(this_data, categories=categories[np.argsort(ix_extras)], ordered=True)
+                ix_spot = np.union1d(ix_spot, ix_extras)
+                plot_func(
+                    this_axes,
+                    this_time[ix_spot],
+                    this_data[ix_spot],
+                    symbol[0],
+                    markersize=4,
+                    label=this_label,
+                    color=this_color,
+                    zorder=9,
+                    linestyle="none",
+                )
+                datashaders.append({"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": this_color})
+            else:
+                plot_func(
+                    this_axes,
+                    this_time[ix_spot],
+                    this_data[ix_spot],
+                    symbol[0],
+                    markersize=4,
+                    label=this_label,
+                    color=this_color,
+                    zorder=9,
+                    linestyle="none",
+                )
+                datashaders.append({"time": this_time, "data": this_data, "ax": this_axes, "color": this_color})
+        else:
+            plot_func(
+                this_axes,
+                this_time,  # type: ignore[arg-type]
+                this_data,
+                symbol,
+                markersize=4,
+                label=this_label,
+                color=this_color,
+                zorder=9,
+            )
         xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
@@ -510,6 +540,12 @@ def make_time_plot(  # noqa: C901
     # plot any extra information through a generic callable
     if extra_plotter is not None:
         extra_plotter(fig=fig, ax=ax)
+
+    # overlay the datashaders (with appropriate time units information)
+    if bool(datashaders):
+        for this_ds in datashaders:
+            this_ds["time_units"] = time_units
+        add_datashaders(datashaders)
 
     # add legend at the very end once everything has been done
     if legend_loc.lower() != "none":
@@ -876,7 +912,7 @@ def make_difference_plot(  # noqa: C901
     for i in range(num_channels):
         this_fig, this_axes = fig_ax[i]
         this_ylabel = ylabels[i]
-        this_label = f"{name_one} {elements[i]}" if name_one else str(elements[i])
+        this_label = f"{name_one} {elements[i]}" if name_one else f"{elements[i]}"
         if have_data_one:
             this_time = times1[i]
             this_data = datum1[i]
@@ -929,7 +965,7 @@ def make_difference_plot(  # noqa: C901
                     color=this_color,
                     zorder=9,
                 )
-        this_label = f"{name_two} {elements[i]}" if name_two else str(elements[i])
+        this_label = f"{name_two} {elements[i]}" if name_two else f"{elements[i]}"
         if have_data_two:
             this_time2 = times2[i]
             this_data2 = datum2[i]
@@ -992,7 +1028,7 @@ def make_difference_plot(  # noqa: C901
         ylabels2 = _get_ylabels(len(ix_diff), ylabel, elements=diff_elems, single_lines=single_lines2, description=description, units=units)  # fmt: skip
         for i, this_ylabel, this_zorder in zip(ix_diff, ylabels2, zorders):
             this_fig, this_axes = fig_ax[i + num_channels]
-            this_label = str(elements[i])
+            this_label = f"{elements[i]}"
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv * nondeg_func[i])
                 if leg_units:
@@ -1308,11 +1344,12 @@ def make_quaternion_plot(
 # %% Functions - make_error_bar_plot
 def make_error_bar_plot(  # noqa: C901
     description: str,
-    time: _Times | None,
-    data: _Data | None,
-    mins: _N | _M | None,
-    maxs: _N | _M | None,
+    time: _Times,
+    data: _Data,
+    mins: _N | _M,
+    maxs: _N | _M,
     *,
+    name: str = "",
     elements: list[str] | tuple[str, ...] | None = None,
     units: str = "",
     time_units: str = "sec",
@@ -1401,13 +1438,6 @@ def make_error_bar_plot(  # noqa: C901
     """
     # hard-coded values
     return_err = False  # TODO: remove this restriction
-    ignore_empties = False  # TODO: remove this restriction
-
-    # check for valid data
-    # TODO: implement this
-    if ignore_plot_data(data, ignore_empties):
-        raise NotImplementedError("Not yet implemented.")
-    assert data is not None
 
     # build lists of time and data
     times, datum = _make_time_and_data_lists(time, data, data_as_rows=data_as_rows)
@@ -1439,14 +1469,12 @@ def make_error_bar_plot(  # noqa: C901
     symbol = ".-"
 
     # extra errorbar calculations
-    assert mins is not None, "You must have mins data to call this plot."
     if mins.ndim == 1:
         err_neg = [data - mins for data in datum]
     elif data_as_rows:
         err_neg = [data - mins[i, :] for i, data in enumerate(datum)]
     else:
         err_neg = [data - mins[:, i] for i, data in enumerate(datum)]
-    assert maxs is not None, "You must have maxs data to call this plot."
     if maxs.ndim == 1:
         err_pos = [maxs - data for data in datum]
     elif data_as_rows:
@@ -1471,8 +1499,8 @@ def make_error_bar_plot(  # noqa: C901
     ax = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
-    for i, ((this_fig, this_axes), this_time, this_data, this_err_neg, this_err_pos, this_ylabel) in enumerate(zip(fig_ax, times, datum, err_neg, err_pos, ylabels)):  # fmt: skip
-        this_label = str(elements[i])
+    for i, ((_, this_axes), this_time, this_data, this_err_neg, this_err_pos, this_ylabel) in enumerate(zip(fig_ax, times, datum, err_neg, err_pos, ylabels)):  # fmt: skip
+        this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
         if show_rms:
             value = _LEG_FORMAT.format(leg_conv * data_func[i])
             if leg_units:
@@ -1537,8 +1565,8 @@ def make_error_bar_plot(  # noqa: C901
 # %% Functions - make_bar_plot
 def make_bar_plot(  # noqa: C901
     description: str,
-    time: _Times | None,
-    data: _Data | None,
+    time: _Times,
+    data: _Data,
     *,
     name: str = "",
     elements: list[str] | tuple[str, ...] | None = None,
@@ -1561,7 +1589,6 @@ def make_bar_plot(  # noqa: C901
     ylims: tuple[int, int] | tuple[float, float] | None = None,
     data_as_rows: bool = True,
     extra_plotter: ExtraPlotter | None = None,
-    use_zoh: bool = False,
     label_vert_lines: bool = True,
     fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
 ) -> Figure:
@@ -1611,7 +1638,6 @@ def make_bar_plot(  # noqa: C901
     >>> ylabel           = None
     >>> data_as_rows     = True
     >>> extra_plotter    = None
-    >>> use_zoh          = False
     >>> label_vert_lines = True
     >>> fig_ax           = None
     >>> fig = make_bar_plot(description, time, data, name=name, elements=elements, units=units, \
@@ -1620,7 +1646,7 @@ def make_bar_plot(  # noqa: C901
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
     ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
     ...     ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
-    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, fig_ax=fig_ax)
+    ...     label_vert_lines=label_vert_lines, fig_ax=fig_ax)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -1628,13 +1654,11 @@ def make_bar_plot(  # noqa: C901
     """
     # hard-coded values
     return_err = False  # TODO: remove this restriction
-    ignore_empties = False  # TODO: remove this restriction
     leg_scale = ("%", 1.0)
 
     # check for valid data
-    # TODO: implement this
     if ignore_plot_data(data, ignore_empties):
-        raise NotImplementedError("Not yet implemented.")
+        raise ValueError("You must have some data to plot.")
     if single_lines:
         raise ValueError("Bar plots are not valid with single_lines.")
 
@@ -1691,9 +1715,9 @@ def make_bar_plot(  # noqa: C901
 
     xlim: tuple[float, float] | None = None
     for i in reversed(range(num_channels)):
-        this_fig, this_axes = fig_ax[i]
+        _, this_axes = fig_ax[i]
         this_ylabel = ylabels[i]
-        this_label = str(elements[i])
+        this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
         if show_rms:
             value = _LEG_FORMAT.format(leg_conv * data_func[i])
             if leg_units:
@@ -1935,19 +1959,19 @@ def make_categories_plot(  # noqa: C901
     xlim: tuple[float, float] | None = None
     datashaders = []
     for i, (this_time, this_data, this_ylabel) in enumerate(zip(times, datum, ylabels)):
-        this_label = str(elements[i])
+        this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
         this_axes = fig_ax[i * num_cats][1]
         # plot the full underlying line once
         if not use_datashader or this_time.size <= datashader_pts:
             plot_func(this_axes, this_time, this_data, ":", label="", color="xkcd:slate", linewidth=1, zorder=2)  # type: ignore[arg-type]
             # plot the data with this category value
             for j, cat in enumerate(ordered_cats):
-                this_fig, sub_axes = fig_ax[i * num_cats + j]
+                _, sub_axes = fig_ax[i * num_cats + j]
                 this_cat_name = cat_names[cat]
                 if show_rms:
-                    value = _LEG_FORMAT.format(unit_conv * data_func[cat][i])
-                    if new_units:
-                        cat_label = f"{this_label} {this_cat_name} ({func_name}: {value} {new_units})"
+                    value = _LEG_FORMAT.format(leg_conv * data_func[cat][i])
+                    if leg_units:
+                        cat_label = f"{this_label} {this_cat_name} ({func_name}: {value} {leg_units})"
                     else:
                         cat_label = f"{this_label} {this_cat_name} ({func_name}: {value})"
                 else:
