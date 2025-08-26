@@ -47,6 +47,7 @@ class Test_plotting_plot_map(unittest.TestCase):
     def test_nominal(self) -> None:
         # simple Earth plot
         self.fig = plot.plot_map()
+        self.assertIsNotNone(self.fig)
 
     # TODO: write more of these (steal from example script)
 

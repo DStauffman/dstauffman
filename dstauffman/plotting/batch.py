@@ -196,7 +196,7 @@ def plot_bpe_results(  # noqa: C901
             colormap = kw_colormap if kw_colormap is not None else "bwr_r"
             temp_opts = opts.__class__(opts)
             temp_opts.disp_xmin = temp_opts.disp_xmax = temp_opts.rms_xmin = temp_opts.rms_xmax = None
-            fig = plot_time_history(  # type: ignore[misc]
+            new_figs = plot_time_history(  # type: ignore[misc]
                 "Innovs Before and After",
                 time,
                 data,
@@ -206,10 +206,10 @@ def plot_bpe_results(  # noqa: C901
                 skip_setup_plots=True,
                 **kwargs,
             )
-            assert isinstance(fig, Figure)
-            fig.axes[0].set_xlabel("Innovation Number")
-            setup_plots(fig, opts=temp_opts)
-            figs.append(fig)
+            for fig in new_figs:
+                fig.axes[0].set_xlabel("Innovation Number")
+            setup_plots(new_figs, opts=temp_opts)
+            figs += new_figs
         else:
             print("Data isn't available for Innovations plot.")
     if plots["convergence"]:

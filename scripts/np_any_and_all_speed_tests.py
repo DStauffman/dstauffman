@@ -9,89 +9,89 @@ import nubs as nubs  # noqa: F401  # pylint: disable=unused-import
 
 # %% Results
 TEXT = r"""i = None, any(x)
-111 ns ± 1.81 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
+96 ns ± 5.88 ns per loop (mean ± std. dev. of 7 runs, 10,000,000 loops each)
 i = None, np.any(x)
-3.74 µs ± 47.6 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+4.73 μs ± 242 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = None, np_any(x)
-342 ns ± 2.11 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+434 ns ± 32.6 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 0, any(x)
-116 ns ± 3.65 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
+96 ns ± 3.08 ns per loop (mean ± std. dev. of 7 runs, 10,000,000 loops each)
 i = 0, np.any(x)
-6.55 µs ± 58.3 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.93 μs ± 365 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 0, np_any(x)
-339 ns ± 3.9 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+387 ns ± 34.4 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 10, any(x)
-255 ns ± 5.41 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+240 ns ± 27.1 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 10, np.any(x)
-6.52 µs ± 75.6 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.17 μs ± 266 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 10, np_any(x)
-340 ns ± 3 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+395 ns ± 25 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 100, any(x)
-1.5 µs ± 9.82 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+1.43 μs ± 54.4 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 100, np.any(x)
-7.14 µs ± 1.01 µs per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.58 μs ± 415 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 100, np_any(x)
-387 ns ± 6.03 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+430 ns ± 25.5 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 1000, any(x)
-14.3 µs ± 146 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+13.4 μs ± 293 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 1000, np.any(x)
-6.57 µs ± 54.2 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.45 μs ± 439 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 1000, np_any(x)
-783 ns ± 5.75 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+751 ns ± 31.9 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 10000, any(x)
-140 µs ± 660 ns per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+135 μs ± 6.02 μs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
 i = 10000, np.any(x)
-6.65 µs ± 126 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.51 μs ± 289 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 10000, np_any(x)
-4.86 µs ± 81.7 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+4.19 μs ± 151 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 50000, any(x)
-703 µs ± 7.79 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+687 μs ± 29.2 μs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
 i = 50000, np.any(x)
-6.54 µs ± 64.9 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.22 μs ± 363 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 50000, np_any(x)
-26.5 µs ± 2 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+20.4 μs ± 1.93 μs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
 i = None, all(x)
-111 ns ± 3.14 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
+90 ns ± 3.68 ns per loop (mean ± std. dev. of 7 runs, 10,000,000 loops each)
 i = None, np.all(x)
-3.89 µs ± 205 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+4.23 μs ± 370 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = None, np_all(x)
-333 ns ± 6.14 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+425 ns ± 33.2 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 0, all(x)
-111 ns ± 3.07 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
+109 ns ± 4.84 ns per loop (mean ± std. dev. of 7 runs, 10,000,000 loops each)
 i = 0, np.all(x)
-6.18 µs ± 41.5 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.68 μs ± 624 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 0, np_all(x)
-334 ns ± 3.92 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+424 ns ± 30.5 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 10, all(x)
-250 ns ± 1.81 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+275 ns ± 25.3 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 10, np.all(x)
-6.25 µs ± 57 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.92 μs ± 398 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 10, np_all(x)
-340 ns ± 4.21 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+412 ns ± 16.9 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 100, all(x)
-1.52 µs ± 19.4 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+1.62 μs ± 54.6 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 100, np.all(x)
-6.18 µs ± 74 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+5.66 μs ± 266 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 100, np_all(x)
-423 ns ± 35.5 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+482 ns ± 24.8 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 1000, all(x)
-14 µs ± 100 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+14.6 μs ± 1.45 μs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
 i = 1000, np.all(x)
-6.26 µs ± 71.9 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+6 μs ± 214 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 1000, np_all(x)
-775 ns ± 6.27 ns per loop (mean ± std. dev. of 7 runs, 1000000 loops each)
+949 ns ± 53.9 ns per loop (mean ± std. dev. of 7 runs, 1,000,000 loops each)
 i = 10000, all(x)
-140 µs ± 642 ns per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+142 μs ± 11.7 μs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
 i = 10000, np.all(x)
-6.55 µs ± 396 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+6 μs ± 379 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 10000, np_all(x)
-4.9 µs ± 56.4 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+4.77 μs ± 219 ns per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 50000, all(x)
-717 µs ± 36.8 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+725 μs ± 45.7 μs per loop (mean ± std. dev. of 7 runs, 1,000 loops each)
 i = 50000, np.all(x)
-6.3 µs ± 66.5 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
+7.07 μs ± 1.17 μs per loop (mean ± std. dev. of 7 runs, 100,000 loops each)
 i = 50000, np_all(x)
-22.5 µs ± 96 ns per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+21.4 μs ± 1.66 μs per loop (mean ± std. dev. of 7 runs, 10,000 loops each)
 """
 
 
@@ -110,7 +110,7 @@ def parse_results(text: str) -> pd.DataFrame:
             func = parts[1]
             next_line = lines[ix + 1]
             speed = next_line.split(" ± ")[0]
-            table.loc[value][func] = speed
+            table.loc[value, func] = speed
         else:
             continue
     return table
@@ -125,32 +125,32 @@ if __name__ == "__main__":
         if x is not None:
             x[i] = True
         print(f"i = {i}, any(x)")
-        ipython.magic("timeit any(x)")
+        ipython.run_line_magic("timeit", "any(x)")
         print(f"i = {i}, np.any(x)")
-        ipython.magic("timeit np.any(x)")
+        ipython.run_line_magic("timeit", "np.any(x)")
         print(f"i = {i}, np_any(x)")
-        ipython.magic("timeit nubs.np_any(x)")
+        ipython.run_line_magic("timeit", "nubs.np_any(x)")
 
     for i in [None, 0, 10, 100, 1000, 10000, 50000]:
         x = np.ones(100000, dtype=bool)
         if x is not None:
             x[i] = False
         print(f"i = {i}, all(x)")
-        ipython.magic("timeit all(x)")
+        ipython.run_line_magic("timeit", "all(x)")
         print(f"i = {i}, np.all(x)")
-        ipython.magic("timeit np.all(x)")
+        ipython.run_line_magic("timeit", "np.all(x)")
         print(f"i = {i}, np_all(x)")
-        ipython.magic("timeit nubs.np_all(x)")
+        ipython.run_line_magic("timeit", "nubs.np_all(x)")
 
     # table = parse_results(TEXT)
     # print(table)
 
     # Gives:
     #         any(x) np.any(x) np_any(x)   all(x) np.all(x) np_all(x)
-    # None    111 ns   3.74 µs    342 ns   111 ns   3.89 µs    333 ns
-    # 0       116 ns   6.55 µs    339 ns   111 ns   6.18 µs    334 ns
-    # 10      255 ns   6.52 µs    340 ns   250 ns   6.25 µs    340 ns
-    # 100     1.5 µs   7.14 µs    387 ns  1.52 µs   6.18 µs    423 ns
-    # 1000   14.3 µs   6.57 µs    783 ns    14 µs   6.26 µs    775 ns
-    # 10000   140 µs   6.65 µs   4.86 µs   140 µs   6.55 µs    4.9 µs
-    # 50000   703 µs   6.54 µs   26.5 µs   717 µs    6.3 µs   22.5 µs
+    # None     96 ns   4.73 μs    434 ns    90 ns   4.23 μs    425 ns
+    # 0        96 ns   5.93 μs    387 ns   109 ns   5.68 μs    424 ns
+    # 10      240 ns   5.17 μs    395 ns   275 ns   5.92 μs    412 ns
+    # 100    1.43 μs   5.58 μs    430 ns  1.62 μs   5.66 μs    482 ns
+    # 1000   13.4 μs   5.45 μs    751 ns  14.6 μs      6 μs    949 ns
+    # 10000   135 μs   5.51 μs   4.19 μs   142 μs      6 μs   4.77 μs
+    # 50000   687 μs   5.22 μs   20.4 μs   725 μs   7.07 μs   21.4 μs

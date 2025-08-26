@@ -139,7 +139,7 @@ if TYPE_CHECKING:
         use_datashader: NotRequired[bool]
         add_quiver: NotRequired[bool]
         quiver_scale: NotRequired[float | None]
-        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
+        fig_ax: NotRequired[tuple[Figure, Axes] | None]
 
 
 # %% Globals

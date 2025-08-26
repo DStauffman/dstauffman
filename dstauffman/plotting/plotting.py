@@ -192,7 +192,7 @@ if TYPE_CHECKING:
         extra_plotter: NotRequired[ExtraPlotter | None]
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
-        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
+        fig_ax: NotRequired[tuple[Figure, Axes] | None]
         classify: NotRequired[str]
 
     class _HistKwargs(TypedDict):
@@ -461,7 +461,7 @@ def plot_time_history(
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_TimeKwargs],
-) -> Figure | None:
+) -> list[Figure]:
     r"""
     Plot multiple metrics over time.
 
@@ -507,21 +507,23 @@ def plot_time_history(
     >>> time = np.arange(0, 5, 1./12) + 2000
     >>> data = np.random.default_rng().random((5, len(time))).cumsum(axis=1)
     >>> data = 10 * data / np.expand_dims(data[:, -1], axis=1)
-    >>> fig  = plot_time_history(description, time, data)
+    >>> figs = plot_time_history(description, time, data)
 
     Date based version
     >>> time2 = np.datetime64("2020-05-01 00:00:00", "ns") + 10**9*np.arange(0, 5*60, 5, dtype=np.int64)
-    >>> fig2 = plot_time_history(description, time2, data, time_units="datetime")
+    >>> figs2 = plot_time_history(description, time2, data, time_units="datetime")
 
     Close plots
-    >>> plt.close(fig)
-    >>> plt.close(fig2)
+    >>> for fig in figs:
+    ...     plt.close(fig)
+    >>> for fig in figs2:
+    ...     plt.close(fig)
 
     """
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
         logger.log(LogLevel.L5, " %s plot skipped due to missing data.", description)
-        return None
+        return []
     assert time is not None
     assert data is not None
 
@@ -575,7 +577,7 @@ def plot_time_history(
     # setup plots
     if not skip_setup_plots:
         setup_plots(fig, this_opts)
-    return fig
+    return [fig]
 
 
 # %% Functions - plot_time_difference
@@ -619,7 +621,7 @@ def plot_time_difference(
     skip_setup_plots: bool = False,
     return_err: bool = False,
     **kwargs: Unpack[_DiffKwargs],
-) -> Figure | _Figs | tuple[_Figs, dict[str, _N]] | None:
+) -> _Figs | tuple[_Figs, dict[str, _N]]:
     r"""
     Plot multiple metrics over time.
 
@@ -689,7 +691,9 @@ def plot_time_difference(
     # check for valid data
     if ignore_plot_data(data_one, ignore_empties) and ignore_plot_data(data_two, ignore_empties):
         logger.log(LogLevel.L5, " %s plot skipped due to missing data.", description)
-        return None
+        if return_err:
+            return ([], {})
+        return []
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
@@ -1002,7 +1006,7 @@ def plot_bar_breakdown(
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_BarKwargs],
-) -> Figure | None:
+) -> list[Figure]:
     r"""
     Plot the pie chart like breakdown by percentage in each category over time.
 
@@ -1050,7 +1054,7 @@ def plot_bar_breakdown(
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
         logger.log(LogLevel.L5, " %s plot skipped due to missing data.", description)
-        return None
+        return []
     assert time is not None
     assert data is not None
 
@@ -1108,7 +1112,7 @@ def plot_bar_breakdown(
     # Setup plots
     if not skip_setup_plots:
         setup_plots(fig, this_opts)
-    return fig
+    return [fig]
 
 
 # %% Functions - plot_histogram
@@ -1499,15 +1503,16 @@ def save_zoomed_version(
     >>> data = np.random.default_rng().random(30)
     >>> data[10] = 1e5
     >>> opts = Opts()
-    >>> fig = plot_time_history("Data vs Time", time, data, opts=opts, second_units=("milli", 1e-3))
-    >>> ax = fig.axes[0]
-    >>> ax2 = fig.axes[1]
+    >>> figs = plot_time_history("Data vs Time", time, data, opts=opts, second_units=("milli", 1e-3))
+    >>> ax = figs[0].axes[0]
+    >>> ax2 = figs[0].axes[1]
     >>> ylims = (-2.0, 2.0)
     >>> save_zoomed_version(fig, ax, ylims, opts=opts, ax2=ax2)
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> plt.close(fig)
+    >>> for fig in figs:
+    ...     plt.close(fig)
 
     """
     if ylims is None:

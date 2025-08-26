@@ -7,10 +7,10 @@ Notes
 
 """
 
+# %% Imports
 import matplotlib.pyplot as plt
 import numpy as np
 
-# %% Imports
 from dstauffman import unit
 from dstauffman.plotting import (
     fig_ax_factory,
@@ -110,16 +110,21 @@ if __name__ == "__main__":
     # %% Example 3
     fig_ax3 = fig_ax_factory(num_figs=None, num_axes=[2, 2], layout="rowwise", sharex=True, suptitle="Vector Plots", passthrough=not comb_plots)  # type: ignore[call-overload]
     time = np.arange(30)
-    plot_time_history("1st", time, np.ones(30), units="one", fig_ax=fig_ax3[0], skip_setup_plots=comb_plots)
+    plot_time_history("1st", time, np.ones(30), units="one", fig_ax=(fig_ax3[0],), skip_setup_plots=comb_plots)
     plot_time_history(
-        "2nd", time, np.array([[10], [11]]) + np.ones((2, 30)), units="two", fig_ax=fig_ax3[1], skip_setup_plots=comb_plots
+        "2nd",
+        time,
+        np.array([[10], [11]]) + np.ones((2, 30)),
+        units="two",
+        fig_ax=2 * (fig_ax3[1],),
+        skip_setup_plots=comb_plots,
     )
     plot_time_history(
         "3rd",
         time,
         np.array([[100], [110], [120]]) + np.ones((3, 30)),
         units="three",
-        fig_ax=fig_ax3[2],
+        fig_ax=3 * (fig_ax3[2],),
         skip_setup_plots=comb_plots,
     )
     fig_ex3 = plot_time_history(
@@ -127,6 +132,6 @@ if __name__ == "__main__":
         time,
         np.array([[1000], [1100], [1200], [1300]]) + np.ones((4, 30)),
         units="four",
-        fig_ax=fig_ax3[3],
+        fig_ax=4 * (fig_ax3[3],),
         skip_setup_plots=False,
     )

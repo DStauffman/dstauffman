@@ -680,13 +680,13 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> str | tuple[st
     --------
     >>> from dstauffman.plotting import plot_time_history, get_figure_title
     >>> import matplotlib.pyplot as plt
-    >>> fig = plot_time_history("My Title", 0, 0)
-    >>> title = get_figure_title(fig)
+    >>> figs = plot_time_history("My Title", 0, 0)
+    >>> title = get_figure_title(figs[0])
     >>> print(title)
     My Title
 
     Close plot
-    >>> plt.close(fig)
+    >>> plt.close(figs[0])
 
     """
     # preallocate if a warning should be thrown
@@ -2116,13 +2116,13 @@ def save_figs_to_pdf(
     --------
     >>> from dstauffman.plotting import close_all, plot_time_history, save_figs_to_pdf
     >>> from dstauffman import get_tests_dir
-    >>> fig = plot_time_history("test", 0, 0)
+    >>> figs = plot_time_history("test", 0, 0)
     >>> filename = get_tests_dir() / "figs.pdf"
-    >>> save_figs_to_pdf(fig, filename)  # doctest: +SKIP
+    >>> save_figs_to_pdf(figs, filename)  # doctest: +SKIP
 
     Delete file and close figure
     >>> filename.unlink(missing_ok=True)
-    >>> close_all(fig)
+    >>> close_all(figs)
 
     """
     # Optional inputs
@@ -2210,18 +2210,18 @@ def save_images_to_pdf(
     --------
     >>> from dstauffman.plotting import close_all, plot_time_history, save_images_to_pdf, storefig
     >>> from dstauffman import get_tests_dir
-    >>> fig = plot_time_history("test", 0, 0)
+    >>> figs = plot_time_history("test", 0, 0)
     >>> folder = get_tests_dir()
     >>> filename = get_tests_dir() / "figs.pdf"
     >>> plot_type = "png"
-    >>> storefig(fig, folder, plot_type)
-    >>> save_images_to_pdf(fig, folder, plot_type, filename)
+    >>> storefig(figs, folder, plot_type)
+    >>> save_images_to_pdf(figs, folder, plot_type, filename)
 
     Delete file and close figure
     >>> filename.unlink(missing_ok=True)
     >>> image_filename = folder / "test.png"
     >>> image_filename.unlink(missing_ok=True)
-    >>> close_all(fig)
+    >>> close_all(figs)
 
     """
     # Optional inputs

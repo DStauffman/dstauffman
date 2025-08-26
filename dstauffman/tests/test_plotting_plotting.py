@@ -194,61 +194,72 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.opts           = plot.Opts()
         self.opts.show_plot = False
         self.elements       = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
-        self.fig: Figure | None = None
+        self.figs: list[Figure] | None = None
         # fmt: on
 
     def test_nominal(self) -> None:
-        self.fig = plot.plot_time_history(self.description, self.time, self.row_data, opts=self.opts, data_as_rows=False)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history(self.description, self.time, self.row_data, opts=self.opts, data_as_rows=False)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_defaults(self) -> None:
-        self.fig = plot.plot_time_history("", self.time, self.col_data)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history("", self.time, self.col_data)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_with_units(self) -> None:
-        self.fig = plot.plot_time_history(self.description, self.time, self.col_data, units=self.units)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history(self.description, self.time, self.col_data, units=self.units)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_with_opts(self) -> None:
-        self.fig = plot.plot_time_history(self.description, self.time, self.col_data, opts=self.opts)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history(self.description, self.time, self.col_data, opts=self.opts)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     @patch("dstauffman.plotting.plotting.logger")
     def test_no_data(self, mock_logger: Mock) -> None:
-        self.fig = plot.plot_time_history("", self.time, None)
-        self.assertIsNone(self.fig)
+        self.figs = plot.plot_time_history("", self.time, None)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 0)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "")
 
     def test_ignore_zeros(self) -> None:
-        self.fig = plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_ignore_zeros2(self) -> None:
         self.col_data[1, :] = 0
         self.col_data[3, :] = 0
-        self.fig = plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     @patch("dstauffman.plotting.plotting.logger")
     def test_ignore_zeros3(self, mock_logger: Mock) -> None:
         self.col_data = np.zeros(self.col_data.shape)
-        self.fig = plot.plot_time_history("All Zeros", self.time, self.col_data, ignore_empties=True)
-        self.assertIsNone(self.fig)
+        self.figs = plot.plot_time_history("All Zeros", self.time, self.col_data, ignore_empties=True)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 0)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "All Zeros")
 
     def test_not_ndarray(self) -> None:
-        self.fig = plot.plot_time_history("Zero", 0, 0)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history("Zero", 0, 0)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_0d(self) -> None:
-        self.fig = plot.plot_time_history("Zero", np.array(0), np.array(0))
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history("Zero", np.array(0), np.array(0))
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_1d(self) -> None:
-        self.fig = plot.plot_time_history("Line", np.arange(5), np.arange(5.0))
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history("Line", np.arange(5), np.arange(5.0))
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_bad_3d(self) -> None:
         bad_data = self.prng.random((self.time.shape[0], 4, 5))
@@ -257,31 +268,36 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def test_datetime(self) -> None:
         dates = np.datetime64("2020-01-11 12:00:00") + np.arange(0, 1000, 10).astype("timedelta64[ms]")
-        self.fig = plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, time_units="numpy")
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, time_units="numpy")
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_lists0(self) -> None:
         time = np.arange(100.0)
         data: list[_I] = [np.zeros(100, dtype=int), np.ones(100, dtype=int)]
-        self.fig = plot.plot_time_history("", time, data)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history("", time, data)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_lists1(self) -> None:
         time = np.arange(10)
         data: list[_N] = [self.prng.random(10), 5 * self.prng.random(10)]
         elements = ("Item 1", "5 Times")
-        self.fig = plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_lists2(self) -> None:
         time = [np.arange(5.0), np.arange(10.0)]
         data = [np.array([0.0, 0.1, 0.2, 0.3, 0.5]), np.arange(10.0)]
-        self.fig = plot.plot_time_history(self.description, time, data, opts=self.opts)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_time_history(self.description, time, data, opts=self.opts)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def tearDown(self) -> None:
-        if self.fig is not None:
-            plt.close(self.fig)
+        if self.figs is not None:
+            for fig in self.figs:
+                plt.close(fig)
 
 
 # %% plotting.plot_time_difference
@@ -313,7 +329,6 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
 
     def setUp(self) -> None:
         num = 10
-        self.fig: Figure | None = None
         self.data = unit(np.random.default_rng().random((num, num)), axis=0)
         self.labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
         self.units = "percentage"
@@ -327,6 +342,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
                     self.sym[i, j] = 1
                 elif i > j:
                     self.sym[i, j] = self.data[j, i]
+        self.fig: Figure | None = None
 
     def test_normal(self) -> None:
         self.fig = plot.plot_correlation_matrix(self.data, self.labels)
@@ -437,70 +453,82 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         self.elements = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         self.opts = plot.Opts()
         self.opts.show_plot = False
-        self.fig: Figure | None = None
+        self.figs: list[Figure] | None = None
 
     def test_nominal(self) -> None:
-        self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, elements=self.elements)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, elements=self.elements)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_defaults(self) -> None:
-        self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, self.time, self.data)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_opts(self) -> None:
-        self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_elements(self) -> None:
-        self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data, elements=self.elements)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, self.time, self.data, elements=self.elements)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_ignore_zeros(self) -> None:
         self.data[:, 1] = 0
         self.data[:, 3] = np.nan
-        self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data, ignore_empties=True)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, self.time, self.data, ignore_empties=True)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     @patch("dstauffman.plotting.plotting.logger")
     def test_null_data(self, mock_logger: Mock) -> None:
-        self.fig = plot.plot_bar_breakdown("", self.time, None)
-        self.assertIsNone(self.fig)
+        self.figs = plot.plot_bar_breakdown("", self.time, None)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 0)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "")
 
     def test_colormap(self) -> None:
         self.opts.colormap = "Dark2"
         colormap = "Paired"
-        self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, colormap=colormap)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, colormap=colormap)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_bad_elements(self) -> None:
         with self.assertRaises(AssertionError):
             plot.plot_bar_breakdown(self.description, self.time, self.data, elements=self.elements[:-1])
 
     def test_single_point(self) -> None:
-        self.fig = plot.plot_bar_breakdown(self.description, self.time[:1], self.data[:, :1])
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, self.time[:1], self.data[:, :1])
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_new_colormap(self) -> None:
         self.opts.colormap = "seismic"
-        self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts)
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_datetime(self) -> None:
         dates = np.datetime64("2020-01-11 12:00:00") + np.arange(0, 7200, 120).astype("timedelta64[s]")
-        self.fig = plot.plot_bar_breakdown(self.description, dates, self.data, opts=self.opts, time_units="numpy")
-        self.assertIsNotNone(self.fig)
+        self.figs = plot.plot_bar_breakdown(self.description, dates, self.data, opts=self.opts, time_units="numpy")
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def test_data_as_rows(self) -> None:
-        self.fig = plot.plot_bar_breakdown(
+        self.figs = plot.plot_bar_breakdown(
             self.description, self.time, self.data.T.copy(), opts=self.opts, elements=self.elements, data_as_rows=False
         )
-        self.assertIsNotNone(self.fig)
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 1)
 
     def tearDown(self) -> None:
-        if self.fig is not None:
-            plt.close(self.fig)
+        if self.figs is not None:
+            for fig in self.figs:
+                plt.close(fig)
 
 
 # %% plotting.plot_histogram

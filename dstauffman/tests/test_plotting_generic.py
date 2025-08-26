@@ -270,6 +270,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_no_subplots(self) -> None:
         self.make_subplots = False
@@ -305,6 +307,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_no_start_date(self) -> None:
         self.start_date = ""
@@ -340,6 +344,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_only_data_one(self) -> None:
         self.data_two.fill(np.nan)
@@ -376,6 +382,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
         self.assertTrue(np.all(np.isnan(err["diff"])))
 
     def test_only_data_two(self) -> None:
@@ -413,6 +421,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
         self.assertTrue(np.all(np.isnan(err["diff"])))
 
     def test_rms_bounds(self) -> None:
@@ -450,6 +460,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_use_mean(self) -> None:
         self.use_mean = True
@@ -485,6 +497,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_no_rms_in_legend(self) -> None:
         self.show_rms = False
@@ -520,6 +534,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_plot_zero(self) -> None:
         self.plot_zero = True
@@ -555,6 +571,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_disp_bounds(self) -> None:
         self.figs = plot.make_difference_plot(  # type: ignore[call-overload]
@@ -568,6 +586,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             disp_xmin=2,
             disp_xmax=5,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_no_overlap(self) -> None:
         time_one = np.arange(11.0)
@@ -605,12 +625,18 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_none1(self) -> None:
         self.figs = plot.make_difference_plot(self.description, self.time_one, None, self.data_one, None)  # type: ignore[call-overload]
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     def test_none2(self) -> None:
         self.figs = plot.make_difference_plot(self.description, None, self.time_two, None, self.data_two)  # type: ignore[call-overload]
+        self.assertIsNotNone(self.figs)
+        self.assertGreaterEqual(len(self.figs), 1)
 
     @patch("dstauffman.plotting.generic.logger")
     def test_none3(self, mock_logger: Mock) -> None:
@@ -619,6 +645,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         mock_logger.log.assert_called_with(
             LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "differences", ""
         )
+        self.assertIsNotNone(self.figs)
+        self.assertEqual(len(self.figs), 0)
 
     def tearDown(self) -> None:
         if self.figs:

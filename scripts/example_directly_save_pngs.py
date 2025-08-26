@@ -35,4 +35,4 @@ if __name__ == "__main__":
 
     # %% Create the plots
     if flags.use_plotting:
-        fig = plot.plot_time_history(description, time, data, opts=opts)
+        figs = plot.plot_time_history(description, time, data, opts=opts)

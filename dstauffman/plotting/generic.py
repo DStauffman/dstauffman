@@ -1590,7 +1590,7 @@ def make_bar_plot(  # noqa: C901
     data_as_rows: bool = True,
     extra_plotter: ExtraPlotter | None = None,
     label_vert_lines: bool = True,
-    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
 ) -> Figure:
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
@@ -1627,7 +1627,6 @@ def make_bar_plot(  # noqa: C901
     >>> rms_xmax         = np.inf
     >>> disp_xmin        = -np.inf
     >>> disp_xmax        = np.inf
-    >>> single_lines     = False
     >>> colormap         = "Paired"
     >>> use_mean         = True
     >>> plot_zero        = False
@@ -1642,10 +1641,10 @@ def make_bar_plot(  # noqa: C901
     >>> fig_ax           = None
     >>> fig = make_bar_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
-    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
-    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
-    ...     ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
+    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, colormap=colormap, use_mean=use_mean, \
+    ...     plot_zero=plot_zero, show_rms=show_rms, ignore_empties=ignore_empties, \
+    ...     legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
+    ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
     ...     label_vert_lines=label_vert_lines, fig_ax=fig_ax)
 
     >>> import matplotlib.pyplot as plt
@@ -1659,8 +1658,6 @@ def make_bar_plot(  # noqa: C901
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
         raise ValueError("You must have some data to plot.")
-    if single_lines:
-        raise ValueError("Bar plots are not valid with single_lines.")
 
     # build lists of time and data
     times, datum = _make_time_and_data_lists(time, data, data_as_rows=data_as_rows)
@@ -1701,21 +1698,12 @@ def make_bar_plot(  # noqa: C901
         ylabels = ylabels[::-1]
 
     if fig_ax is None:
-        # get the number of axes to make
-        num_figs = 1
-        num_rows = 1
-        num_cols = 1
-        fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
-        if not single_lines:
-            fig_ax = fig_ax * num_channels
+        fig_ax = _create_figure(1, 1, 1, description=description)[0]
     assert fig_ax is not None
-    assert len(fig_ax) == num_channels, "Expecting a (figure, axes) pair for each channel in data."
-    fig = fig_ax[0][0]
-    ax = [fig_ax[0][1]]
+    (fig, ax) = fig_ax
 
     xlim: tuple[float, float] | None = None
     for i in reversed(range(num_channels)):
-        _, this_axes = fig_ax[i]
         this_ylabel = ylabels[i]
         this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
         if show_rms:
@@ -1727,7 +1715,7 @@ def make_bar_plot(  # noqa: C901
         if not ignore_plot_data(datum[i], ignore_empties):
             # Note: The performance of ax.bar is really slow with large numbers of bars (>20), so
             # fill_between is a better alternative
-            this_axes.fill_between(
+            ax.fill_between(
                 times[i],
                 bottoms[i],
                 bottoms[i + 1],
@@ -1736,35 +1724,31 @@ def make_bar_plot(  # noqa: C901
                 color=cm.get_color(i),
                 edgecolor="none",
             )
-        xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
-        this_axes.set_ylim(0, 100)
-        if plot_zero:
-            show_zero_ylim(this_axes)
-        if ylims is not None:
-            this_axes.set_ylim(ylims)
-        if i == num_channels - 1:
-            this_axes.set_title(description)
-        if bool(this_ylabel):
-            this_axes.set_ylabel(this_ylabel)
-            this_axes.grid(True)
-            # optionally add second Y axis
-            plot_second_units_wrapper(this_axes, (new_units, unit_conv))
-            # plot RMS lines
-            if show_rms:
-                vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
-                plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
-
-    if single_lines:  # TODO: what was intended here?
-        fig.supylabel(description)  # type: ignore[unreachable]
+        if i == 0:
+            xlim = _label_x(ax, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+            ax.set_ylim(0, 100)
+            if plot_zero:
+                show_zero_ylim(ax)
+            if ylims is not None:
+                ax.set_ylim(ylims)
+            ax.set_title(description)
+            if bool(this_ylabel):
+                ax.set_ylabel(this_ylabel)
+                ax.grid(True)
+                # optionally add second Y axis
+                plot_second_units_wrapper(ax, (new_units, unit_conv))
+                # plot RMS lines
+                if show_rms:
+                    vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
+                    plot_vert_lines(ax, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
 
     # plot any extra information through a generic callable
     if extra_plotter is not None:
-        extra_plotter(fig=fig, ax=ax)
+        extra_plotter(fig=fig, ax=[ax])
 
     # add legend at the very end once everything has been done
     if legend_loc.lower() != "none":
-        for this_axes in ax:
-            this_axes.legend(loc=legend_loc)
+        ax.legend(loc=legend_loc)
 
     return fig
 
@@ -2066,7 +2050,7 @@ def make_connected_sets(  # noqa: C901
     use_datashader: bool = False,
     add_quiver: bool = False,
     quiver_scale: float | None = None,
-    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
 ) -> Figure:
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
@@ -2222,7 +2206,7 @@ def make_connected_sets(  # noqa: C901
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
     else:
-        (fig, ax) = fig_ax[0]
+        (fig, ax) = fig_ax
     assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
         fig.canvas.manager.set_window_title(description + extra_text)
