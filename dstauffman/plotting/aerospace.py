@@ -270,7 +270,7 @@ def plot_quaternion(  # noqa: C901
 
     Returns
     -------
-    fig_hand : list of class matplotlib.figure.Figure
+    figs : list of class matplotlib.figure.Figure
         Figure handles
     err : dict
         Numerical outputs of comparison
@@ -298,12 +298,12 @@ def plot_quaternion(  # noqa: C901
     >>> opts.quat_comp = True
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_quaternion("Quaternion", time_one, time_two, quat_one, quat_two, \
-    ...                            opts=opts, name_one="KF1", name_two="KF2")
+    >>> figs = plot_quaternion("Quaternion", time_one, time_two, quat_one, quat_two, \
+    ...     opts=opts, name_one="KF1", name_two="KF2")
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
+    >>> for fig in figs:
     ...     plt.close(fig)
 
     """
@@ -452,7 +452,7 @@ def plot_attitude(  # noqa: C901
 
     Returns
     -------
-    fig_hand : list of class matplotlib.figure.Figure
+    figs : list of class matplotlib.figure.Figure
         Figure handles
     err : dict
         Numerical outputs of comparison
@@ -484,11 +484,11 @@ def plot_attitude(  # noqa: C901
     >>> opts.quat_comp = True
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_attitude(kf1, kf2, opts=opts)
+    >>> figs = plot_attitude(kf1, kf2, opts=opts)
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
+    >>> for fig in figs:
     ...     plt.close(fig)
 
     """
@@ -689,7 +689,7 @@ def plot_position(  # noqa: C901
 
     Returns
     -------
-    fig_hand : list of class matplotlib.figure.Figure
+    figs : list of class matplotlib.figure.Figure
         Figure handles
     err : dict
         Numerical outputs of comparison
@@ -714,11 +714,11 @@ def plot_position(  # noqa: C901
     >>> kf2.pos  = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
     >>> kf2.vel  = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100
 
-    >>> fig_hand = plot_position(kf1, kf2)
+    >>> figs = plot_position(kf1, kf2)
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
+    >>> for fig in figs:
     ...     plt.close(fig)
 
     """
@@ -969,7 +969,7 @@ def plot_innovations(  # noqa: C901
 
     Returns
     -------
-    fig_hand : list of class matplotlib.figure.Figure
+    figs : list of class matplotlib.figure.Figure
         Figure handles
     err : dict
         Numerical outputs of comparison
@@ -1000,11 +1000,11 @@ def plot_innovations(  # noqa: C901
     >>> opts.case_name = "test_plot"
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_innovations(kf1, kf2, opts=opts)
+    >>> figs = plot_innovations(kf1, kf2, opts=opts)
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
+    >>> for fig in figs:
     ...     plt.close(fig)
 
     """
@@ -1313,7 +1313,7 @@ def plot_innov_fplocs(
 
     Returns
     -------
-    fig_hand : list of class matplotlib.figure.Figure
+    figs : list of class matplotlib.figure.Figure
         Figure handles
 
     Notes
@@ -1341,11 +1341,11 @@ def plot_innov_fplocs(
     >>> opts.case_name = "test_plot"
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_innov_fplocs(kf1, opts=opts, color_by="magnitude")
+    >>> figs = plot_innov_fplocs(kf1, opts=opts, color_by="magnitude")
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
+    >>> for fig in figs:
     ...     plt.close(fig)
 
     """
@@ -1515,7 +1515,7 @@ def plot_covariance(  # noqa: C901
 
     Returns
     -------
-    fig_hand : list of class matplotlib.figure.Figure
+    figs : list of class matplotlib.figure.Figure
         Figure handles
     err : dict
         Numerical outputs of comparison
@@ -1545,11 +1545,11 @@ def plot_covariance(  # noqa: C901
     >>> opts.case_name = "test_plot"
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_covariance(kf1, kf2, opts=opts)
+    >>> figs = plot_covariance(kf1, kf2, opts=opts)
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
+    >>> for fig in figs:
     ...     plt.close(fig)
 
     """

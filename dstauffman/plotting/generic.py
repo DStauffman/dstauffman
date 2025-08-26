@@ -399,7 +399,7 @@ def make_time_plot(  # noqa: C901
     >>> label_vert_lines = True
     >>> use_datashader   = False
     >>> fig_ax           = None
-    >>> figs = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
+    >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
     ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, colormap=colormap, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
@@ -747,7 +747,7 @@ def make_difference_plot(  # noqa: C901
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
+    >>> for fig in figs:
     ...     plt.close(fig)
 
     """
@@ -1295,7 +1295,7 @@ def make_quaternion_plot(
 
     Close plots
     >>> import matplotlib.pyplot as plt
-    >>> for fig in fig_hand:
+    >>> for fig in figs:
     ...     plt.close(fig)
 
     """
