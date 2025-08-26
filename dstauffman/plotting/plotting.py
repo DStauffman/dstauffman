@@ -180,7 +180,6 @@ if TYPE_CHECKING:
         rms_xmax: NotRequired[_Time]
         disp_xmin: NotRequired[_Time]
         disp_xmax: NotRequired[_Time]
-        single_lines: NotRequired[bool]
         colormap: NotRequired[_CM | None]
         use_mean: NotRequired[bool]
         plot_zero: NotRequired[bool]
@@ -486,8 +485,8 @@ def plot_time_history(
 
     Returns
     -------
-    fig : class matplotlib.figure.Figure
-        figure handle, if None, no figure was created
+    figs : list of class matplotlib.figure.Figure
+        figure handles
 
     See Also
     --------
@@ -650,8 +649,8 @@ def plot_time_difference(
 
     Returns
     -------
-    fig : class matplotlib.figure.Figure
-        figure handle, if None, no figure was created
+    figs : list of class matplotlib.figure.Figure
+        figure handles
 
     See Also
     --------
@@ -1027,8 +1026,8 @@ def plot_bar_breakdown(
 
     Returns
     -------
-    fig : class matplotlib.figure.Figure
-        Figure handle
+    figs : list of class matplotlib.figure.Figure
+        Figure handles
 
     Notes
     -----
@@ -1044,11 +1043,12 @@ def plot_bar_breakdown(
     >>> data = np.random.default_rng().random((5, len(time)))
     >>> mag  = np.sum(data, axis=0)
     >>> data = data / np.expand_dims(mag, axis=0)
-    >>> fig  = plot_bar_breakdown(description, time, data)
+    >>> figs = plot_bar_breakdown(description, time, data)
 
     Close plot
     >>> import matplotlib.pyplot as plt
-    >>> plt.close(fig)
+    >>> for fig in figs:
+    ...     plt.close(fig)
 
     """
     # check for valid data
@@ -1074,7 +1074,6 @@ def plot_bar_breakdown(
     rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
     disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
     disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
-    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
     colormap     = kwargs.pop("colormap", this_opts.colormap)
     use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
     lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
@@ -1099,7 +1098,6 @@ def plot_bar_breakdown(
         rms_xmax=rms_xmax,
         disp_xmin=disp_xmin,
         disp_xmax=disp_xmax,
-        single_lines=single_lines,
         colormap=colormap,
         use_mean=use_mean,
         label_vert_lines=lab_vert,

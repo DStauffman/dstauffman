@@ -399,14 +399,13 @@ def make_time_plot(  # noqa: C901
     >>> label_vert_lines = True
     >>> use_datashader   = False
     >>> fig_ax           = None
-    >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
+    >>> figs = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
-    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
-    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     legend_loc=legend_loc, second_units=second_units, leg_scale=leg_scale, \
-    ...     ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
-    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, use_datashader=use_datashader, \
-    ...     fig_ax=fig_ax)
+    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, colormap=colormap, \
+    ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+    ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
+    ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
+    ...     use_datashader=use_datashader, fig_ax=fig_ax)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -734,16 +733,17 @@ def make_difference_plot(  # noqa: C901
     >>> extra_plotter    = None
     >>> use_datashader   = False
     >>> fig_ax           = None
-    >>> fig_hand = make_difference_plot(description, time_one, time_two, data_one, data_two, \
+    >>> diff_type        = "comp"
+    >>> figs = make_difference_plot(description, time_one, time_two, data_one, data_two, \
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     time_units=time_units, disp_xmax=disp_xmax, make_subplots=make_subplots, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
     ...     show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
-    ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, \
-    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter, \
-    ...     use_datashader=use_datashader, fig_ax=fig_ax)
+    ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
+    ...     tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
+    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter, \
+    ...     use_datashader=use_datashader, fig_ax=fig_ax, diff_type=diff_type)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1284,7 +1284,7 @@ def make_quaternion_plot(
     >>> label_vert_lines = True
     >>> extra_plotter    = None
     >>> use_datashader   = False
-    >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
+    >>> figs = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, \
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     make_subplots=make_subplots, single_lines=single_lines, use_mean=use_mean, \
@@ -1397,9 +1397,10 @@ def make_error_bar_plot(  # noqa: C901
     >>> prng             = np.random.default_rng()
     >>> description      = "Random Data Error Bars"
     >>> time             = np.arange(11)
-    >>> data             = np.array([[3.], [-2.], [5]]) + prng.random((3, 11))
+    >>> data             = np.array([[3.0], [-2.0], [5.0]]) + prng.random((3, 11))
     >>> mins             = data - 0.5 * prng.random((3, 11))
     >>> maxs             = data + 1.5 * prng.random((3, 11))
+    >>> name             = ""
     >>> elements         = ["x", "y", "z"]
     >>> units            = "rad"
     >>> time_units       = "sec"
@@ -1422,7 +1423,7 @@ def make_error_bar_plot(  # noqa: C901
     >>> use_zoh          = False
     >>> label_vert_lines = True
     >>> fig_ax           = None
-    >>> fig              = make_error_bar_plot(description, time, data, mins, maxs, \
+    >>> fig              = make_error_bar_plot(description, time, data, mins, maxs, name=name, \
     ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
@@ -1577,7 +1578,6 @@ def make_bar_plot(  # noqa: C901
     rms_xmax: _Time = inf,
     disp_xmin: _Time = -inf,
     disp_xmax: _Time = inf,
-    single_lines: bool = False,
     colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool = True,
     plot_zero: bool = False,
@@ -1614,7 +1614,7 @@ def make_bar_plot(  # noqa: C901
     >>> from dstauffman.plotting import make_bar_plot
     >>> import numpy as np
     >>> description      = "Test vs Time"
-    >>> time             = np.arange(0, 5, 1./12) + 2000
+    >>> time             = np.arange(0, 5, 1.0/12) + 2000
     >>> data             = np.random.default_rng().random((5, len(time)))
     >>> mag              = np.sum(data, axis=0)
     >>> data             = 100 * data / mag
@@ -1643,9 +1643,8 @@ def make_bar_plot(  # noqa: C901
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
     ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, colormap=colormap, use_mean=use_mean, \
     ...     plot_zero=plot_zero, show_rms=show_rms, ignore_empties=ignore_empties, \
-    ...     legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
-    ...     label_vert_lines=label_vert_lines, fig_ax=fig_ax)
+    ...     legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, data_as_rows=data_as_rows, \
+    ...     extra_plotter=extra_plotter, label_vert_lines=label_vert_lines, fig_ax=fig_ax)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -1693,9 +1692,7 @@ def make_bar_plot(  # noqa: C901
         bottoms.append(last)
 
     # build labels
-    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=single_lines, description=description, units=units)  # fmt: skip
-    if not single_lines:
-        ylabels = ylabels[::-1]
+    ylabels = _get_ylabels(num_channels, ylabel, elements=elements, single_lines=False, description=description, units=units)[::-1]  # fmt: skip
 
     if fig_ax is None:
         fig_ax = _create_figure(1, 1, 1, description=description)[0]
@@ -1806,7 +1803,7 @@ def make_categories_plot(  # noqa: C901
     >>> from dstauffman.plotting import make_categories_plot
     >>> import numpy as np
     >>> description      = "Values vs Time"
-    >>> time             = np.arange(-10., 10.1, 0.1)
+    >>> time             = np.arange(-10.0, 10.1, 0.1)
     >>> data             = np.vstack((time + np.cos(time), np.ones(time.shape)))
     >>> data[1, 60:85]   = 2
     >>> MeasStatus       = type("MeasStatus", (object,), {"rejected": 0, "accepted": 1})
