@@ -14,7 +14,7 @@ import datetime
 import os
 import pathlib
 import platform
-from typing import TYPE_CHECKING
+from typing import NotRequired, TYPE_CHECKING, TypedDict
 import unittest
 
 from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS, NP_NAT
@@ -46,6 +46,19 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _N = NDArray[np.floating]
+
+    class _DataShaders(TypedDict):
+        time: _N
+        data: _N
+        ax: Axes
+        value: NotRequired[_N]
+        vmin: NotRequired[float]
+        vmax: NotRequired[float]
+        color: NotRequired[str | tuple[float, float, float, float]]
+        colormap: NotRequired[str]
+        time_units: NotRequired[str]
+        norm: NotRequired[str]
+        aspect: NotRequired[str]
 
 
 # %% plotting.DEFAULT_COLORMAP
@@ -1250,7 +1263,7 @@ class Test_plotting_add_datashaders(unittest.TestCase):
         self.ax = self.fig.add_subplot(1, 1, 1)
         self.ax.plot([0, 0], [1, 1], ".-")
         self.points = 0.5 + 0.25 * self.prng.random((2, 1000))
-        self.datashaders = [{"time": self.points[0, :], "data": self.points[1, :], "ax": self.ax}]
+        self.datashaders: list[_DataShaders] = [{"time": self.points[0, :], "data": self.points[1, :], "ax": self.ax}]
 
     def test_nominal(self) -> None:
         self.datashaders[0]["color"] = "xkcd:black"
@@ -1258,10 +1271,15 @@ class Test_plotting_add_datashaders(unittest.TestCase):
 
     def test_datetime(self) -> None:
         self.datashaders[0]["color"] = "xkcd:black"
-        self.datashaders.append({"color": "xkcd:blue", "ax": self.ax})
-        self.datashaders[1]["time"] = np.arange(np.datetime64("now", "ns"), np.timedelta64(1, "m"), np.timedelta64(1, "s"))
-        self.datashaders[1]["data"] = self.prng.random(self.datashaders[1]["time"].shape)  # type: ignore[attr-defined]
-        self.datashaders[1]["time_units"] = "numpy"
+        self.datashaders.append(
+            {
+                "color": "xkcd:blue",
+                "ax": self.ax,
+                "time": np.arange(np.datetime64("now", "ns"), np.timedelta64(1, "m"), np.timedelta64(1, "s")),
+                "data": self.prng.random(60),
+                "time_units": "numpy",
+            }
+        )
         plot.add_datashaders(self.datashaders)
 
     def test_min_max(self) -> None:

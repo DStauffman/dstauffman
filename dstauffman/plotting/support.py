@@ -22,7 +22,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Callable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
+from typing import Any, Callable, Literal, NotRequired, overload, Protocol, TYPE_CHECKING, TypedDict
 import unittest
 import warnings
 
@@ -113,6 +113,19 @@ if TYPE_CHECKING:
         one: _B
         two: _B
         overlap: _B
+
+    class _DataShaders(TypedDict):
+        time: _N
+        data: _N
+        ax: Axes
+        value: NotRequired[_N]
+        vmin: NotRequired[float]
+        vmax: NotRequired[float]
+        color: NotRequired[str | tuple[float, float, float, float]]
+        colormap: NotRequired[str]
+        time_units: NotRequired[str]
+        norm: NotRequired[str]
+        aspect: NotRequired[str]
 
 
 # %% Constants
@@ -2257,7 +2270,7 @@ def save_images_to_pdf(
 
 # %% add_datashaders
 def add_datashaders(
-    datashaders: list[dict[str, Any]],
+    datashaders: list[_DataShaders],
     *,
     threshold: float = 0.8,
     max_px: int = 6,

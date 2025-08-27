@@ -13,7 +13,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import logging
-from typing import Any, Iterable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
+from typing import Any, Callable, Iterable, Literal, NotRequired, overload, Protocol, TYPE_CHECKING, TypedDict
 import unittest
 
 from slog import LogLevel
@@ -52,6 +52,7 @@ if HAVE_MPL:
     from matplotlib.collections import LineCollection
     from matplotlib.colors import Colormap, ListedColormap
     from matplotlib.figure import Figure
+    from matplotlib.lines import Line2D
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -93,6 +94,19 @@ if TYPE_CHECKING:
         one: list[_B]
         two: list[_B]
         overlap: list[_B]
+
+    class _DataShaders(TypedDict):
+        time: _N
+        data: _N
+        ax: Axes
+        value: NotRequired[_N]
+        vmin: NotRequired[float]
+        vmax: NotRequired[float]
+        color: NotRequired[str | tuple[float, float, float, float]]
+        colormap: NotRequired[str]
+        time_units: NotRequired[str]
+        norm: NotRequired[str]
+        aspect: NotRequired[str]
 
 
 # %% Globals
@@ -280,29 +294,29 @@ def _create_figure(num_figs: int, num_rows: int, num_cols: int, *, description: 
 
 
 # %% Functions - _plot_linear
-def _plot_linear(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kwargs: Any) -> None:
+def _plot_linear(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kwargs: Any) -> list[Line2D]:
     """Plots a normal linear plot with passthrough options."""
     if len(args) != 0:
         raise AssertionError("Unexpected positional arguments.")
     try:
         if np.all(np.isnan(data)):
-            return
+            return []
     except TypeError:
         pass  # like categorical data that cannot be safely coerced to NaNs
-    ax.plot(time, data, symbol, markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
+    return ax.plot(time, data, symbol, markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
 
 
 # %% Functions - _plot_zoh
-def _plot_zoh(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kwargs: Any) -> None:
+def _plot_zoh(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kwargs: Any) -> list[Line2D]:
     """Plots a zero-order hold step plot with passthrough options."""
     if len(args) != 0:
         raise AssertionError("Unexpected positional arguments.")
     try:
         if np.all(np.isnan(data)):
-            return
+            return []
     except TypeError:
         pass  # like categorical data that cannot be safely coerced to NaNs
-    ax.step(time, data, symbol, where="post", markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
+    return ax.step(time, data, symbol, where="post", markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
 
 
 # %% Functions - _label_x
@@ -325,6 +339,68 @@ def _label_x(  # pylint: disable=too-many-positional-arguments
     else:
         this_axes.set_xlabel(f"Time [{time_units}]{start_date}")
     return xlim
+
+
+# %% Functions - _draw_lines
+def _draw_lines(
+    datashaders: list[_DataShaders],
+    this_time: _N,
+    this_data: _N,
+    plot_func: Callable[..., list[Line2D]],
+    this_axes: Axes,
+    *,
+    symbol: str,
+    markersize: int,
+    color: tuple[float, float, float, float],
+    label: str,
+    zorder: int,
+    use_datashader: bool = False,
+    datashader_pts: int = 2000,
+) -> list[Line2D]:
+    """Draws the actual plotting lines and markers, with options for datashader."""
+    if use_datashader and this_time.size > datashader_pts:
+        ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)
+        if not np.issubdtype(this_data.dtype, np.number):
+            (categories, ix_extras) = np.unique(this_data, return_index=True)
+            temp_data = pd.Categorical(this_data, categories=categories[np.argsort(ix_extras)], ordered=True)
+            ix_spot = np.union1d(ix_spot, ix_extras)
+            line = plot_func(
+                this_axes,
+                this_time[ix_spot],
+                this_data[ix_spot],
+                symbol[0],
+                markersize=markersize,
+                label=label,
+                color=color,
+                zorder=zorder,
+                linestyle="none",
+            )
+            datashaders.append({"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": color})
+        else:
+            line = plot_func(
+                this_axes,
+                this_time[ix_spot],
+                this_data[ix_spot],
+                symbol[0],
+                markersize=markersize,
+                label=label,
+                color=color,
+                zorder=zorder,
+                linestyle="none",
+            )
+            datashaders.append({"time": this_time, "data": this_data, "ax": this_axes, "color": color})
+    else:
+        line = plot_func(
+            this_axes,
+            this_time,
+            this_data,
+            symbol,
+            markersize=markersize,
+            label=label,
+            color=color,
+            zorder=zorder,
+        )
+    return line
 
 
 # %% Functions - make_time_plot
@@ -411,9 +487,6 @@ def make_time_plot(  # noqa: C901
     >>> plt.close(fig)
 
     """
-    # hard-coded values
-    datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
-
     times, datum = _make_time_and_data_lists(time, data, data_as_rows=data_as_rows)
     num_channels = len(times)
     time_is_date = len(times) > 0 and is_datetime(times[0])
@@ -462,7 +535,7 @@ def make_time_plot(  # noqa: C901
     ax: list[Axes] = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
     xlim: tuple[float, float] | None = None
-    datashaders = []
+    datashaders: list[_DataShaders] = []
     for i, ((_, this_axes), this_time, this_data, this_ylabel) in enumerate(zip(fig_ax, times, datum, ylabels)):  # fmt: skip
         this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
         if show_rms:
@@ -471,50 +544,8 @@ def make_time_plot(  # noqa: C901
                 this_label += f" ({func_name}: {value} {leg_units})"
             else:
                 this_label += f" ({func_name}: {value})"
-        this_color = cm.get_color(i)
-        # TODO: functionalize this datashader part
-        if use_datashader and this_time.size > datashader_pts:
-            ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)
-            if not np.issubdtype(this_data.dtype, np.number):
-                (categories, ix_extras) = np.unique(this_data, return_index=True)
-                temp_data = pd.Categorical(this_data, categories=categories[np.argsort(ix_extras)], ordered=True)
-                ix_spot = np.union1d(ix_spot, ix_extras)
-                plot_func(
-                    this_axes,
-                    this_time[ix_spot],
-                    this_data[ix_spot],
-                    symbol[0],
-                    markersize=4,
-                    label=this_label,
-                    color=this_color,
-                    zorder=9,
-                    linestyle="none",
-                )
-                datashaders.append({"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": this_color})
-            else:
-                plot_func(
-                    this_axes,
-                    this_time[ix_spot],
-                    this_data[ix_spot],
-                    symbol[0],
-                    markersize=4,
-                    label=this_label,
-                    color=this_color,
-                    zorder=9,
-                    linestyle="none",
-                )
-                datashaders.append({"time": this_time, "data": this_data, "ax": this_axes, "color": this_color})
-        else:
-            plot_func(
-                this_axes,
-                this_time,  # type: ignore[arg-type]
-                this_data,
-                symbol,
-                markersize=4,
-                label=this_label,
-                color=this_color,
-                zorder=9,
-            )
+        _draw_lines(datashaders, this_time, this_data, plot_func, this_axes, symbol=symbol,  # type: ignore[arg-type]
+            markersize=4, color=cm.get_color(i), label=this_label, zorder=9, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
         xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
@@ -751,9 +782,6 @@ def make_difference_plot(  # noqa: C901
     ...     plt.close(fig)
 
     """
-    # hard-coded values
-    datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
-
     # build lists of time and data
     times1, datum1 = _make_time_and_data_lists(time_one, data_one, data_as_rows=data_as_rows)
     times2, datum2 = _make_time_and_data_lists(time_two, data_two, data_as_rows=data_as_rows)
@@ -907,7 +935,7 @@ def make_difference_plot(  # noqa: C901
     # Primary plot
     xlim: tuple[float, float] | None = None
     color_offset = len(times1)
-    datashaders = []
+    datashaders: list[_DataShaders] = []
     this_zorder = 3 if is_quat_diff else 4
     for i in range(num_channels):
         this_fig, this_axes = fig_ax[i]
@@ -922,49 +950,8 @@ def make_difference_plot(  # noqa: C901
                     this_label += f" ({func_name}: {value} {leg_units})"
                 else:
                     this_label += f" ({func_name}: {value})"
-            this_color = cm.get_color(i)
-            if use_datashader and this_time.size > datashader_pts:
-                ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)
-                if not np.issubdtype(this_data.dtype, np.number):
-                    (categories, ix_extras) = np.unique(this_data, return_index=True)
-                    temp_data = pd.Categorical(this_data, categories=categories[np.argsort(ix_extras)], ordered=True)
-                    ix_spot = np.union1d(ix_spot, ix_extras)
-                    plot_func(
-                        this_axes,
-                        this_time[ix_spot],
-                        this_data[ix_spot],
-                        symbol_one[0],
-                        markersize=4,
-                        label=this_label,
-                        color=this_color,
-                        zorder=this_zorder,
-                        linestyle="none",
-                    )
-                    datashaders.append({"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": this_color})
-                else:
-                    plot_func(
-                        this_axes,
-                        this_time[ix_spot],
-                        this_data[ix_spot],
-                        symbol_one[0],
-                        markersize=4,
-                        label=this_label,
-                        color=this_color,
-                        zorder=this_zorder,
-                        linestyle="none",
-                    )
-                    datashaders.append({"time": this_time, "data": this_data, "ax": this_axes, "color": this_color})
-            else:
-                plot_func(
-                    this_axes,
-                    this_time,
-                    this_data,
-                    symbol_one,
-                    markersize=4,
-                    label=this_label,
-                    color=this_color,
-                    zorder=9,
-                )
+            _draw_lines(datashaders, this_time, this_data, plot_func, this_axes, symbol=symbol_one, markersize=4,  # type: ignore[arg-type]
+                color=cm.get_color(i), label=this_label, zorder=this_zorder, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
         this_label = f"{name_two} {elements[i]}" if name_two else f"{elements[i]}"
         if have_data_two:
             this_time2 = times2[i]
@@ -975,32 +962,8 @@ def make_difference_plot(  # noqa: C901
                     this_label += f" ({func_name}: {value} {leg_units})"
                 else:
                     this_label += f" ({func_name}: {value})"
-            this_color = cm.get_color(i + color_offset)
-            if use_datashader and this_time2.size > datashader_pts:
-                ix_spot = np.round(np.linspace(0, this_time2.size - 1, datashader_pts)).astype(int)
-                plot_func(
-                    this_axes,
-                    this_time2[ix_spot],
-                    this_data2[ix_spot],
-                    symbol_two[0],
-                    markersize=4,
-                    label=this_label,
-                    color=this_color,
-                    zorder=this_zorder + 1,
-                    linestyle="none",
-                )
-                datashaders.append({"time": times2[i], "data": datum2[i], "ax": this_axes, "color": this_color})
-            else:
-                plot_func(
-                    this_axes,
-                    times2[i],
-                    datum2[i],
-                    symbol_two,
-                    markersize=4,
-                    label=this_label,
-                    color=this_color,
-                    zorder=9,
-                )
+            _draw_lines(datashaders, this_time2, this_data2, plot_func, this_axes, symbol=symbol_two, markersize=4,  # type: ignore[arg-type]
+                color=cm.get_color(i + color_offset), label=this_label, zorder=this_zorder + 1, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
         xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
@@ -1035,31 +998,10 @@ def make_difference_plot(  # noqa: C901
                     this_label += f" ({func_name}: {value} {leg_units})"
                 else:
                     this_label += f" ({func_name}: {value})"
-            this_color = cm.get_color(i + color_offset)
-            if use_datashader and time_overlap[i].size > datashader_pts:
-                ix_spot = np.round(np.linspace(0, time_overlap[i].size - 1, datashader_pts)).astype(int)
-                plot_func(
-                    this_axes,
-                    time_overlap[i][ix_spot],
-                    diffs[i][ix_spot],
-                    ".",
-                    markersize=4,
-                    label=this_label,
-                    color=this_color,
-                    linestyle="none",
-                )
-                datashaders.append({"time": time_overlap[i], "data": diffs[i], "ax": this_axes, "color": this_color})
-            else:
-                plot_func(
-                    this_axes,
-                    time_overlap[i],
-                    diffs[i],
-                    ".-",
-                    markersize=4,
-                    label=this_label,
-                    color=this_color,
-                    zorder=this_zorder,
-                )
+            lines = _draw_lines(datashaders, time_overlap[i], diffs[i], plot_func, this_axes, symbol=".-", markersize=4,
+                color=cm.get_color(i + color_offset), label=this_label, zorder=this_zorder, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
+            if bool(datashaders) and bool(lines):
+                lines[0].set_linestyle("none")
             if show_extra and i == ix_diff[-1]:
                 if d1_miss_ix.size > 0:
                     this_axes.plot(
@@ -1938,7 +1880,7 @@ def make_categories_plot(  # noqa: C901
 
     # Primary plot
     xlim: tuple[float, float] | None = None
-    datashaders = []
+    datashaders: list[_DataShaders] = []
     for i, (this_time, this_data, this_ylabel) in enumerate(zip(times, datum, ylabels)):
         this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
         this_axes = fig_ax[i * num_cats][1]
@@ -1958,43 +1900,14 @@ def make_categories_plot(  # noqa: C901
                 else:
                     cat_label = f"{this_label} {this_cat_name}"
                 this_cats = cats == cat
-                this_linestyle = "-" if single_lines else "none"
                 # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
                 # won't mess up the color scheme by skipping colors
                 this_cat_ix = np.argmax(cat == cat_keys)
                 this_color = cm.get_color(i * len(cat_keys) + this_cat_ix)
-                if use_datashader and np.count_nonzero(this_cats) > datashader_pts:
-                    temp = np.flatnonzero(this_cats)
-                    ix_spot = temp[np.round(np.linspace(0, temp.size - 1, datashader_pts)).astype(int)]
-                    sub_axes.plot(
-                        this_time[ix_spot],
-                        this_data[ix_spot],
-                        linestyle="none",
-                        marker=".",
-                        markersize=6,
-                        label=cat_label,
-                        color=this_color,
-                        zorder=3,
-                    )
-                    datashaders.append(
-                        {
-                            "time": this_time[this_cats],
-                            "data": this_data[this_cats],
-                            "ax": sub_axes,
-                            "color": this_color,
-                        }
-                    )
-                else:
-                    sub_axes.plot(
-                        this_time[this_cats],
-                        this_data[this_cats],
-                        linestyle=this_linestyle,
-                        marker=".",
-                        markersize=6,
-                        label=cat_label,
-                        color=this_color,
-                        zorder=3,
-                    )
+                lines = _draw_lines(datashaders, this_time[this_cats], this_data[this_cats], _plot_linear, sub_axes, symbol=".",
+                    markersize=6, color=this_color, label=cat_label, zorder=3, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
+                if bool(lines):
+                    lines[0].set_linestyle("none" if bool(datashaders) or not single_lines else "-")
         xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
@@ -2003,15 +1916,17 @@ def make_categories_plot(  # noqa: C901
             this_axes.set_ylim(ylims)
         if i == 0:
             this_axes.set_title(description)
-        if bool(this_ylabel):
-            this_axes.set_ylabel(this_ylabel)
-            this_axes.grid(True)
-            # optionally add second Y axis
-            plot_second_units_wrapper(this_axes, (new_units, unit_conv))
-            # plot RMS lines
-            if show_rms:
-                vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
-                plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
+        if bool(this_ylabel) or single_lines:
+            subs = [fig_ax[i * num_cats + j][1] for j in range(num_cats)] if single_lines else [this_axes]
+            for sub in subs:
+                sub.set_ylabel(this_ylabel)
+                sub.grid(True)
+                # optionally add second Y axis
+                plot_second_units_wrapper(sub, (new_units, unit_conv))
+                # plot RMS lines
+                if show_rms:
+                    vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
+                    plot_vert_lines(sub, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
 
     if single_lines:
         figs[0].supylabel(description)
@@ -2127,7 +2042,7 @@ def make_connected_sets(  # noqa: C901
     else:
         plot_innovs = True
         predicts = points - innovs
-    datashaders = []
+    datashaders: list[_DataShaders] = []
 
     # get index to subset of points for datashading
     if use_datashader:
@@ -2218,7 +2133,7 @@ def make_connected_sets(  # noqa: C901
                 "time": points[0, :],
                 "data": points[1, :],
                 "ax": ax,
-                color_key: ds_color,
+                color_key: ds_color,  # type: ignore[misc]
                 "vmin": ds_low,
                 "vmax": ds_high,
                 "value": ds_value,
