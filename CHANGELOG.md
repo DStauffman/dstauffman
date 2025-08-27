@@ -1,5 +1,13 @@
 # Change Log
 
+## August 2025 (by David C. Stauffer)
+
+* Large refactor of plotting routines.
+
+## June 2025 (by David C. Stauffer)
+
+* Moved setup_dir, read/write text files into slog module.
+
 ## February 2025 (by David C. Stauffer
 
 * Drop explicit ClassVar typing for enums

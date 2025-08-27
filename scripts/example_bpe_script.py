@@ -1,5 +1,5 @@
 r"""
-Example script for running the Batch Parameter Estimation (BPE) portion of the DStauffman code.
+Example script for running the Batch Parameter Estimation (BPE) portion of the dstauffman code.
 
 Notes
 -----

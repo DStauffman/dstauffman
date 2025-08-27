@@ -897,24 +897,44 @@ def make_difference_plot(  # noqa: C901
     symbol_one = "^-" if have_both else ".-"
     symbol_two = "v:" if have_both else ".-"
 
-    if fig_ax is None:
+    if fig_ax is None:  # pylint: disable=too-many-nested-blocks
         # get the number of figures and axes to make
         if have_both:
             if make_subplots:
-                num_figs = 1
-                num_rows = num_channels if single_lines else 2
-                num_cols = 2 if single_lines else 1
+                if single_lines1:
+                    if single_lines2:
+                        fig_ax = _create_figure(1, num_channels, 2, description=description)
+                    else:
+                        fig = plt.figure(constrained_layout=True)
+                        gs = fig.add_gridspec(num_channels, 2)
+                        ax = [fig.add_subplot(gs[0, 0])]
+                        for i in range(1, num_channels):
+                            ax.append(fig.add_subplot(gs[i, 0], sharex=ax[0]))
+                        ax2 = fig.add_subplot(gs[:, 1], sharex=ax[0])
+                        fig_ax = tuple((fig, this_ax) for this_ax in ax) + num_channels * ((fig, ax2),)
+                elif single_lines2:
+                    fig = plt.figure(constrained_layout=True)
+                    gs = fig.add_gridspec(num_channels, 2)
+                    ax1 = fig.add_subplot(gs[:, 0])
+                    ax = [fig.add_subplot(gs[i, 1], sharex=ax1) for i in range(num_channels)]
+                    fig_ax = num_channels * ((fig, ax1),) + tuple((fig, this_ax) for this_ax in ax)
+                else:
+                    fig_ax = _create_figure(1, 2, 1, description=description)
+                    fig_ax = tuple(item for temp in fig_ax for item in [temp] * num_channels)
             else:
-                num_figs = 2
-                num_rows = num_channels if single_lines else 1
-                num_cols = 1
+                if single_lines1:
+                    if single_lines2:
+                        fig_ax = _create_figure(1, num_channels, 1, description=description) + _create_figure(1, num_channels, 1, description=description)  # fmt: skip
+                    else:
+                        fig_ax = _create_figure(1, num_channels, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description)  # fmt: skip
+                elif single_lines2:
+                    fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + _create_figure(1, num_channels, 1, description=description)  # fmt: skip
+                else:
+                    fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description)  # fmt: skip
         else:
-            num_figs = 1
-            num_rows = num_channels if single_lines else 1
-            num_cols = 1
-        fig_ax = _create_figure(num_figs, num_rows, num_cols, description=description)
-        if not single_lines:
-            fig_ax = tuple(item for temp in fig_ax for item in [temp] * num_channels)
+            fig_ax = _create_figure(1, num_channels if single_lines1 else 1, 1, description=description)
+            if not single_lines1:
+                fig_ax = tuple(item for temp in fig_ax for item in [temp] * num_channels)
     expected_axes = 2 * num_channels if have_both else num_channels
     assert len(fig_ax) == expected_axes, "Mismatch in the number of figures and axes."
 
@@ -991,7 +1011,7 @@ def make_difference_plot(  # noqa: C901
         ylabels2 = _get_ylabels(len(ix_diff), ylabel, elements=diff_elems, single_lines=single_lines2, description=description, units=units)  # fmt: skip
         for i, this_ylabel, this_zorder in zip(ix_diff, ylabels2, zorders):
             this_fig, this_axes = fig_ax[i + num_channels]
-            this_label = f"{elements[i]}"
+            this_label = f"{diff_elems[i]}"
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv * nondeg_func[i])
                 if leg_units:
@@ -1032,7 +1052,7 @@ def make_difference_plot(  # noqa: C901
                 this_axes.set_ylim(ylims)
             if i == 0:
                 this_axes.set_title(description)
-            if bool(this_ylabel) or single_lines:
+            if bool(this_ylabel) or single_lines2:
                 this_axes.set_ylabel(this_ylabel)
                 this_axes.grid(True)
                 # optionally add second Y axis
@@ -1042,7 +1062,7 @@ def make_difference_plot(  # noqa: C901
                     vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
                     plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
 
-    if single_lines:
+    if single_lines1 or single_lines2:
         figs[0].supylabel(description)
 
     # plot any extra information through a generic callable
