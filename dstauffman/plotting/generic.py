@@ -924,13 +924,13 @@ def make_difference_plot(  # noqa: C901
             else:
                 if single_lines1:
                     if single_lines2:
-                        fig_ax = _create_figure(1, num_channels, 1, description=description) + _create_figure(1, num_channels, 1, description=description)  # fmt: skip
+                        fig_ax = _create_figure(1, num_channels, 1, description=description) + _create_figure(1, num_channels, 1, description=description + " Difference")  # fmt: skip
                     else:
-                        fig_ax = _create_figure(1, num_channels, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description)  # fmt: skip
+                        fig_ax = _create_figure(1, num_channels, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description + " Difference")  # fmt: skip
                 elif single_lines2:
-                    fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + _create_figure(1, num_channels, 1, description=description)  # fmt: skip
+                    fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + _create_figure(1, num_channels, 1, description=description + " Difference")  # fmt: skip
                 else:
-                    fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description)  # fmt: skip
+                    fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description + " Difference")  # fmt: skip
         else:
             fig_ax = _create_figure(1, num_channels if single_lines1 else 1, 1, description=description)
             if not single_lines1:
