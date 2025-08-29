@@ -991,7 +991,7 @@ def make_difference_plot(  # noqa: C901
         if ylims is not None:
             this_axes.set_ylim(ylims)
         if i == 0:
-            this_axes.set_title(description)
+            this_axes.set_title(description + (" Components" if is_quat_diff else ""))
         if bool(this_ylabel):
             this_axes.set_ylabel(this_ylabel)
             this_axes.grid(True)
@@ -1050,8 +1050,8 @@ def make_difference_plot(  # noqa: C901
                 show_zero_ylim(this_axes)
             if ylims is not None:
                 this_axes.set_ylim(ylims)
-            if i == 0:
-                this_axes.set_title(description)
+            if i == ix_diff[0]:
+                this_axes.set_title(description + " Difference")
             if bool(this_ylabel) or single_lines2:
                 this_axes.set_ylabel(this_ylabel)
                 this_axes.grid(True)
