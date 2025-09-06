@@ -551,6 +551,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
 
 
 # %% aerospace.advance_true_anomaly
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_advance_true_anomaly(unittest.TestCase):
     r"""
     Tests the aerospace.advance_true_anomaly function with the following cases:
@@ -561,6 +562,7 @@ class Test_aerospace_advance_true_anomaly(unittest.TestCase):
 
 
 # %% aerospace.advance_elements
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_advance_elements(unittest.TestCase):
     r"""
     Tests the aerospace.advance_elements function with the following cases:

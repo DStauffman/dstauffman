@@ -13,7 +13,11 @@ from __future__ import annotations
 import datetime
 import doctest
 import logging
-from typing import Any, Callable, Iterable, Literal, NotRequired, overload, Protocol, TYPE_CHECKING, TypedDict
+from typing import Any, Callable, Iterable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing_extensions import NotRequired  # for Python v3.10
 import unittest
 
 from slog import LogLevel
@@ -303,7 +307,7 @@ def _plot_linear(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, *
             return []
     except TypeError:
         pass  # like categorical data that cannot be safely coerced to NaNs
-    return ax.plot(time, data, symbol, markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
+    return ax.plot(time, data, symbol, **kwargs)  # type: ignore[arg-type]
 
 
 # %% Functions - _plot_zoh
@@ -316,7 +320,7 @@ def _plot_zoh(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kw
             return []
     except TypeError:
         pass  # like categorical data that cannot be safely coerced to NaNs
-    return ax.step(time, data, symbol, where="post", markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
+    return ax.step(time, data, symbol, where="post", **kwargs)  # type: ignore[arg-type]
 
 
 # %% Functions - _label_x
@@ -354,6 +358,7 @@ def _draw_lines(
     color: tuple[float, float, float, float],
     label: str,
     zorder: int,
+    markerfacecolor: str = "none",
     use_datashader: bool = False,
     datashader_pts: int = 2000,
 ) -> list[Line2D]:
@@ -370,6 +375,7 @@ def _draw_lines(
                 this_data[ix_spot],
                 symbol[0],
                 markersize=markersize,
+                markerfacecolor=markerfacecolor,
                 label=label,
                 color=color,
                 zorder=zorder,
@@ -383,6 +389,7 @@ def _draw_lines(
                 this_data[ix_spot],
                 symbol[0],
                 markersize=markersize,
+                markerfacecolor=markerfacecolor,
                 label=label,
                 color=color,
                 zorder=zorder,
@@ -396,6 +403,7 @@ def _draw_lines(
             this_data,
             symbol,
             markersize=markersize,
+            markerfacecolor=markerfacecolor,
             label=label,
             color=color,
             zorder=zorder,
@@ -1030,7 +1038,7 @@ def make_difference_plot(  # noqa: C901
                         "kx",
                         markersize=8,
                         markeredgewidth=2,
-                        markerfacecolor="None",
+                        markerfacecolor="none",
                         label=name_one + " Extra",
                     )
                 if d2_miss_ix.size > 0:
@@ -1040,7 +1048,7 @@ def make_difference_plot(  # noqa: C901
                         "go",
                         markersize=8,
                         markeredgewidth=2,
-                        markerfacecolor="None",
+                        markerfacecolor="none",
                         label=name_two + " Extra",
                     )
             xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
@@ -1477,6 +1485,7 @@ def make_error_bar_plot(  # noqa: C901
             this_data,
             symbol,
             markersize=4,
+            markerfacecolor="none",
             label=this_label,
             color=this_color,
             zorder=3,
@@ -1907,27 +1916,27 @@ def make_categories_plot(  # noqa: C901
         # plot the full underlying line once
         if not use_datashader or this_time.size <= datashader_pts:
             plot_func(this_axes, this_time, this_data, ":", label="", color="xkcd:slate", linewidth=1, zorder=2)  # type: ignore[arg-type]
-            # plot the data with this category value
-            for j, cat in enumerate(ordered_cats):
-                _, sub_axes = fig_ax[i * num_cats + j]
-                this_cat_name = cat_names[cat]
-                if show_rms:
-                    value = _LEG_FORMAT.format(leg_conv * data_func[cat][i])
-                    if leg_units:
-                        cat_label = f"{this_label} {this_cat_name} ({func_name}: {value} {leg_units})"
-                    else:
-                        cat_label = f"{this_label} {this_cat_name} ({func_name}: {value})"
+        # plot the data with this category value
+        for j, cat in enumerate(ordered_cats):
+            _, sub_axes = fig_ax[i * num_cats + j]
+            this_cat_name = cat_names[cat]
+            if show_rms:
+                value = _LEG_FORMAT.format(leg_conv * data_func[cat][i])
+                if leg_units:
+                    cat_label = f"{this_label} {this_cat_name} ({func_name}: {value} {leg_units})"
                 else:
-                    cat_label = f"{this_label} {this_cat_name}"
-                this_cats = cats == cat
-                # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
-                # won't mess up the color scheme by skipping colors
-                this_cat_ix = np.argmax(cat == cat_keys)
-                this_color = cm.get_color(i * len(cat_keys) + this_cat_ix)
-                lines = _draw_lines(datashaders, this_time[this_cats], this_data[this_cats], _plot_linear, sub_axes, symbol=".",
-                    markersize=6, color=this_color, label=cat_label, zorder=3, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
-                if bool(lines):
-                    lines[0].set_linestyle("none" if bool(datashaders) or not single_lines else "-")
+                    cat_label = f"{this_label} {this_cat_name} ({func_name}: {value})"
+            else:
+                cat_label = f"{this_label} {this_cat_name}"
+            this_cats = cats == cat
+            # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
+            # won't mess up the color scheme by skipping colors
+            this_cat_ix = np.argmax(cat == cat_keys)
+            this_color = cm.get_color(i * len(cat_keys) + this_cat_ix)
+            lines = _draw_lines(datashaders, this_time[this_cats], this_data[this_cats], plot_func, sub_axes, symbol=".",
+                markersize=6, markerfacecolor=this_color, color=this_color, label=cat_label, zorder=3, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
+            if bool(lines):
+                lines[0].set_linestyle("none" if bool(datashaders) or not single_lines else "-")
         xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:

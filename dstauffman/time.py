@@ -486,7 +486,9 @@ def convert_date(  # noqa: C901
     elif old_form == "numpy":
         is_num = ~np.isnat(date)
         if form == "datetime":
-            out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.UTC) if is_num else None  # fmt: skip
+            out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.timezone.utc) if is_num else None  # fmt: skip
+            # When Python v3.11 and newer:
+            # out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.UTC) if is_num else None  # fmt: skip
         elif form == "matplotlib":
             out = dates.date2num(date)
         elif form in time_forms:  # pragma: no branch

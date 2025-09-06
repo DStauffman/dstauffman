@@ -15,7 +15,11 @@ from __future__ import annotations
 import doctest
 from pathlib import Path
 import sys
-from typing import Any, Callable, Literal, NotRequired, overload, Type, TYPE_CHECKING, TypedDict, TypeVar, Unpack
+from typing import Any, Callable, Literal, overload, Type, TYPE_CHECKING, TypedDict, TypeVar
+try:
+    from typing import NotRequired, Unpack
+except ImportError:
+    from typing_extensions import NotRequired, Unpack  # for Python v3.10
 import unittest
 import warnings
 

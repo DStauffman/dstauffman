@@ -14,10 +14,14 @@ import datetime
 import os
 import pathlib
 import platform
-from typing import NotRequired, TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing_extensions import NotRequired  # for Python v3.10
 import unittest
 
-from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS, NP_NAT
+from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS, NP_DATETIME_UNITS, NP_NAT
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -1357,6 +1361,36 @@ class Test_plotting_fig_ax_factory(unittest.TestCase):
                 if this_fig is not last_fig:
                     plt.close(this_fig)
                 last_fig = this_fig
+
+
+# %% plotting.extra_plotter_factory
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
+class Test_plotting_extra_plotter_factory(unittest.TestCase):
+    pass
+    r"""
+    Tests the plotting.extra_plotter_factory function with the following cases:
+        Nominal
+        None
+    """
+
+    def test_single_event(self) -> None:
+        t_events = {"Event": np.datetime64("2025-09-02 12:00:00", NP_DATETIME_UNITS)}
+        c_events = {"Event": "#000000"}
+        extra_plotter = plot.extra_plotter_factory(t_events, c_events)
+        self.assertTrue(callable(extra_plotter))
+
+    def test_multiple_events(self) -> None:
+        t_events = {
+            "Event 1": np.datetime64("2025-09-02 12:00:00", NP_DATETIME_UNITS),
+            "Event 2": np.datetime64("2025-09-15 03:30:00", NP_DATETIME_UNITS),
+        }
+        c_events = {"Event 1": "#000000", "Event 2": "xkcd:dark red"}
+        extra_plotter = plot.extra_plotter_factory(t_events, c_events)
+        self.assertTrue(callable(extra_plotter))
+
+    def test_none(self) -> None:
+        extra_plotter = plot.extra_plotter_factory({}, {})
+        self.assertIsNone(extra_plotter)
 
 
 # %% Unit test execution

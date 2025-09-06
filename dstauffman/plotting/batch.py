@@ -14,7 +14,11 @@ from __future__ import annotations
 import datetime
 import doctest
 from pathlib import Path
-from typing import NotRequired, Sequence, TYPE_CHECKING, TypedDict, Unpack
+from typing import Sequence, TYPE_CHECKING, TypedDict
+try:
+    from typing import NotRequired, Unpack
+except ImportError:
+    from typing_extensions import NotRequired, Unpack  # for Python v3.10
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY

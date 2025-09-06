@@ -22,7 +22,11 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Callable, Literal, NotRequired, overload, Protocol, TYPE_CHECKING, TypedDict
+from typing import Any, Callable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing_extensions import NotRequired  # for Python v3.10
 import unittest
 import warnings
 
@@ -53,6 +57,7 @@ from dstauffman import (
     HAVE_SCIPY,
     is_datetime,
     IS_WINDOWS,
+    NP_DATETIME_FORM,
 )
 
 if HAVE_MPL:
@@ -2432,6 +2437,58 @@ def fig_ax_factory(  # noqa: C901
         elif layout == "colwise":
             fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[call-overload, index]
     return fig_ax
+
+
+# %% Functions - extra_plotter_factory
+def extra_plotter_factory(t_events: dict[str, np.datetime64], c_events: dict[str, str]) -> ExtraPlotter | None:
+    """
+    Create a plotter to draw the event lines.
+
+    Parameters
+    ----------
+    t_events : dict
+        Time of each event
+    c_events : dict
+        Color for each event
+
+    Returns
+    -------
+    extra_plotter : protocol ExtraPlotter
+        A function to pass into plotting routines to plot vertical lines at the given events
+
+    Change Log
+    ----------
+    #.  Written by David C. Stauffer in September 2025.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import extra_plotter_factory
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> t_events = {"Event 1": np.datetime64("2025-09-02"), "Event 2": np.datetime64("2025-09-15")}
+    >>> c_events = {"Event 1": "xkcd:red", "Event 2": "#0000cc"}
+    >>> extra_plotter = extra_plotter_factory(t_events, c_events)
+    >>> (fig, ax) = plt.subplots(1, 1)
+    >>> ax.plot([np.datetime64("2025-09-01"), np.datetime64("2025-10-01")], [0, 1], label="Data")
+    >>> extra_plotter(fig, [ax])
+    >>> ax.legend()
+    >>> plt.show(block=False)  # doctest: +SKIP
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+
+    def _extra_plotter(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument
+        keys = list(t_events.keys())
+        times: _D = np.array([t_events[key] for key in keys], dtype=NP_DATETIME_FORM)
+        colormap = ColorMap(colors.ListedColormap([c_events[key] for key in keys]))
+        for this_axes in ax:
+            plot_vert_lines(this_axes, times, show_in_legend=True, colormap=colormap, labels=keys)
+
+    if not bool(t_events):
+        return None
+    return _extra_plotter
 
 
 # %% Unit test

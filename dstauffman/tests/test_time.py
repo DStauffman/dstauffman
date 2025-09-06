@@ -191,8 +191,11 @@ class Test_convert_date(unittest.TestCase):
 
     def setUp(self) -> None:
         self.seconds = 3725.5
-        self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.UTC)
-        self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.UTC)
+        self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
+        self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.timezone.utc)
+        # When Python v3.11 and newer
+        # self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.UTC)
+        # self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.UTC)
         self.date = datetime.date(2022, 1, 17)
         if dcs.HAVE_NUMPY:
             self.numpy = np.datetime64("2020-06-01 01:02:05.500000", "ns")

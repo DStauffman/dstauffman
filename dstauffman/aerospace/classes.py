@@ -13,7 +13,11 @@ from __future__ import annotations
 import copy
 import doctest
 from pathlib import Path
-from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, TypeVar, Unpack
+from typing import Any, Literal, overload, TYPE_CHECKING, TypedDict, TypeVar
+try:
+    from typing import NotRequired, Unpack
+except ImportError:
+    from typing_extensions import NotRequired, Unpack  # for Python v3.10
 import unittest
 
 from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, NP_NAT, save_method

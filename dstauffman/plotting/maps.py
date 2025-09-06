@@ -14,7 +14,11 @@ from __future__ import annotations
 import doctest
 import json
 from pathlib import Path
-from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
+from typing import TYPE_CHECKING, TypedDict
+try:
+    from typing import NotRequired, Unpack
+except ImportError:
+    from typing_extensions import NotRequired, Unpack  # for Python v3.10
 import unittest
 
 from dstauffman import DEG2RAD, get_data_dir, HAVE_MPL, HAVE_NUMPY, M2FT, RAD2DEG, unit
@@ -216,7 +220,7 @@ def plot_map(  # noqa: C901
                 low=float(np.nanmin(cbar_data)),
                 high=float(np.nanmax(cbar_data)),
             )
-            colors = tuple(cbar_cmap.get_color(x) for x in cbar_data)  # type: ignore[unused-ignore]
+            colors = tuple(cbar_cmap.get_color(x) for x in cbar_data)
         else:
             colors = "xkcd:orange"  # type: ignore[assignment]
         ax.scatter(latlon_scale * lon, latlon_scale * lat, s=10, c=colors, label="Trace", zorder=6)

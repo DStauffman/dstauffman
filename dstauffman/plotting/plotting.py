@@ -14,7 +14,11 @@ import datetime
 import doctest
 import logging
 from pathlib import Path
-from typing import Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
+from typing import Literal, overload, TYPE_CHECKING, TypedDict
+try:
+    from typing import NotRequired, Unpack
+except ImportError:
+    from typing_extensions import NotRequired, Unpack  # for Python v3.10
 import unittest
 
 from slog import LogLevel
@@ -150,7 +154,7 @@ if TYPE_CHECKING:
         disp_xmin: NotRequired[_Time]
         disp_xmax: NotRequired[_Time]
         make_subplots: NotRequired[bool]
-        single_lines: NotRequired[bool]
+        single_lines: NotRequired[bool | tuple[bool, bool]]
         colormap: NotRequired[_CM | None]
         use_mean: NotRequired[bool]
         label_vert_lines: NotRequired[bool]

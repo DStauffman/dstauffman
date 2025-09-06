@@ -13,7 +13,11 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
+from typing import Literal, overload, TYPE_CHECKING, TypedDict
+try:
+    from typing import NotRequired, Unpack
+except ImportError:
+    from typing_extensions import NotRequired, Unpack  # for Python v3.10
 import unittest
 
 from slog import LogLevel
