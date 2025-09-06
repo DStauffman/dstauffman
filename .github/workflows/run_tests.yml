@@ -271,3 +271,44 @@ jobs:
         coverage combine --keep
         coverage html --rcfile $PYPROJECT_TOLM
         coverage xml --rcfile $PYPROJECT_TOLM
+        coverage json --rcfile $PYPROJECT_TOLM
+
+  old_versions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v4
+      with:
+        path: ${{ github.workspace }}/dstauffman_repo
+
+    - name: Clone nubs
+      uses: actions/checkout@v4
+      with:
+        repository: DStauffman/nubs
+        path: ${{ github.workspace }}/nubs_repo
+
+    - name: Clone slog
+      uses: actions/checkout@v4
+      with:
+        repository: DStauffman/slog
+        path: ${{ github.workspace }}/slog_repo
+
+    - name: Install uv and set the python version
+      uses: astral-sh/setup-uv@v5
+      id: setup_uv
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up Python
+      run: uv python install
+
+    - name: Install Dependencies and run tests
+      run: |
+        uv venv old_version
+        source $VENV_ROOT_DIR/old_version/bin/activate
+        uv pip install dask[dataframe] datashader h5py matplotlib numba numpy pandas pyarrow PyQt5 pytest-cov qtpy scipy tblib
+        python -m dstauffman tests
+        deactivate
