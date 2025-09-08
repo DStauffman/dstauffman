@@ -359,7 +359,7 @@ def _draw_lines(
     color: tuple[float, float, float, float],
     label: str,
     zorder: int,
-    markerfacecolor: str = "none",
+    markerfacecolor: str | tuple[float, float, float, float] = "none",
     use_datashader: bool = False,
     datashader_pts: int = 2000,
 ) -> list[Line2D]:

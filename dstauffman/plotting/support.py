@@ -526,7 +526,7 @@ def close_all(fig: _FigOrListFig | None = None) -> None:
     # Note that we are filtering matplotlib UserWarning's to avoid bug
     # https://github.com/matplotlib/matplotlib/issues/9970 #DCS: 2024-06-10
     with warnings.catch_warnings():
-        warnings.filterwarnings(action="ignore", category=UserWarning, module=r"matplotlib\..*")
+        warnings.filterwarnings("ignore", category=UserWarning, module=r"matplotlib\..*")
         if fig is None:
             for this_fig in plt.get_fignums():
                 plt.figure(this_fig).clear()

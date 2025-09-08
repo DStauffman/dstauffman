@@ -1367,7 +1367,6 @@ class Test_plotting_fig_ax_factory(unittest.TestCase):
 # %% plotting.extra_plotter_factory
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_extra_plotter_factory(unittest.TestCase):
-    pass
     r"""
     Tests the plotting.extra_plotter_factory function with the following cases:
         Nominal
@@ -1375,13 +1374,13 @@ class Test_plotting_extra_plotter_factory(unittest.TestCase):
     """
 
     def test_single_event(self) -> None:
-        t_events = {"Event": np.datetime64("2025-09-02 12:00:00", NP_DATETIME_UNITS)}
+        t_events: dict[str, np.datetime64] = {"Event": np.datetime64("2025-09-02 12:00:00", NP_DATETIME_UNITS)}
         c_events = {"Event": "#000000"}
         extra_plotter = plot.extra_plotter_factory(t_events, c_events)
         self.assertTrue(callable(extra_plotter))
 
     def test_multiple_events(self) -> None:
-        t_events = {
+        t_events: dict[str, np.datetime64] = {
             "Event 1": np.datetime64("2025-09-02 12:00:00", NP_DATETIME_UNITS),
             "Event 2": np.datetime64("2025-09-15 03:30:00", NP_DATETIME_UNITS),
         }

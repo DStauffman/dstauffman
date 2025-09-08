@@ -456,7 +456,9 @@ def convert_date(  # noqa: C901
             out = np.full(date.shape, NP_NAT, dtype=numpy_form)
             if np.any(is_num):
                 datetime_units = get_np_time_units(numpy_form)
-                with warnings.catch_warnings(action="ignore", category=UserWarning):
+                # with warnings.catch_warnings(action="ignore", category=UserWarning):  # When v3.11+
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=UserWarning)
                     date_zero_np = (
                         np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)  # type: ignore[call-overload]
                     )
@@ -472,7 +474,9 @@ def convert_date(  # noqa: C901
     elif old_form == "datetime":
         is_num = date is not None
         if form == "numpy":
-            with warnings.catch_warnings(action="ignore", category=UserWarning):
+            # with warnings.catch_warnings(action="ignore", category=UserWarning):  # When v3.11+
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
                 out = np.array(date, dtype=numpy_form)
         elif form == "matplotlib":
             out = dates.date2num(date) if is_num else np.nan
@@ -494,7 +498,9 @@ def convert_date(  # noqa: C901
         elif form in time_forms:  # pragma: no branch
             out = np.full(date.shape, np.nan)
             if np.any(is_num):
-                with warnings.catch_warnings(action="ignore", category=UserWarning):
+                # with warnings.catch_warnings(action="ignore", category=UserWarning):  # When v3.11+
+                with warnings.catch_warnings():
+                    warnings.simplefilter("ignore", category=UserWarning)
                     out[is_num] = (date[is_num] - np.array(date_zero, dtype="datetime64[ns]")).astype("timedelta64[ns]").astype(np.int64) / 10**9  # fmt: skip
     # from matplotlib
     elif old_form == "matplotlib":  # pragma: no branch
