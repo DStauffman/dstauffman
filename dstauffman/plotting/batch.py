@@ -15,6 +15,7 @@ import datetime
 import doctest
 from pathlib import Path
 from typing import Sequence, TYPE_CHECKING, TypedDict
+
 try:
     from typing import NotRequired, Unpack
 except ImportError:

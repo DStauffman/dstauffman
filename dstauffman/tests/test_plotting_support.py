@@ -15,6 +15,7 @@ import os
 import pathlib
 import platform
 from typing import TYPE_CHECKING, TypedDict
+
 try:
     from typing import NotRequired
 except ImportError:

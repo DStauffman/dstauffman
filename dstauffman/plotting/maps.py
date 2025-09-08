@@ -15,6 +15,7 @@ import doctest
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING, TypedDict
+
 try:
     from typing import NotRequired, Unpack
 except ImportError:

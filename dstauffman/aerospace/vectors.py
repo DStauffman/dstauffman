@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import doctest
 from typing import Callable, Literal, overload, TYPE_CHECKING, TypedDict
+
 try:
     from typing import NotRequired, Unpack
 except ImportError:

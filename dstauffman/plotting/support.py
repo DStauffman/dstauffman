@@ -23,6 +23,7 @@ import platform
 import re
 import sys
 from typing import Any, Callable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
+
 try:
     from typing import NotRequired
 except ImportError:
@@ -2469,9 +2470,9 @@ def extra_plotter_factory(t_events: dict[str, np.datetime64], c_events: dict[str
     >>> c_events = {"Event 1": "xkcd:red", "Event 2": "#0000cc"}
     >>> extra_plotter = extra_plotter_factory(t_events, c_events)
     >>> (fig, ax) = plt.subplots(1, 1)
-    >>> ax.plot([np.datetime64("2025-09-01"), np.datetime64("2025-10-01")], [0, 1], label="Data")
+    >>> _ = ax.plot([np.datetime64("2025-09-01"), np.datetime64("2025-10-01")], [0, 1], label="Data")
     >>> extra_plotter(fig, [ax])
-    >>> ax.legend()
+    >>> _ = ax.legend()
     >>> plt.show(block=False)  # doctest: +SKIP
 
     Close plot

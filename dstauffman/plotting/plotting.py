@@ -15,6 +15,7 @@ import doctest
 import logging
 from pathlib import Path
 from typing import Literal, overload, TYPE_CHECKING, TypedDict
+
 try:
     from typing import NotRequired, Unpack
 except ImportError:
