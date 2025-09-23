@@ -327,8 +327,8 @@ class Test_aerospace_two_line_elements(unittest.TestCase):
             line2 = lines[3 * i + 2]
             elements = space.two_line_elements(line1, line2)
             self.assertTrue(this_name.startswith("GPS "))
-            self.assertGreater(elements.e, 0.0)  # type: ignore[arg-type]
-            self.assertLess(elements.e, 1.0)  # type: ignore[arg-type]
+            self.assertGreater(elements.e, 0.0)
+            self.assertLess(elements.e, 1.0)
 
 
 # %% aerospace.rv_2_oe

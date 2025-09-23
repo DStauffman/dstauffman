@@ -345,8 +345,8 @@ class Test_apply_prob_to_mask(unittest.TestCase):
         num = np.count_nonzero(mask)
         out = dcs.apply_prob_to_mask(mask, prob, self.prng)
         self.assertIsNot(out, mask)
-        self.assertLess(num, 30000, "Too many trues in mask.")  # type: ignore[misc]
-        self.assertLess(np.count_nonzero(out), 4 * num // 10, "Too many trues in out.")  # type: ignore[call-overload]
+        self.assertLess(num, 30000, "Too many trues in mask.")
+        self.assertLess(np.count_nonzero(out), 4 * num // 10, "Too many trues in out.")
 
     def test_inplace(self) -> None:
         mask = self.prng.random(50000) < 0.2
@@ -354,8 +354,8 @@ class Test_apply_prob_to_mask(unittest.TestCase):
         num = np.count_nonzero(mask)
         out = dcs.apply_prob_to_mask(mask, prob, self.prng, inplace=True)
         self.assertIs(out, mask)
-        self.assertLess(num, 20000, "Too many trues in mask.")  # type: ignore[misc]
-        self.assertLess(np.count_nonzero(out), num, "Too many trues in out.")  # type: ignore[call-overload]
+        self.assertLess(num, 20000, "Too many trues in mask.")
+        self.assertLess(np.count_nonzero(out), num, "Too many trues in out.")
 
     def test_zero_prob(self) -> None:
         mask = self.prng.random(1000) < 0.8

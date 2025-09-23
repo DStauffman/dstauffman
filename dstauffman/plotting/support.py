@@ -1744,7 +1744,7 @@ def plot_phases(  # noqa: C901
         assert t1.size == t2.size, "Expecting both time vectors to be the same size."
     elif isinstance(times, list) or times.ndim == 1:
         t1 = np.asanyarray(times)
-        t2 = np.hstack((times[1:], max(times[-1], xlims[1])))  # type: ignore[arg-type, type-var]
+        t2 = np.hstack((times[1:], max(times[-1], xlims[1])))
     elif times.ndim == 2:
         t1 = times[0, :]
         t2 = times[1, :]

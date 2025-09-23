@@ -39,7 +39,7 @@ class MyData(dcs.Frozen, metaclass=dcs.SaveAndLoad):
         self.ver = ver
 
 
-class MyCollection(dict, metaclass=dcs.SaveAndLoad):  # type: ignore[misc]
+class MyCollection(dict, metaclass=dcs.SaveAndLoad):
     """Class based wrapper that is just a simple dictionary."""
 
     # fmt: off

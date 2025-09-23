@@ -301,7 +301,7 @@ max-complexity = 30
 
 [tool.ruff.lint.per-file-ignores]
 "dstauffman/**/__init__.py" = ["F401"]
-"dstauffman/tests/*" = ["D102", "D205", "D400", "D415", "N801", "N802", "N806"]
+"dstauffman/tests/*" = ["D102", "D205", "D400", "D415", "N801", "N802", "N806", "RUF059"]
 "scripts/*.py" = ["INP001"]
 
 [tool.ruff.format]
