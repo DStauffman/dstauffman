@@ -1060,6 +1060,7 @@ def zoom_ylim(  # noqa: C901
     t_final: _Time = inf,
     channel: int | None = None,
     pad: float = 0.1,
+    zoom: str = "both",
 ) -> None:
     r"""
     Zooms the Y-axis to the data for the given time bounds, with an optional pad.
@@ -1080,6 +1081,8 @@ def zoom_ylim(  # noqa: C901
         Column within 2D data to look at
     pad : float
         Amount of pad, as a percentage of delta range, to show around the plot bounds
+    zoom : str, from {"in", "out", "both"}
+        Whether to zoom in only, or out only, or both.
 
     Notes
     -----
@@ -1164,11 +1167,25 @@ def zoom_ylim(  # noqa: C901
             this_ymax = (1 + pad) * this_ymax
     # get the current limits
     (old_ymin, old_ymax) = ax.get_ylim()
-    # compare the new bounds to the old ones and update as appropriate
-    if this_ymin > old_ymin:
-        ax.set_ylim(bottom=this_ymin)  # type: ignore[arg-type]
-    if this_ymax < old_ymax:
-        ax.set_ylim(top=this_ymax)  # type: ignore[arg-type]
+    # compare the new bounds to the old ones and update as appropriate based on zoom option
+    match zoom:
+        case "in":
+            if this_ymin > old_ymin and np.isfinite(this_ymin):
+                ax.set_ylim(bottom=this_ymin)  # type: ignore[arg-type]
+            if this_ymax < old_ymax and np.isfinite(this_ymax):
+                ax.set_ylim(top=this_ymax)  # type: ignore[arg-type]
+        case "out":
+            if this_ymin < old_ymin and np.isfinite(this_ymin):
+                ax.set_ylim(bottom=this_ymin)  # type: ignore[arg-type]
+            if this_ymax > old_ymax and np.isfinite(this_ymax):
+                ax.set_ylim(top=this_ymax)  # type: ignore[arg-type]
+        case "both":
+            if this_ymin != old_ymin and np.isfinite(this_ymin):
+                ax.set_ylim(bottom=this_ymin)  # type: ignore[arg-type]
+            if this_ymax != old_ymax and np.isfinite(this_ymax):
+                ax.set_ylim(top=this_ymax)  # type: ignore[arg-type]
+        case _:
+            raise ValueError(f'Unexpected value for zoom of {zoom}. Expect "in", "out", or "both".')
 
 
 # %% Functions - figmenu

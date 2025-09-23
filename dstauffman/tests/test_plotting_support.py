@@ -756,12 +756,27 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
         self.assertGreater(old_ymax, new_ymax)
         self.assertLess(old_ymin, new_ymin)
 
-    def test_no_zoom(self) -> None:
+    def test_no_zoom_out(self) -> None:
         (old_ymin, old_ymax) = self.ax.get_ylim()
-        plot.zoom_ylim(self.ax, self.time, self.data, pad=2.0)
+        plot.zoom_ylim(self.ax, self.time, self.data, pad=2.0, zoom="in")
         (new_ymin, new_ymax) = self.ax.get_ylim()
         self.assertEqual(old_ymax, new_ymax)
         self.assertEqual(old_ymin, new_ymin)
+        plot.zoom_ylim(self.ax, self.time, self.data, pad=2.0)
+        (new_ymin, new_ymax) = self.ax.get_ylim()
+        self.assertLess(old_ymax, new_ymax)
+        self.assertGreater(old_ymin, new_ymin)
+
+    def test_no_zoom_in(self) -> None:
+        (old_ymin, old_ymax) = self.ax.get_ylim()
+        plot.zoom_ylim(self.ax, self.time, self.data, t_start=self.t_start, t_final=self.t_final, zoom="out")
+        (new_ymin, new_ymax) = self.ax.get_ylim()
+        self.assertEqual(old_ymax, new_ymax)
+        self.assertEqual(old_ymin, new_ymin)
+        plot.zoom_ylim(self.ax, self.time, self.data, t_start=self.t_start, t_final=self.t_final, zoom="in")
+        (new_ymin, new_ymax) = self.ax.get_ylim()
+        self.assertGreater(old_ymax, new_ymax)
+        self.assertLess(old_ymin, new_ymin)
 
     def test_bad_pad(self) -> None:
         with self.assertRaises(ValueError):

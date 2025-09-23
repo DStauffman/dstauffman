@@ -34,7 +34,7 @@ from dstauffman.plotting.generic import (
     make_time_plot,
 )
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
-from dstauffman.plotting.support import ColorMap, ExtraPlotter, fig_ax_factory, get_nondeg_colorlists, get_rms_indices, plot_phases
+from dstauffman.plotting.support import ColorMap, ExtraPlotter, fig_ax_factory, get_nondeg_colorlists, get_rms_indices, plot_phases  # fmt: skip
 
 if HAVE_MPL:
     from matplotlib.axes import Axes
@@ -1829,12 +1829,9 @@ def plot_tci(
     # fmt: off
     make_time_plot(
         title, time, data, units="W", second_units=("10^11 W", 1e-11), time_units="numpy",
-        fig_ax=fig_ax, show_rms=False, legend_loc="none", ylabel="Power [W]",
+        fig_ax=fig_ax, show_rms=False, legend_loc="none", ylabel="Power [W]", ylims=(0.0, 6.0e11),
     )
     # fmt: on
-    # ax.set_xlabel("Year")
-    ax.set_ylim(0.0, 6.0e11)
-    fig.axes[1].set_ylim(0.0, 6.0)
     if solar_cycles is not None:
         plot_phases(ax, solar_cycles, labels=solar_labels)
     for name, color, value in zip(quintile_names, quintile_colors, quintiles):
