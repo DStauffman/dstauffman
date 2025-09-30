@@ -46,6 +46,8 @@ if HAVE_MPL:
         HAVE_DS = True
     except ModuleNotFoundError:
         HAVE_DS = False
+    except OSError:
+        HAVE_DS = False
 else:
     HAVE_DS = False
 try:

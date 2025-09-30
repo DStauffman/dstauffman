@@ -327,7 +327,6 @@ def _plot_zoh(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kw
 # %% Functions - _label_x
 def _label_x(  # pylint: disable=too-many-positional-arguments
     this_axes: Axes,
-    xlim: tuple[float, float] | None,
     disp_xmin: _Time,
     disp_xmax: _Time,
     time_is_date: bool,
@@ -335,15 +334,13 @@ def _label_x(  # pylint: disable=too-many-positional-arguments
     start_date: str,
 ) -> tuple[float, float]:
     """Build the list of x-labels."""
-    if xlim is None:
-        disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
-        xlim = this_axes.get_xlim()
     if time_is_date:
         this_axes.set_xlabel("Date")
         assert time_units in {"datetime", "numpy"}, f'Expected time units of "datetime" or "numpy", not "{time_units}".'
     else:
         this_axes.set_xlabel(f"Time [{time_units}]{start_date}")
-    return xlim
+    disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
+    return this_axes.get_xlim()
 
 
 # %% Functions - _draw_lines
@@ -543,7 +540,6 @@ def make_time_plot(  # noqa: C901
     fig = fig_ax[0][0]
     ax: list[Axes] = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
-    xlim: tuple[float, float] | None = None
     datashaders: list[_DataShaders] = []
     for i, ((_, this_axes), this_time, this_data, this_ylabel) in enumerate(zip(fig_ax, times, datum, ylabels)):  # fmt: skip
         this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
@@ -555,7 +551,7 @@ def make_time_plot(  # noqa: C901
                 this_label += f" ({func_name}: {value})"
         _draw_lines(datashaders, this_time, this_data, plot_func, this_axes, symbol=symbol,  # type: ignore[arg-type]
             markersize=4, color=cm.get_color(i), label=this_label, zorder=9, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
-        xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+        xlim = _label_x(this_axes, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
             show_zero_ylim(this_axes)
@@ -962,7 +958,6 @@ def make_difference_plot(  # noqa: C901
             axes[this_fig_id] |= {this_axes_id}
 
     # Primary plot
-    xlim: tuple[float, float] | None = None
     color_offset = len(times1)
     datashaders: list[_DataShaders] = []
     this_zorder = 3 if is_quat_diff else 4
@@ -993,7 +988,7 @@ def make_difference_plot(  # noqa: C901
                     this_label += f" ({func_name}: {value})"
             _draw_lines(datashaders, this_time2, this_data2, plot_func, this_axes, symbol=symbol_two, markersize=4,  # type: ignore[arg-type]
                 color=cm.get_color(i + color_offset), label=this_label, zorder=this_zorder + 1, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
-        xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+        xlim = _label_x(this_axes, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
             show_zero_ylim(this_axes)
@@ -1014,7 +1009,6 @@ def make_difference_plot(  # noqa: C901
     # Difference plots
     if have_both:
         assert time_overlap is not None
-        xlim = None
         color_offset = len(times1) + len(times2)
         diff_elems = ("X", "Y", "Z", "Magnitude") if is_quat_diff else elements
         ylabels2 = _get_ylabels(len(ix_diff), ylabel, elements=diff_elems, single_lines=single_lines2, description=description, units=units)  # fmt: skip
@@ -1052,7 +1046,7 @@ def make_difference_plot(  # noqa: C901
                         markerfacecolor="none",
                         label=name_two + " Extra",
                     )
-            xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+            xlim = _label_x(this_axes, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
             if not ignore_plot_data(diffs[i], True):
                 zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
             if plot_zero:
@@ -1470,7 +1464,6 @@ def make_error_bar_plot(  # noqa: C901
     fig = fig_ax[0][0]
     ax = [f_a[1] for f_a in fig_ax] if single_lines else [fig_ax[0][1]]
 
-    xlim: tuple[float, float] | None = None
     for i, ((_, this_axes), this_time, this_data, this_err_neg, this_err_pos, this_ylabel) in enumerate(zip(fig_ax, times, datum, err_neg, err_pos, ylabels)):  # fmt: skip
         this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
         if show_rms:
@@ -1502,7 +1495,7 @@ def make_error_bar_plot(  # noqa: C901
             zorder=5,
             capsize=2,
         )
-        xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+        xlim = _label_x(this_axes, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
             show_zero_ylim(this_axes)
@@ -1671,7 +1664,6 @@ def make_bar_plot(  # noqa: C901
     assert fig_ax is not None
     (fig, ax) = fig_ax
 
-    xlim: tuple[float, float] | None = None
     for i in reversed(range(num_channels)):
         this_ylabel = ylabels[i]
         this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
@@ -1694,7 +1686,7 @@ def make_bar_plot(  # noqa: C901
                 edgecolor="none",
             )
         if i == 0:
-            xlim = _label_x(ax, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+            _label_x(ax, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
             ax.set_ylim(0, 100)
             if plot_zero:
                 show_zero_ylim(ax)
@@ -1909,7 +1901,6 @@ def make_categories_plot(  # noqa: C901
             fig.canvas.manager.set_window_title(title)
 
     # Primary plot
-    xlim: tuple[float, float] | None = None
     datashaders: list[_DataShaders] = []
     for i, (this_time, this_data, this_ylabel) in enumerate(zip(times, datum, ylabels)):
         this_label = f"{name} {elements[i]}" if name else f"{elements[i]}"
@@ -1938,7 +1929,7 @@ def make_categories_plot(  # noqa: C901
                 markersize=6, markerfacecolor=this_color, color=this_color, label=cat_label, zorder=3, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
             if bool(lines):
                 lines[0].set_linestyle("none" if bool(datashaders) or not single_lines else "-")
-        xlim = _label_x(this_axes, xlim, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
+        xlim = _label_x(this_axes, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
             show_zero_ylim(this_axes)

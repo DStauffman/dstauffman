@@ -1025,6 +1025,7 @@ def disp_xlimits(  # noqa: C901
     # loop through axes
     for this_axis in ax:
         # get xlimits for this axis
+        this_axis.autoscale()
         (old_xmin, old_xmax) = this_axis.get_xlim()
         # set the new limits
         if xmin is not None:
@@ -1170,22 +1171,18 @@ def zoom_ylim(  # noqa: C901
     # compare the new bounds to the old ones and update as appropriate based on zoom option
     match zoom:
         case "in":
-            if this_ymin > old_ymin and np.isfinite(this_ymin):
-                ax.set_ylim(bottom=this_ymin)  # type: ignore[arg-type]
-            if this_ymax < old_ymax and np.isfinite(this_ymax):
-                ax.set_ylim(top=this_ymax)  # type: ignore[arg-type]
+            bottom = this_ymin if this_ymin > old_ymin and np.isfinite(this_ymin) else None
+            top = this_ymax if this_ymax < old_ymax and np.isfinite(this_ymax) else None
         case "out":
-            if this_ymin < old_ymin and np.isfinite(this_ymin):
-                ax.set_ylim(bottom=this_ymin)  # type: ignore[arg-type]
-            if this_ymax > old_ymax and np.isfinite(this_ymax):
-                ax.set_ylim(top=this_ymax)  # type: ignore[arg-type]
+            bottom = this_ymin if this_ymin < old_ymin and np.isfinite(this_ymin) else None
+            top = this_ymax if this_ymax > old_ymax and np.isfinite(this_ymax) else None
         case "both":
-            if this_ymin != old_ymin and np.isfinite(this_ymin):
-                ax.set_ylim(bottom=this_ymin)  # type: ignore[arg-type]
-            if this_ymax != old_ymax and np.isfinite(this_ymax):
-                ax.set_ylim(top=this_ymax)  # type: ignore[arg-type]
+            bottom = this_ymin if this_ymin != old_ymin and np.isfinite(this_ymin) else None
+            top = this_ymax if this_ymax != old_ymax and np.isfinite(this_ymax) else None
         case _:
             raise ValueError(f'Unexpected value for zoom of {zoom}. Expect "in", "out", or "both".')
+    if bottom is not None or top is not None:
+        ax.set_ylim(bottom=bottom, top=top)  # type: ignore[arg-type]
 
 
 # %% Functions - figmenu

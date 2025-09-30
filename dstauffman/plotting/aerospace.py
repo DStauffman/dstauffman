@@ -20,6 +20,7 @@ try:
     from typing import NotRequired, Unpack
 except ImportError:
     from typing_extensions import NotRequired, Unpack  # for Python v3.10
+
 import unittest
 
 from slog import LogLevel
