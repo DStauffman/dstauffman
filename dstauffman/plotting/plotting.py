@@ -20,7 +20,9 @@ try:
     from typing import NotRequired, Unpack
 except ImportError:
     from typing_extensions import NotRequired, Unpack  # for Python v3.10
+
 import unittest
+import warnings
 
 from slog import LogLevel
 
@@ -51,13 +53,12 @@ from dstauffman.plotting.support import (
 )
 
 if HAVE_MPL:
+    from matplotlib import colors, transforms
     from matplotlib.axes import Axes
     from matplotlib.collections import PatchCollection
-    import matplotlib.colors as colors
     from matplotlib.figure import Figure
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
-    import matplotlib.transforms as transforms
 if HAVE_NUMPY:
     import numpy as np
 
@@ -314,7 +315,7 @@ class Opts(Frozen):
                     else:
                         raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
             else:
-                raise ValueError("Unexpected input argument receieved.")
+                raise TypeError("Unexpected input argument receieved.")
         use_datetime = False
         for key, value in kwargs.items():
             if key == "use_datetime":
@@ -326,17 +327,14 @@ class Opts(Frozen):
         if use_datetime:
             self.convert_dates("datetime")
 
-    def __copy__(self) -> "Opts":
+    def __copy__(self) -> Opts:
         r"""Allows a new copy to be generated with data from the original."""
         new = type(self)(self)
         return new
 
     def get_names(self, ix: int) -> str:
         r"""Get the specified name from the list."""
-        if hasattr(self, "names") and len(self.names) >= ix + 1:
-            name = self.names[ix]
-        else:
-            name = ""
+        name = self.names[ix] if hasattr(self, "names") and len(self.names) >= ix + 1 else ""
         return name
 
     def get_name_one_and_two(self, kwargs: _NameKwargs, *, kf1: _Gnds = None, kf2: _Gnds = None) -> tuple[str, str]:
@@ -364,18 +362,17 @@ class Opts(Frozen):
           t(0) = 01-Apr-2019 18:00:00 Z
 
         """
-        TIMESTR_FORMAT = "%d-%b-%Y %H:%M:%S"
+        TIMESTR_FORMAT = "%d-%b-%Y %H:%M:%S"  # noqa: N806
         if date is None:
             if self.date_zero is None:
                 start_date: str = ""
             else:
                 start_date = "  t(0) = " + self.date_zero.strftime(TIMESTR_FORMAT) + " Z"
+        elif isinstance(date, datetime.datetime):
+            start_date = "  t(0) = " + date.strftime(TIMESTR_FORMAT) + " Z"
         else:
-            if isinstance(date, datetime.datetime):
-                start_date = "  t(0) = " + date.strftime(TIMESTR_FORMAT) + " Z"
-            else:
-                temp_date = datetime.datetime(*date)  # type: ignore[arg-type]
-                start_date = "  t(0) = " + temp_date.strftime(TIMESTR_FORMAT) + " Z"
+            temp_date = datetime.datetime(*date)  # type: ignore[arg-type]
+            start_date = "  t(0) = " + temp_date.strftime(TIMESTR_FORMAT) + " Z"
         return start_date
 
     def get_time_limits(self) -> tuple[_Time, _Time, _Time, _Time]:
@@ -395,7 +392,7 @@ class Opts(Frozen):
         rms_xmax  = _convert(self.rms_xmax)  # fmt: skip
         return (disp_xmin, disp_xmax, rms_xmin, rms_xmax)
 
-    def convert_dates(self, form: str, old_form: str = "sec", numpy_form: str = "datetime64[ns]") -> "Opts":
+    def convert_dates(self, form: str, old_form: str = "sec", numpy_form: str = "datetime64[ns]") -> Opts:
         r"""Converts between double and datetime representations."""
         assert form in {"datetime", "numpy", "sec"}, f'Unexpected form of "{form}".'
         self.time_base = form
@@ -430,7 +427,7 @@ def suppress_plots() -> None:
     >>> suppress_plots()
 
     """
-    global _Plotter  # pylint: disable=global-statement
+    global _Plotter  # pylint: disable=global-statement  # noqa: PLW0603
     _Plotter = False
     if HAVE_MPL:
         plt.ioff()
@@ -451,7 +448,7 @@ def unsuppress_plots() -> None:
     >>> unsuppress_plots()
 
     """
-    global _Plotter  # pylint: disable=global-statement
+    global _Plotter  # pylint: disable=global-statement  # noqa: PLW0603
     _Plotter = True
 
 
@@ -776,23 +773,23 @@ def plot_time_difference(
 
 
 # %% Functions - plot_correlation_matrix
-def plot_correlation_matrix(  # noqa: C901
+def plot_correlation_matrix(
     data: _M,
     labels: list[str] | tuple[str, ...] | list[list[str]] | None = None,
     units: str = "",
     *,
     opts: Opts | None = None,
     matrix_name: str = "Correlation Matrix",
-    cmin: int | float = 0,
-    cmax: int | float = 1,
+    cmin: float = 0,
+    cmax: float = 1,
     xlabel: str = "",
     ylabel: str = "",
     plot_lower_only: bool = True,
     label_values: bool = False,
-    x_lab_rot: int | float = 90,
+    x_lab_rot: float = 90,
     colormap: _CM | None = None,
     plot_border: str | None = None,
-    leg_scale: str | int | float | tuple[str, float] | None = "unity",
+    leg_scale: str | float | tuple[str, float] | None = "unity",
     fig_ax: tuple[Figure, Axes] | None = None,
     skip_setup_plots: bool = False,
 ) -> Figure:
@@ -881,10 +878,7 @@ def plot_correlation_matrix(  # noqa: C901
     if opts is None:
         opts = Opts()
     if colormap is None:
-        if opts.colormap is None:
-            colormap = "cool"
-        else:
-            colormap = opts.colormap
+        colormap = "cool" if opts.colormap is None else opts.colormap
     (new_units, scale) = get_unit_conversion(leg_scale, units)
 
     # Hard-coded values
@@ -898,13 +892,12 @@ def plot_correlation_matrix(  # noqa: C901
     if labels is None:
         xlab = [str(i) for i in range(m)]
         ylab = [str(i) for i in range(n)]
+    elif isinstance(labels[0], list):
+        xlab = labels[0]
+        ylab = labels[1]  # type: ignore[assignment]
     else:
-        if isinstance(labels[0], list):
-            xlab = labels[0]
-            ylab = labels[1]  # type: ignore[assignment]
-        else:
-            xlab = labels  # type: ignore[assignment]
-            ylab = labels  # type: ignore[assignment]
+        xlab = labels  # type: ignore[assignment]
+        ylab = labels  # type: ignore[assignment]
     # check lengths
     if len(xlab) != m or len(ylab) != n:
         raise ValueError("Incorrectly sized labels.")
@@ -925,10 +918,10 @@ def plot_correlation_matrix(  # noqa: C901
         cmin = -1
     # test if outside the cmin to cmax range, and if so, adjust range.
     temp = np.min(data)
-    if temp < cmin:  # pylint: disable=consider-using-min-builtin
+    if temp < cmin:  # pylint: disable=consider-using-min-builtin  # noqa: PLR1730
         cmin = temp  # type: ignore[assignment]
     temp = np.max(data)
-    if temp > cmax:  # pylint: disable=consider-using-max-builtin
+    if temp > cmax:  # pylint: disable=consider-using-max-builtin  # noqa: PLR1730
         cmax = temp  # type: ignore[assignment]
 
     # determine which type of data to plot
@@ -944,7 +937,7 @@ def plot_correlation_matrix(  # noqa: C901
         (fig, ax) = fig_ax
     # set figure title
     assert fig.canvas.manager is not None
-    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
         fig.canvas.manager.set_window_title(matrix_name)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
@@ -1009,6 +1002,8 @@ def plot_bar_breakdown(
     opts: Opts | None = None,
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
+    slide_by: int = 0,
+    sub_by: int = 0,
     **kwargs: Unpack[_BarKwargs],
 ) -> list[Figure]:
     r"""
@@ -1028,6 +1023,10 @@ def plot_bar_breakdown(
         Removes any entries from the plot and legend that contain only zeros or only NaNs
     skip_setup_plots : bool, optional, default is False
         Whether to skip the setup_plots step, in case you are manually adding to an existing axis
+    slide_by : int, optional, default is 0
+        If non-zero, then calculate a sliding mean over the given number of data points
+    sub_by : int, optional, default is 0
+        If non-zero, then only plot zero sub_by time point, holding values in-between
 
     Returns
     -------
@@ -1038,6 +1037,7 @@ def plot_bar_breakdown(
     -----
     #.  Written by David C. Stauffer in June 2015.
     #.  Updated by David C. Stauffer in May 2021 to use wrap generic lower level function.
+    #.  Updated by David C. Stauffer in October 2025 to have slide_by and sub_by options.
 
     Examples
     --------
@@ -1091,11 +1091,39 @@ def plot_bar_breakdown(
     scale = 100
     units = "%"
 
+    # smooth over the given number of data points
+    if slide_by != 0:
+        if not kwargs.get("data_as_rows", True):
+            raise NotImplementedError("This has not been coded.")
+        smooth_time = np.copy(time)  # type: ignore[arg-type]
+        smooth_data = np.copy(data)
+        axis = np.ndim(smooth_data) - 1
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="Mean of empty slice")
+            for i in range(smooth_data.shape[-1]):
+                smooth_data[..., i] = np.nanmean(smooth_data[..., i : i + slide_by], axis=axis)
+            smooth_data[np.isnan(data)] = np.nan
+    else:
+        smooth_time = np.asanyarray(time)
+        smooth_data = np.asanyarray(data)
+
+    # subsample the (potentially smoothed) data points
+    if sub_by != 0:
+        if kwargs.get("data_as_rows", True):
+            sub_time = smooth_time[..., ::sub_by]
+            sub_data = smooth_data[..., ::sub_by]
+        else:
+            sub_time = smooth_time[::sub_by, ...]
+            sub_data = smooth_data[::sub_by, ...]
+    else:
+        sub_time = smooth_time
+        sub_data = smooth_data
+
     # call wrapper function for most of the details
     fig = make_bar_plot(  # type: ignore[misc]
         description,
-        time,
-        scale * data,
+        sub_time,  # type: ignore[arg-type]
+        scale * sub_data,
         units=units,
         time_units=time_units,
         start_date=start_date,
@@ -1219,6 +1247,10 @@ def plot_histogram(  # noqa: C901
     >>> plt.close(fig2)
 
     """
+    # data checks (do before any figures are generated)
+    using_cdf = show_cdf or cdf_x is not None or cdf_y is not None
+    if using_cdf and not cdf_round_to_bin and data is None:
+        raise ValueError("CDF bins must be rounded to the bin edges if you specified counts instead of data.")
     # check optional inputs
     if opts is None:
         opts = Opts()
@@ -1257,9 +1289,7 @@ def plot_histogram(  # noqa: C901
             plotting_bins[ix_pinf] = np.max(data) if data is not None else 1e10
         if np.any(ix_ninf):
             plotting_bins[ix_ninf] = np.min(data) if data is not None else -1e10
-    rects = []
-    for i in range(num - 1):
-        rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i + 1] - plotting_bins[i], counts[i]))
+    rects = [Rectangle((plotting_bins[i], 0), plotting_bins[i + 1] - plotting_bins[i], counts[i]) for i in range(num - 1)]
     if missing > 0:
         rects.append(Rectangle((plotting_bins[-1], 0), 1, missing))
     coll = PatchCollection(rects, facecolor=color, edgecolor="k", zorder=6)
@@ -1270,7 +1300,7 @@ def plot_histogram(  # noqa: C901
     else:
         (fig, ax) = fig_ax
     assert fig.canvas.manager is not None
-    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
         fig.canvas.manager.set_window_title(description)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
@@ -1298,7 +1328,6 @@ def plot_histogram(  # noqa: C901
         ax.set_xticklabels(xlab)
     plot_second_yunits(ax, ylab=second_ylabel, multiplier=100 / data_size)
     # Optionally add CDF information
-    using_cdf = show_cdf or cdf_x is not None or cdf_y is not None
     if using_cdf:
         # prepare the colormap
         if cdf_colormap is None:
@@ -1310,16 +1339,11 @@ def plot_histogram(  # noqa: C901
         trans = transforms.blended_transform_factory(ax.transData, ax.transAxes)
         # create the CDF
         if cdf_round_to_bin:
-            if data is not None:
-                cdf = np.hstack([0.0, np.cumsum(counts)]) / data_size
-            else:
-                cdf = np.cumsum(counts)
+            cdf = np.hstack([0.0, np.cumsum(counts)]) / data_size if data is not None else np.cumsum(counts)
             cdf_bin = plotting_bins
         else:
-            if data is None:
-                raise ValueError("CDF bins must be rounded to the bin edges if you specified counts instead of data.")
             cdf = np.hstack([np.arange(data_size) / data_size, 1.0])
-            cdf_bin = np.hstack([0.0, np.sort(data)])
+            cdf_bin = np.hstack([0.0, np.sort(data)])  # type: ignore[arg-type]
     if show_cdf:
         # plot the CDF
         if not cdf_same_axis:
@@ -1332,7 +1356,9 @@ def plot_histogram(  # noqa: C901
         # Note: plot on transformed axes instead of ax3 to maintain constant pan/zoom
         if normalize_spacing:
             temp = np_digitize(cdf_bin, bins)
-            cdf_scaled = temp + (cdf_bin - bins[temp]) / (bins[temp + 1] - bins[temp])
+            bins_temp = np.array([bins[t] for t in temp])
+            bins_plus = np.array([bins[t + 1] for t in temp])
+            cdf_scaled = temp + (cdf_bin - bins_temp) / (bins_plus - bins_temp)
             ax.step(cdf_scaled, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
         else:
             ax.step(cdf_bin, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
@@ -1387,7 +1413,7 @@ def plot_histogram(  # noqa: C901
 
 
 # %% Functions - setup_plots
-def setup_plots(figs: Figure | _Figs, opts: Opts, *, skip_tight: bool = False) -> None:  # noqa: C901
+def setup_plots(figs: Figure | _Figs, opts: Opts, *, skip_tight: bool = False) -> None:
     r"""
     Combine common plot operations into one easy command.
 
@@ -1510,7 +1536,7 @@ def save_zoomed_version(
     >>> ax = figs[0].axes[0]
     >>> ax2 = figs[0].axes[1]
     >>> ylims = (-2.0, 2.0)
-    >>> save_zoomed_version(fig, ax, ylims, opts=opts, ax2=ax2)
+    >>> save_zoomed_version(figs[0], ax, ylims, opts=opts, ax2=ax2)
 
     Close plots
     >>> import matplotlib.pyplot as plt

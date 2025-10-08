@@ -161,7 +161,7 @@ class KfInnov(Frozen):
         num_innovs: int = 0,
         num_axes: int = 0,
         time_dtype: DTypeLike = float,
-    ):
+    ) -> None:
         r"""Initializes a new KfInnov instance."""
         self.name = name
         self.chan: _Chan | None
@@ -201,10 +201,7 @@ class KfInnov(Frozen):
                     setattr(self, key, value)
             return kfinnov2  # TODO: make a copy?
         # concatenate fields
-        if inplace:
-            kfinnov = self
-        else:
-            kfinnov = copy.deepcopy(self)
+        kfinnov = self if inplace else copy.deepcopy(self)
         if kfinnov2.time is None:
             return kfinnov
         assert kfinnov.time is not None
@@ -301,7 +298,7 @@ class Kf(Frozen):
         use_pv: bool = True,
         innov_chan: _Chan | None = None,
         **kwargs: Unpack[_KfKwargs],
-    ):
+    ) -> None:
         r"""Initializes a new Kf instance."""
         self.name = name
         self.chan: list[str] | tuple[str, ...] | None
@@ -346,16 +343,16 @@ class Kf(Frozen):
         # fmt: on
         if innov_class is None:
             self.innov = KfInnov(time_dtype=time_dtype, chan=innov_chan, **kwargs)
-            self._subclasses = frozenset({"innov",})  # fmt: skip
+            self._subclasses = frozenset({"innov"})  # fmt: skip
         elif callable(innov_class):
             self.innov = innov_class(time_dtype=time_dtype, chan=innov_chan, **kwargs)
-            self._subclasses = frozenset({"innov",})  # fmt: skip
+            self._subclasses = frozenset({"innov"})  # fmt: skip
         else:
             for innov_name, func in innov_class.items():
                 setattr(self, innov_name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
             self._subclasses = frozenset(innov_class.keys())
 
-    def save(self, filename: Path | None = None) -> None:  # noqa: C901
+    def save(self, filename: Path | None = None) -> None:
         r"""Save the object to disk as an HDF5 file."""
         # exit if no filename is given
         if filename is None:
@@ -393,7 +390,7 @@ class Kf(Frozen):
                         grp.create_dataset(key, data=value)
 
     @classmethod
-    def load(cls, filename: Path | None = None, subclasses: _Sets = frozenset({"innov"})) -> Kf:  # noqa: C901
+    def load(cls, filename: Path | None = None, subclasses: _Sets = frozenset({"innov"})) -> Kf:
         r"""Load the object from disk."""
         if filename is None:
             raise ValueError("No file specified to load.")
@@ -435,10 +432,7 @@ class Kf(Frozen):
                     setattr(self, key, value)
             return kf2  # TODO: make a copy?
         # concatenate fields
-        if inplace:
-            kf = self
-        else:
-            kf = copy.deepcopy(self)
+        kf = self if inplace else copy.deepcopy(self)
         if kf2.time is None:
             return kf
         assert kf.time is not None
@@ -522,7 +516,7 @@ class KfRecord(Frozen):
 
     def __init__(
         self, num_points: int = 0, *, num_states: int = 0, num_active: int = 0, num_axes: int = 0, time_dtype: DTypeLike = float
-    ):
+    ) -> None:
         self.time: _N | _D | None
         self.P: _N | None
         self.stm: _N | None
@@ -604,10 +598,7 @@ class KfRecord(Frozen):
                     setattr(self, key, value)
             return kfrecord2  # TODO: make a copy?
         # concatenate fields
-        if inplace:
-            kfrecord = self
-        else:
-            kfrecord = copy.deepcopy(self)
+        kfrecord = self if inplace else copy.deepcopy(self)
         if kfrecord2.time is None:
             return kfrecord
         assert kfrecord.time is not None

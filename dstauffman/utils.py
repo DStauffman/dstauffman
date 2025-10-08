@@ -12,7 +12,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Generator, Iterable, Mapping
 from contextlib import contextmanager
 import datetime
 import doctest
@@ -23,12 +23,13 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Generator, Iterable, Literal, overload, TYPE_CHECKING, TypedDict
+from typing import Any, Literal, overload, TYPE_CHECKING, TypedDict
 
 try:
     from typing import NotRequired, Unpack
 except ImportError:
     from typing_extensions import NotRequired, Unpack  # for Python v3.10
+
 import unittest
 import warnings
 
@@ -69,9 +70,9 @@ if TYPE_CHECKING:
         suppress: NotRequired[bool | None]
         nanstr: NotRequired[str | None]
         infstr: NotRequired[str | None]
-        sign: NotRequired[Literal["-" | "+" | " "] | None]
+        sign: NotRequired[Literal["-", "+", " "] | None]
         formatter: NotRequired[dict[str, Callable]]
-        floatmode: NotRequired[Literal["fixed" | "unique" | "maxprec" | "maxprec_equal"] | None]
+        floatmode: NotRequired[Literal["fixed", "unique", "maxprec", "maxprec_equal"] | None]
 
     class _ButterKwArgs(TypedDict):
         btype: NotRequired[Literal["lowpass", "highpass", "bandpass", "bandstop"]]
@@ -83,7 +84,7 @@ _ALLOWED_ENVS: dict[str, str] | None = None  # allows any environment variables 
 
 
 # %% Functions - _nan_equal
-def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: C901
+def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: PLR0911
     a: Any, b: Any, /, tolerance: float | None = None
 ) -> bool:
     r"""
@@ -122,7 +123,7 @@ def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: C901
     def _is_nan(x: Any) -> bool:
         try:
             out = isnan(x)
-        except Exception:  # pylint: disable=broad-exception-caught
+        except Exception:  # pylint: disable=broad-exception-caught  # noqa: BLE001
             return False
         return out  # type: ignore[no-any-return]
 
@@ -136,7 +137,7 @@ def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: C901
                     _ = np.isfinite(a) & np.isfinite(b)
                 except TypeError:
                     do_simple = True
-                except Exception:  # pylint: disable=broad-exception-caught
+                except Exception:  # pylint: disable=broad-exception-caught  # noqa: S110, BLE001
                     pass
             if do_simple:
                 np.testing.assert_array_equal(a, b)
@@ -233,9 +234,8 @@ def find_in_range(
     if np.isfinite(max_):
         func = np.less_equal if inclusive or right else np.less  # type: ignore[assignment]
         valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
-    else:
-        if np.isnan(max_) or np.sign(max_) < 0:
-            raise AssertionError("The maximum should be np.inf if not finite.")
+    elif np.isnan(max_) or np.sign(max_) < 0:
+        raise AssertionError("The maximum should be np.inf if not finite.")
     return valid  # type: ignore[no-any-return]
 
 
@@ -255,10 +255,12 @@ def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
     data : array_like
         input data
     axis : int, optional
-        Axis along which RMS is computed. The default is to compute the RMS of the flattened array.
+        Axis along which RMS is computed. The default is to compute the RMS of the flattened array
     keepdims : bool, optional
-        If true, the axes which are reduced are left in the result as dimensions with size one.
-        With this option, the result will broadcast correctly against the original `data`.
+        If true, the axes which are reduced are left in the result as dimensions with size one
+        With this option, the result will broadcast correctly against the original `data`
+    ignore_nans : bool, optional, default is False
+        Whether to ignore NaNs when doing the calculation
 
     Returns
     -------
@@ -287,20 +289,19 @@ def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
         out = np.sqrt(np.mean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[arg-type]
-    else:
-        # check for all NaNs case
-        if np.all(np.isnan(data)):
-            if axis is None:
-                out = np.nan
-            else:
-                assert isinstance(data, np.ndarray)
-                if keepdims:
-                    shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
-                else:
-                    shape = (*data.shape[:axis], *data.shape[axis + 1 :])
-                out = np.full(shape, np.nan)
+    # check for all NaNs case
+    elif np.all(np.isnan(data)):
+        if axis is None:
+            out = np.nan
         else:
-            out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[arg-type]
+            assert isinstance(data, np.ndarray)
+            if keepdims:
+                shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
+            else:
+                shape = (*data.shape[:axis], *data.shape[axis + 1 :])
+            out = np.full(shape, np.nan)
+    else:
+        out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[arg-type]
     # return the result
     return out  # type: ignore[no-any-return]
 
@@ -321,10 +322,12 @@ def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
     data : array_like
         input data
     axis : int, optional
-        Axis along which RMS is computed. The default is to compute the RMS of the flattened array.
+        Axis along which RMS is computed. The default is to compute the RMS of the flattened array
     keepdims : bool, optional
-        If true, the axes which are reduced are left in the result as dimensions with size one.
-        With this option, the result will broadcast correctly against the original `data`.
+        If true, the axes which are reduced are left in the result as dimensions with size one
+        With this option, the result will broadcast correctly against the original `data`
+    ignore_nans : bool, optional, default is False
+        Whether to ignore NaNs when doing the calculation
 
     Returns
     -------
@@ -354,26 +357,25 @@ def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
         out = np.sqrt(np.sum(data * np.conj(data), axis=axis, keepdims=keepdims))
-    else:
-        # check for all NaNs case
-        if np.all(np.isnan(data)):
-            if axis is None:
-                out = np.array(np.nan)
-            else:
-                assert isinstance(data, np.ndarray)
-                if keepdims:
-                    shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
-                else:
-                    shape = (*data.shape[:axis], *data.shape[axis + 1 :])
-                out = np.full(shape, np.nan)
+    # check for all NaNs case
+    elif np.all(np.isnan(data)):
+        if axis is None:
+            out = np.array(np.nan)
         else:
-            out = np.sqrt(np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims))
+            assert isinstance(data, np.ndarray)
+            if keepdims:
+                shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
+            else:
+                shape = (*data.shape[:axis], *data.shape[axis + 1 :])
+            out = np.full(shape, np.nan)
+    else:
+        out = np.sqrt(np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims))
     # return the result
     return out
 
 
 # %% Functions - compare_two_classes
-def compare_two_classes(  # noqa: C901
+def compare_two_classes(
     c1: Any,
     c2: Any,
     /,
@@ -396,11 +398,13 @@ def compare_two_classes(  # noqa: C901
     c2 : class object
         Any other class object
     suppress_output : bool, optional
-        If True, suppress the information printed to the screen, defaults to False.
+        If True, suppress the information printed to the screen, defaults to False
     names : list of str, optional
-        List of the names to be printed to the screen for the two input classes.
+        List of the names to be printed to the screen for the two input classes
     ignore_callables : bool, optional
-        If True, ignore differences in callable attributes (i.e. methods), defaults to True.
+        If True, ignore differences in callable attributes (i.e. methods), defaults to True
+    compare_recursively : bool, optional, default is True
+        Whether to compare recursively with the class contains a subclass
     is_subset : bool, optional
         If True, only compares in c1 is a strict subset of c2, but c2 can have extra fields, defaults to False
     tolerance : float, optional
@@ -544,7 +548,7 @@ def compare_two_classes(  # noqa: C901
 
 
 # %% Functions - compare_two_dicts
-def compare_two_dicts(  # noqa: C901
+def compare_two_dicts(
     d1: Mapping[Any, Any],
     d2: Mapping[Any, Any],
     /,
@@ -572,6 +576,8 @@ def compare_two_dicts(  # noqa: C901
         If True, only compares in c1 is a strict subset of c2, but c2 can have extra fields, defaults to False
     tolerance : float, optional
         Numerical tolerance used to compare two numbers that are close together to consider them equal
+    exclude : set of str, optional
+        Any field names to be excluded when doing comparisons
 
     Returns
     -------
@@ -831,9 +837,7 @@ def is_np_int(x: Any, /) -> bool:
     True
 
     """
-    if isinstance(x, int) or (hasattr(x, "dtype") and np.issubdtype(x.dtype, np.integer)):
-        return True
-    return False
+    return bool(isinstance(x, int) or (hasattr(x, "dtype") and np.issubdtype(x.dtype, np.integer)))
 
 
 # %% np_digitize
@@ -905,11 +909,10 @@ def np_digitize(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
             bad_bounds = True
             bad_left = np.flatnonzero(x <= bmin)  # type: ignore[operator]
             bad_right = np.flatnonzero(x > bmax)  # type: ignore[operator]
-    else:
-        if np.any(x < bmin) or np.any(x >= bmax):  # type: ignore[operator]
-            bad_bounds = True
-            bad_left = np.flatnonzero(x < bmin)  # type: ignore[operator]
-            bad_right = np.flatnonzero(x >= bmax)  # type: ignore[operator]
+    elif np.any(x < bmin) or np.any(x >= bmax):  # type: ignore[operator]
+        bad_bounds = True
+        bad_left = np.flatnonzero(x < bmin)  # type: ignore[operator]
+        bad_right = np.flatnonzero(x >= bmax)  # type: ignore[operator]
     if bad_bounds:
         message = f"Some values ({len(bad_left)} left, {len(bad_right)} right) of x are outside the given bins ([{bmin}, {bmax}])."  # type: ignore[str-bytes-safe]
         if bad_left.size > 0:
@@ -1049,6 +1052,8 @@ def combine_per_year(data: _Array | None, func: Callable[..., Any] | None = None
     ----------
     data : ndarray, 1D or 2D
         Data array
+    func : Callable
+        The callable function to be used to combine the data
 
     Returns
     -------
@@ -1147,7 +1152,7 @@ def execute(
         env = os.environ.copy().update(env)
 
     # create a process to spawn the thread
-    popen = subprocess.Popen(  # pylint: disable=consider-using-with
+    popen = subprocess.Popen(  # pylint: disable=consider-using-with  # noqa: S603
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -1174,10 +1179,9 @@ def execute(
     # return_code = process.poll()
 
     # determine if command exited cleanly or not and return appropriate code
-    if return_code:
-        if ignored_codes is None or return_code not in ignored_codes:
-            # raise subprocess.CalledProcessError(return_code, command)
-            return ReturnCodes.bad_command
+    if return_code and (ignored_codes is None or return_code not in ignored_codes):
+        # raise subprocess.CalledProcessError(return_code, command)
+        return ReturnCodes.bad_command
     return ReturnCodes.clean
 
 
@@ -1292,9 +1296,8 @@ def get_env_var(env_key: str, default: str | None = None) -> str:
     >>> value = get_env_var("HOME")
 
     """
-    if _ALLOWED_ENVS is not None:
-        if env_key not in _ALLOWED_ENVS:
-            raise KeyError(f'The environment variable of "{env_key}" is not on the allowed list.')
+    if _ALLOWED_ENVS is not None and env_key not in _ALLOWED_ENVS:  # pylint: disable=unsupported-membership-test
+        raise KeyError(f'The environment variable of "{env_key}" is not on the allowed list.')
     try:
         value = os.environ[env_key]
     except KeyError:
@@ -1386,7 +1389,7 @@ def intersect(
     b: ArrayLike,
     /,
     *,
-    tolerance: int | float | np.timedelta64,
+    tolerance: float | np.timedelta64,
     assume_unique: bool,
     return_index: Literal[False] = ...,
 ) -> _I | _N | _D: ...
@@ -1396,7 +1399,7 @@ def intersect(
     b: ArrayLike,
     /,
     *,
-    tolerance: int | float | np.timedelta64,
+    tolerance: float | np.timedelta64,
     assume_unique: bool,
     return_index: Literal[True],
 ) -> tuple[_I | _N | _D, _I, _I]: ...
@@ -1405,7 +1408,7 @@ def intersect(  # type: ignore[misc]
     b: ArrayLike,
     /,
     *,
-    tolerance: int | float | np.timedelta64 = 0,
+    tolerance: float | np.timedelta64 = 0,
     assume_unique: bool = False,
     return_indices: bool = False,
 ) -> _I | _N | _D | tuple[_I | _N | _D, _I, _I]:
@@ -1576,7 +1579,7 @@ def zero_order_hold(
     xp: ArrayLike,
     yp: ArrayLike,
     *,
-    left: int | float | str = nan,
+    left: float | str = nan,
     assume_sorted: bool = False,
     return_indices: bool = False,
 ) -> _N:
@@ -1595,6 +1598,8 @@ def zero_order_hold(
         Value to use for any value less that all points in xp
     assume_sorted : bool, optional, default is False
         Whether you can assume the data is sorted and do simpler (i.e. faster) calculations
+    return_indices : bool, optional, default is False
+        Whether to return the indices, in addition to the values
 
     Returns
     -------
@@ -1643,8 +1648,8 @@ def linear_interp(
     xp: ArrayLike,
     yp: ArrayLike,
     *,
-    left: int | float | None = None,
-    right: int | float | None = None,
+    left: float | None = None,
+    right: float | None = None,
     assume_sorted: bool = False,
     extrapolate: bool = False,
 ) -> _N:
@@ -1693,10 +1698,9 @@ def linear_interp(
     yp = np.asanyarray(yp)
     # use simpler numpy version if data is sorted
     if assume_sorted or issorted(xp):
-        if not extrapolate:
-            # checks the bounds for any bad data
-            if np.any(x < xp[0]) or np.any(x > xp[-1]):
-                raise ValueError("Desired points outside given xp array and extrapolation is False")
+        # checks the bounds for any bad data
+        if not extrapolate and (np.any(x < xp[0]) or np.any(x > xp[-1])):
+            raise ValueError("Desired points outside given xp array and extrapolation is False")
         out = np.interp(x, xp, yp, left=left, right=right)
         return out  # type: ignore[no-any-return]
     # use slower scipy version
@@ -1705,10 +1709,7 @@ def linear_interp(
     fill_value: str | tuple[int, int] | tuple[float, float] | None
     if extrapolate:
         bounds_error = False
-        if left is None or right is None:
-            fill_value = "extrapolate"
-        else:
-            fill_value = (left, right)
+        fill_value = "extrapolate" if left is None or right is None else (left, right)
     else:
         bounds_error = True
         fill_value = None
@@ -1807,7 +1808,7 @@ def drop_following_time(times: _N, drop_starts: _N, dt_drop: float, *, reverse: 
 def drop_following_time(
     times: _D | _I | _N,
     drop_starts: _D | _I | _N,
-    dt_drop: int | float | np.datetime64,
+    dt_drop: float | np.datetime64,
     *,
     reverse: bool = False,
 ) -> _B:
@@ -1822,6 +1823,8 @@ def drop_following_time(
         Times at which the drops start
     dt_drop : float or int
         Delta time for each drop window
+    reverse : bool, optional, default is False
+        Whether to apply the window in the reverse (i.e. earlier) direction
 
     Returns
     -------

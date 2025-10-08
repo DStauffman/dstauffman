@@ -11,7 +11,7 @@ Notes
 import unittest
 
 from dstauffman import get_data_dir, HAVE_NUMPY, HAVE_PANDAS
-import dstauffman.aerospace as space  # noqa: F401  # pylint: disable=unused-import
+import dstauffman.aerospace as space  # pylint: disable=unused-import
 
 if HAVE_NUMPY:
     import numpy as np

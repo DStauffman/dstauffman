@@ -16,7 +16,7 @@ import dstauffman.plotting as plot
 def _extra_plotter_factory() -> plot.ExtraPlotter:
     """Create a plotter to highlight the zero latitude and longitudes."""
 
-    def _extra_plotter(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument
+    def _extra_plotter(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument  # noqa: ARG001
         for this_axes in ax:
             this_axes.axvline(0, color="xkcd:brick red", linewidth=2, label="Prime Meridian")
             this_axes.axhline(0, color="xkcd:dark red", linewidth=2, label="Equator")
@@ -62,7 +62,7 @@ if __name__ == "__main__":
     xy_events: tuple[tuple[float, float], ...] = ((lon[10], lat[10]),)
     xy_annotations: tuple[str, ...] = ("ISS",)
     fig4 = plot.plot_map(None, lat, lon, land_colors="same", color_by=color_by, cbar_colormap="spring",
-        title="Event", xy_events=xy_events, xy_annotations=xy_annotations)  # fmt: skip  # noqa: E128
+        title="Event", xy_events=xy_events, xy_annotations=xy_annotations)  # fmt: skip
 
     # ground track with multiple events and custom colors
     m = len(lat) // 2
@@ -74,8 +74,8 @@ if __name__ == "__main__":
     map_colors2["Mexico"] = 0
     map_colors2["Canada"] = 5
     fig5 = plot.plot_map(None, lat, lon, land_colors="multi", color_by=color_by, map_colors=map_colors2,
-        title="Custom Colors", xy_events=xy_events, xy_annotations=xy_annotations, xy_colors=xy_colors,  # noqa: E128
-        background="xkcd:cyan", border="xkcd:yellow", land_colormap="tab10")  # fmt: skip  # noqa: E128
+        title="Custom Colors", xy_events=xy_events, xy_annotations=xy_annotations, xy_colors=xy_colors,
+        background="xkcd:cyan", border="xkcd:yellow", land_colormap="tab10")  # fmt: skip
 
     # map with labels and extra plotter
     extra_plotter = _extra_plotter_factory()

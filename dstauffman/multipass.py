@@ -10,12 +10,13 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 import doctest
 import logging
 import multiprocessing
 import sys
 import traceback
-from typing import Any, Callable, Iterable, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 import unittest
 import warnings
 
@@ -41,7 +42,7 @@ logger = logging.getLogger(__name__)
 class MultipassExceptionWrapper:
     r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
 
-    def __init__(self, ee: BaseException):
+    def __init__(self, ee: BaseException) -> None:
         # save exception
         self.ee = ee
         # save traceback
@@ -54,7 +55,7 @@ class MultipassExceptionWrapper:
 
 
 # %% Functions - parfor_wrapper
-def parfor_wrapper(  # noqa: C901
+def parfor_wrapper(
     func: Callable,
     args: Iterable,
     *,
@@ -141,7 +142,7 @@ def parfor_wrapper(  # noqa: C901
                         result.re_raise()
                 else:
                     results.append(result)
-            except StopIteration:
+            except StopIteration:  # noqa: PERF203
                 break
     if ignore_errors and len(errors) > 0:
         logger.log(LogLevel.L2, "There were %i error(s) in the processing.", len(errors))

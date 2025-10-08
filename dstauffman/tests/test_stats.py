@@ -32,7 +32,7 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
     def setUp(self) -> None:
         self.monthly = np.arange(10) / 1000.0
         self.annuals = self.monthly.copy()
-        for i in range(1, 12):
+        for _ in range(1, 12):
             self.annuals[:] = 1 - (1 - self.annuals) * (1 - self.monthly)
 
     def test_conversion(self) -> None:
@@ -78,7 +78,7 @@ class Test_convert_monthly_to_annual_probability(unittest.TestCase):
     def setUp(self) -> None:
         self.monthly = np.arange(10) / 1000.0
         self.annuals = self.monthly.copy()
-        for i in range(1, 12):
+        for _ in range(1, 12):
             self.annuals[:] = 1 - (1 - self.annuals) * (1 - self.monthly)
 
     def test_conversion(self) -> None:

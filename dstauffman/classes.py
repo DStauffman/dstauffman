@@ -7,20 +7,22 @@ Notes
 #.  Added mutable integer Counter class in January 2016.
 #.  Updated by David C. Stauffer in June 2020 to make MetaClass methods public for direct use if desired.
 
-"""
+"""  # pylint: disable=protected-access
 
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 import doctest
 from pathlib import Path
 import sys
-from typing import Any, Callable, Literal, overload, Type, TYPE_CHECKING, TypedDict, TypeVar
+from typing import Any, Literal, overload, TYPE_CHECKING, TypedDict, TypeVar
 
 try:
     from typing import NotRequired, Unpack
 except ImportError:
     from typing_extensions import NotRequired, Unpack  # for Python v3.10
+
 import unittest
 import warnings
 
@@ -79,14 +81,14 @@ def _frozen(set_: Callable) -> Callable:
             # If attribute already exists, simply set it
             set_(self, name, value)
             return
-        if sys._getframe(1).f_code.co_name == "__init__":  # pylint: disable=protected-access
+        if sys._getframe(1).f_code.co_name == "__init__":  # noqa: SLF001
             # Allow __setattr__ calls in __init__ calls of proper object types
-            for key, val in sys._getframe(1).f_locals.items():  # pragma: no branch  # pylint: disable=protected-access
+            for key, val in sys._getframe(1).f_locals.items():  # pragma: no branch  # noqa: SLF001
                 if key == "self" and isinstance(val, self.__class__):  # pragma: no branch
                     set_(self, name, value)
                     return
         # fmt: off
-        raise AttributeError(f"You cannot add attribute of {name} to {self} in {sys._getframe(1).f_code.co_name}.")  # pylint: disable=protected-access
+        raise AttributeError(f"You cannot add attribute of {name} to {self} in {sys._getframe(1).f_code.co_name}.")  # noqa: SLF001
         # fmt: on
 
     # return the custom defined function
@@ -94,7 +96,7 @@ def _frozen(set_: Callable) -> Callable:
 
 
 # %% Methods - save_hdf5
-def save_hdf5(  # noqa: C901
+def save_hdf5(
     self: Any,
     filename: Path | None = None,
     *,
@@ -205,28 +207,28 @@ def save_hdf5(  # noqa: C901
 
 # %% Methods - load_hdf5
 @overload
-def load_hdf5(cls: Type[_T], filename: Path | None, return_meta: Literal[False] = ...) -> _T: ...
+def load_hdf5(cls: type[_T], filename: Path | None, return_meta: Literal[False] = ...) -> _T: ...
 @overload
 def load_hdf5(
     cls: dict[str, None] | list[str] | set[str] | tuple[str, ...],
     filename: Path | None,
     return_meta: Literal[False] = ...,
-) -> Type[Any]: ...
+) -> type[Any]: ...
 @overload
-def load_hdf5(cls: None, filename: Path | None, return_meta: Literal[False] = ...) -> Type[Any]: ...
+def load_hdf5(cls: None, filename: Path | None, return_meta: Literal[False] = ...) -> type[Any]: ...
 @overload
-def load_hdf5(cls: Type[_T], filename: Path | None, return_meta: Literal[True]) -> tuple[_T, dict[str, Any]]: ...
+def load_hdf5(cls: type[_T], filename: Path | None, return_meta: Literal[True]) -> tuple[_T, dict[str, Any]]: ...
 @overload
 def load_hdf5(
     cls: dict[str, None] | list[str] | set[str] | tuple[str, ...], filename: Path | None, return_meta: Literal[True]
-) -> tuple[Type[Any], dict[str, Any]]: ...
+) -> tuple[type[Any], dict[str, Any]]: ...
 @overload
-def load_hdf5(cls: None, filename: Path | None, return_meta: Literal[True]) -> tuple[Type[Any], dict[str, Any]]: ...
-def load_hdf5(  # type: ignore[misc]  # noqa: C901
-    cls: Type[_T] | dict[str, None] | list[str] | set[str] | tuple[str, ...] | None,
+def load_hdf5(cls: None, filename: Path | None, return_meta: Literal[True]) -> tuple[type[Any], dict[str, Any]]: ...
+def load_hdf5(  # type: ignore[misc]
+    cls: type[_T] | dict[str, None] | list[str] | set[str] | tuple[str, ...] | None,
     filename: Path | None = None,
     return_meta: bool = False,
-) -> _T | Type[Any] | tuple[_T, dict[str, Any]] | tuple[Type[Any] | dict[str, Any]]:
+) -> _T | type[Any] | tuple[_T, dict[str, Any]] | tuple[type[Any] | dict[str, Any]]:
     r"""
     Load the object from disk.
 
@@ -271,10 +273,8 @@ def load_hdf5(  # type: ignore[misc]  # noqa: C901
 
     if filename is None:
         raise ValueError("No file specified to load.")
-    if return_meta:
-        meta: dict[str, Any] = {}
     # Load data
-    out: _T | Type[Any]
+    out: _T | type[Any]
     if cls is None:
         out = type("Temp", (object,), {})
         limit_fields = False
@@ -291,8 +291,7 @@ def load_hdf5(  # type: ignore[misc]  # noqa: C901
         for key in file:
             group = file[key]
             if return_meta:
-                for key2, value in group.attrs.items():
-                    meta[key2] = value
+                meta: dict[str, Any] = dict(group.attrs.items())
             _load_dataset(out, group=group, prefix=f"/{key}", limit_fields=limit_fields)
     if return_meta:
         return (out, meta)  # type: ignore[return-value]
@@ -324,12 +323,12 @@ def save_method(
     # exit if no filename is given
     if filename is None:
         return
-    if hasattr(self, "_save_convert_hdf5") and callable(self._save_convert_hdf5):  # pylint: disable=protected-access
-        restore_kwargs = self._save_convert_hdf5()  # pylint: disable=protected-access
+    if hasattr(self, "_save_convert_hdf5") and callable(self._save_convert_hdf5):
+        restore_kwargs = self._save_convert_hdf5()
     else:
         restore_kwargs = {}
     try:
-        additional_exclusions = self._exclude_fields()  # pylint: disable=protected-access
+        additional_exclusions = self._exclude_fields()
     except AttributeError:
         pass
     else:
@@ -338,19 +337,19 @@ def save_method(
         else:
             exclusions |= set(additional_exclusions)
     save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
-    if hasattr(self, "_save_restore_hdf5") and callable(self._save_restore_hdf5):  # pylint: disable=protected-access
-        self._save_restore_hdf5(**restore_kwargs)  # pylint: disable=protected-access
+    if hasattr(self, "_save_restore_hdf5") and callable(self._save_restore_hdf5):
+        self._save_restore_hdf5(**restore_kwargs)
 
 
 # %% Methods - load_method
 @overload
-def load_method(cls: Type[_T], filename: Path | None, return_meta: Literal[False] = ..., **kwargs: Any) -> _T: ...
+def load_method(cls: type[_T], filename: Path | None, return_meta: Literal[False] = ..., **kwargs: Any) -> _T: ...
 @overload
 def load_method(
-    cls: Type[_T], filename: Path | None, return_meta: Literal[True], **kwargs: Any
+    cls: type[_T], filename: Path | None, return_meta: Literal[True], **kwargs: Any
 ) -> tuple[_T, dict[str, Any]]: ...
 def load_method(
-    cls: Type[_T], filename: Path | None = None, return_meta: bool = False, **kwargs: Any
+    cls: type[_T], filename: Path | None = None, return_meta: bool = False, **kwargs: Any
 ) -> _T | tuple[_T, dict[str, Any]]:
     r"""
     Load the object from disk.
@@ -366,8 +365,8 @@ def load_method(
     if filename is None:
         raise ValueError("No file specified to load.")
     out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
-    if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # pylint: disable=protected-access
-        out._save_restore_hdf5(**kwargs)  # pylint: disable=protected-access
+    if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # noqa: SLF001
+        out._save_restore_hdf5(**kwargs)  # noqa: SLF001
     return out  # type: ignore[no-any-return]
 
 
@@ -378,7 +377,7 @@ def save_convert_hdf5(self: Any, **kwargs: Any) -> dict[str, bool]:
         datetime_fields = kwargs["datetime_fields"]
     else:
         try:
-            datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
+            datetime_fields = self._datetime_fields()
         except AttributeError:
             datetime_fields = ()
     convert_dates = all(map(lambda key: is_datetime(getattr(self, key)), datetime_fields))  # noqa: C417
@@ -391,7 +390,7 @@ def save_convert_hdf5(self: Any, **kwargs: Any) -> dict[str, bool]:
 
 
 # %% save_restore_hdf5
-def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) -> None:  # noqa: C901
+def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) -> None:
     r"""Supporting function for loading from HDF5."""
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert dates."
@@ -399,7 +398,7 @@ def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) 
             datetime_fields = kwargs["datetime_fields"]
         else:
             try:
-                datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
+                datetime_fields = self._datetime_fields()
             except AttributeError:
                 datetime_fields = ()
         for key in datetime_fields:
@@ -409,7 +408,7 @@ def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) 
         string_fields = kwargs["string_fields"]
     else:
         try:
-            string_fields = self._string_fields()  # pylint: disable=protected-access
+            string_fields = self._string_fields()
         except AttributeError:
             string_fields = ()
     for key in string_fields:
@@ -426,7 +425,7 @@ def pprint(self: Any, return_text: bool = False, **kwargs: Any) -> str | None:
 
 
 # %% pprint_dict
-def pprint_dict(  # noqa: C901
+def pprint_dict(
     dct: dict[Any, Any],
     *,
     name: str = "",
@@ -495,7 +494,7 @@ def pprint_dict(  # noqa: C901
                     offset=offset + indent,
                     max_elements=max_elements,
                 )
-            except Exception:  # pylint: disable=broad-exception-caught
+            except Exception:  # pylint: disable=broad-exception-caught  # noqa: BLE001
                 # TODO: do I need this check or just let it fail?
                 warnings.warn("pprint recursive call failed, reverting to default.")
                 this_pad = " " * (pad_len - len(this_key)) if align else ""
@@ -504,17 +503,16 @@ def pprint_dict(  # noqa: C901
             this_pad = " " * (pad_len - len(this_key)) if align else ""
             if max_elements is None or not HAVE_NUMPY:
                 this_line = f"{this_indent}{this_key}{this_pad} = {this_value}"
-            else:
-                if max_elements == 0:
-                    if isinstance(this_value, ndarray):
-                        this_line = f"{this_indent}{this_key}{this_pad} = <ndarray {this_value.dtype} {this_value.shape}>"
-                    elif isinstance(this_value, IntEnumPlus):  # TODO: may not be necessary on newer versions of Python?
-                        this_line = f"{this_indent}{this_key}{this_pad} = {this_value.__class__.__name__}"
-                    else:
-                        this_line = f"{this_indent}{this_key}{this_pad} = {type(this_value)}"
+            elif max_elements == 0:
+                if isinstance(this_value, ndarray):
+                    this_line = f"{this_indent}{this_key}{this_pad} = <ndarray {this_value.dtype} {this_value.shape}>"
+                elif isinstance(this_value, IntEnumPlus):  # TODO: may not be necessary on newer versions of Python?
+                    this_line = f"{this_indent}{this_key}{this_pad} = {this_value.__class__.__name__}"
                 else:
-                    with printoptions(threshold=max_elements):
-                        this_line = f"{this_indent}{this_key}{this_pad} = {this_value}"
+                    this_line = f"{this_indent}{this_key}{this_pad} = {type(this_value)}"
+            else:
+                with printoptions(threshold=max_elements):
+                    this_line = f"{this_indent}{this_key}{this_pad} = {this_value}"
         lines.append(this_line)
     text = "\n".join(lines)
     if disp:
@@ -674,7 +672,7 @@ class Frozen:
     # freeze the set attributes function based on the above `frozen` funcion
     __setattr__ = _frozen(object.__setattr__)
 
-    class __metaclass__(type):
+    class __metaclass__(type):  # noqa: N801
         __setattr__ = _frozen(type.__setattr__)
 
     @overload
@@ -694,16 +692,16 @@ class Frozen:
 class SaveAndLoad(type):
     r"""Metaclass to add "save" and "load" methods to the given class."""
 
-    def __init__(cls, name: Any, bases: Any, dct: Any):
+    def __init__(cls, name: Any, bases: Any, dct: Any) -> None:
         r"""Add the "save" and "load" classes if they are not already present."""
         if not hasattr(cls, "save"):
-            setattr(cls, "save", save_method)
+            cls.save = save_method
         if not hasattr(cls, "load"):
-            setattr(cls, "load", classmethod(load_method))
+            cls.load = classmethod(load_method)  # type: ignore[var-annotated]
         if not hasattr(cls, "_save_convert_hdf5"):
-            setattr(cls, "_save_convert_hdf5", save_convert_hdf5)
+            cls._save_convert_hdf5 = save_convert_hdf5
         if not hasattr(cls, "_save_restore_hdf5"):
-            setattr(cls, "_save_restore_hdf5", save_restore_hdf5)
+            cls._save_restore_hdf5 = save_restore_hdf5
 
         super().__init__(name, bases, dct)
 

@@ -38,9 +38,8 @@ class Test_run_docstrings(unittest.TestCase):
     def test_with_failures(self) -> None:
         files = [dcs.get_tests_dir() / x for x in ("test_matlab.py", "test_repos.py")]
         verbose = True
-        with patch("dstauffman.repos.doctest.testfile", return_value=(1, 0)) as mock_tester:
-            with capture_output() as ctx:
-                return_code = dcs.run_docstrings(files, verbose)
+        with patch("dstauffman.repos.doctest.testfile", return_value=(1, 0)) as mock_tester, capture_output() as ctx:
+            return_code = dcs.run_docstrings(files, verbose)
         lines = ctx.get_output().split("\n")
         self.assertEqual(return_code, ReturnCodes.test_failures)
         exp = f'Testing "{dcs.get_tests_dir().joinpath("test_matlab.py")}":'

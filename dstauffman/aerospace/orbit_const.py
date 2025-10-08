@@ -16,9 +16,9 @@ import unittest
 from dstauffman import DEG2RAD, HAVE_NUMPY
 
 if HAVE_NUMPY:
-    from numpy import pi as PI, sqrt
+    from numpy import pi as PI, sqrt  # noqa: N812
 else:
-    from math import pi as PI, sqrt  # type: ignore[assignment]
+    from math import pi as PI, sqrt  # type: ignore[assignment]  # noqa: N812
 
 # %% Constants
 # Written by David C. Stauffer for AA 279 on 28 Apr 2007, constants provided by Professor West.

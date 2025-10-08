@@ -11,15 +11,17 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Sequence
 import datetime
 import doctest
 from pathlib import Path
-from typing import Sequence, TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 try:
     from typing import NotRequired, Unpack
 except ImportError:
     from typing_extensions import NotRequired, Unpack  # for Python v3.10
+
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY
@@ -130,7 +132,7 @@ def plot_bpe_convergence(
     else:
         (fig, ax) = fig_ax
     assert fig.canvas.manager is not None
-    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
         fig.canvas.manager.set_window_title(this_title)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
@@ -152,7 +154,7 @@ def plot_bpe_convergence(
 
 
 # %% plot_bpe_results
-def plot_bpe_results(  # noqa: C901
+def plot_bpe_results(
     bpe_results: BpeResults,
     *,
     opts: Opts | None = None,
@@ -164,10 +166,7 @@ def plot_bpe_results(  # noqa: C901
     label_values = False
 
     # alias the names
-    if bpe_results.param_names is not None:
-        names = [name.decode("utf-8") for name in bpe_results.param_names]
-    else:
-        names = []
+    names = [name.decode("utf-8") for name in bpe_results.param_names] if bpe_results.param_names is not None else []
 
     # defaults for which plots to make
     default_plots = {"innovs": False, "convergence": False, "correlation": False, "info_svd": False, "covariance": False}

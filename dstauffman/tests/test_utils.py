@@ -100,9 +100,8 @@ class Test__nan_equal(unittest.TestCase):
         self.assertFalse(dcs.utils._nan_equal(a, b, tolerance=1e-12))
 
     def test_bad_tolerance(self) -> None:
-        with patch("dstauffman.utils.HAVE_NUMPY", False):
-            with self.assertRaises(ValueError):
-                dcs.utils._nan_equal(0.01, 0.01, 1e-6)
+        with patch("dstauffman.utils.HAVE_NUMPY", False), self.assertRaises(ValueError):
+            dcs.utils._nan_equal(0.01, 0.01, 1e-6)
 
 
 # %% find_in_range
@@ -496,8 +495,8 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertEqual(
             output,
             "b is different from c1 to c2.\nb is different from c1.e to c2.e.\n"
-            + 'c is only in c1.e.\nd is only in c2.e.\n"c1.e" and "c2.e" are not the same.\n'
-            + 'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.',
+            'c is only in c1.e.\nd is only in c2.e.\n"c1.e" and "c2.e" are not the same.\n'
+            'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.',
         )
 
     def test_subclasses_norecurse(self) -> None:
@@ -539,7 +538,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertEqual(
             output,
             "b is different from c1 to c2.\ne is different from c1 to c2.\n"
-            + 'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.',
+            'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.',
         )
         is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False, suppress_output=True)
         self.assertFalse(is_same)
@@ -650,7 +649,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertEqual(
             output,
             "b is different.\n\"d1['e']\" and \"d2['e']\" are the same.\n"
-            + 'c is only in d1.\nd is only in d2.\n"d1" and "d2" are not the same.',
+            'c is only in d1.\nd is only in d2.\n"d1" and "d2" are not the same.',
         )
         self.assertFalse(is_same)
 
@@ -1001,9 +1000,8 @@ class Test_full_print(unittest.TestCase):
         # normalize whitespace
         lines = self._norm_output(lines)
         self.assertEqual(lines, self.x_print)
-        with capture_output() as ctx:
-            with dcs.full_print():
-                print(self.x)
+        with capture_output() as ctx, dcs.full_print():
+            print(self.x)
         lines = ctx.get_output().split("\n")
         # normalize whitespace
         lines = self._norm_output(lines)
@@ -1011,25 +1009,22 @@ class Test_full_print(unittest.TestCase):
         self.assertEqual(lines, self.x_full)
 
     def test_small1(self) -> None:
-        with capture_output() as ctx:
-            with dcs.full_print():
-                print(np.array(0))
+        with capture_output() as ctx, dcs.full_print():
+            print(np.array(0))
         output = ctx.get_output()
         ctx.close()
         self.assertEqual(output, "0")
 
     def test_small2(self) -> None:
-        with capture_output() as ctx:
-            with dcs.full_print():
-                print(np.array([1.35, 1.58]))
+        with capture_output() as ctx, dcs.full_print():
+            print(np.array([1.35, 1.58]))
         output = ctx.get_output()
         ctx.close()
         self.assertEqual(output, "[1.35 1.58]")
 
     def test_keyword_arguments(self) -> None:
-        with capture_output() as ctx:
-            with dcs.full_print(formatter={"float": lambda x: "{:.1f}".format(x)}):
-                print(np.array([1.2345, 1001.555]))
+        with capture_output() as ctx, dcs.full_print(formatter={"float": lambda x: f"{x:.1f}"}):
+            print(np.array([1.2345, 1001.555]))
         output = ctx.get_output()
         ctx.close()
         self.assertEqual(output, "[1.2 1001.6]")
@@ -1150,9 +1145,8 @@ class Test_get_env_var(unittest.TestCase):
         self.assertEqual(key, "test")
 
     def test_not_allowed(self) -> None:
-        with patch("dstauffman.utils._ALLOWED_ENVS", {"user", "username"}):
-            with self.assertRaises(KeyError):
-                dcs.get_env_var("HOME")
+        with patch("dstauffman.utils._ALLOWED_ENVS", {"user", "username"}), self.assertRaises(KeyError):
+            dcs.get_env_var("HOME")
 
 
 # %% get_username
@@ -1164,15 +1158,13 @@ class Test_get_username(unittest.TestCase):
     """
 
     def test_windows(self) -> None:
-        with patch("dstauffman.utils.IS_WINDOWS", True):
-            with patch.dict(os.environ, {"USER": "name", "USERNAME": "name_two"}):
-                username = dcs.get_username()
+        with patch("dstauffman.utils.IS_WINDOWS", True), patch.dict(os.environ, {"USER": "name", "USERNAME": "name_two"}):
+            username = dcs.get_username()
         self.assertEqual(username, "name_two")
 
     def test_unix(self) -> None:
-        with patch("dstauffman.utils.IS_WINDOWS", False):
-            with patch.dict(os.environ, {"USER": "name", "USERNAME": "name_two"}):
-                username = dcs.get_username()
+        with patch("dstauffman.utils.IS_WINDOWS", False), patch.dict(os.environ, {"USER": "name", "USERNAME": "name_two"}):
+            username = dcs.get_username()
         self.assertEqual(username, "name")
 
 
@@ -1495,9 +1487,8 @@ class Test_zero_order_hold(unittest.TestCase):
         xp    = np.array([0, 5, 10, 15, 4])
         yp    = np.array([0, 1, -2, 3, 0])
         x     = np.array([-4, -2, 0, 2, 4, 6])
-        with self.assertRaises(RuntimeError) as err:
-            with patch("dstauffman.utils.HAVE_SCIPY", False):
-                dcs.zero_order_hold(x, xp, yp)
+        with self.assertRaises(RuntimeError) as err, patch("dstauffman.utils.HAVE_SCIPY", False):
+            dcs.zero_order_hold(x, xp, yp)
         self.assertEqual(str(err.exception), "You must have scipy available to run this.")
     # fmt: on
 

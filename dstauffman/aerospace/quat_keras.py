@@ -17,7 +17,7 @@ import unittest
 from dstauffman import HAVE_KERAS, HAVE_NUMPY
 
 if HAVE_KERAS:
-    import keras.ops as ops
+    from keras import ops
 if HAVE_NUMPY:
     import numpy as np
 
@@ -70,7 +70,7 @@ def quat_mult_keras(a: _Q, b: _Q) -> _Q:
     # fmt: off
     c = ops.transpose(ops.array([
          b[..., 0] * a[..., 3] + b[..., 1] * a[..., 2] - b[..., 2] * a[..., 1] + b[..., 3] * a[..., 0],
-        -b[..., 0] * a[..., 2] + b[..., 1] * a[..., 3] + b[..., 2] * a[..., 0] + b[..., 3] * a[..., 1],  # noqa: E131
+        -b[..., 0] * a[..., 2] + b[..., 1] * a[..., 3] + b[..., 2] * a[..., 0] + b[..., 3] * a[..., 1],
          b[..., 0] * a[..., 1] - b[..., 1] * a[..., 0] + b[..., 2] * a[..., 3] + b[..., 3] * a[..., 2],
         -b[..., 0] * a[..., 0] - b[..., 1] * a[..., 1] - b[..., 2] * a[..., 2] + b[..., 3] * a[..., 3],
     ]))
@@ -99,12 +99,12 @@ def quat_times_vector_keras(quat: _Q, v: _V) -> _Q:
     # fmt: off
     qv = ops.array([
          quat[..., 1] * v[..., 2] - quat[..., 2] * v[..., 1],
-        -quat[..., 0] * v[..., 2] + quat[..., 2] * v[..., 0],  # noqa: E131
+        -quat[..., 0] * v[..., 2] + quat[..., 2] * v[..., 0],
          quat[..., 0] * v[..., 1] - quat[..., 1] * v[..., 0],
     ])
     skew_qv = ops.array([
          quat[..., 1] * ( quat[..., 0] * v[..., 1] - quat[..., 1] * v[..., 0]) - quat[..., 2] * (-quat[..., 0] * v[..., 2] + quat[..., 2] * v[..., 0]),
-        -quat[..., 0] * ( quat[..., 0] * v[..., 1] - quat[..., 1] * v[..., 0]) + quat[..., 2] * ( quat[..., 1] * v[..., 2] - quat[..., 2] * v[..., 1]),  # noqa: E131
+        -quat[..., 0] * ( quat[..., 0] * v[..., 1] - quat[..., 1] * v[..., 0]) + quat[..., 2] * ( quat[..., 1] * v[..., 2] - quat[..., 2] * v[..., 1]),
          quat[..., 0] * (-quat[..., 0] * v[..., 2] + quat[..., 2] * v[..., 0]) - quat[..., 1] * ( quat[..., 1] * v[..., 2] - quat[..., 2] * v[..., 1]),
     ])
     # fmt: on

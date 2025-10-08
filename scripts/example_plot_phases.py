@@ -3,8 +3,9 @@
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 import datetime
-from typing import Callable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -26,7 +27,7 @@ def extra_plotter_func(
 ) -> Callable[[Figure, Axes], None]:
     """Wrapper to the plot_phases to be passed into other functions."""
 
-    def _plot_phases(fig: Figure, ax: Axes) -> None:  # pylint: disable=unused-argument
+    def _plot_phases(fig: Figure, ax: Axes) -> None:  # pylint: disable=unused-argument  # noqa: ARG001
         for this_axes in ax:  # type: ignore[attr-defined]
             plot_phases(this_axes, time_phases, labels=labels, group_all=group_all, use_legend=use_legend)
 

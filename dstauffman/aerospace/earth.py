@@ -116,7 +116,7 @@ def geod2ecf(
     assert lon is not None
     assert alt is not None
     # intermediate calculations
-    Ne = a**2 / np.sqrt(a**2 * np.cos(lat) ** 2 + b**2 * np.sin(lat) ** 2)
+    Ne = a**2 / np.sqrt(a**2 * np.cos(lat) ** 2 + b**2 * np.sin(lat) ** 2)  # noqa: N806
     # determine output shape
     shape = (3,) if np.size(lat) == 1 else (3, np.size(lat))
     xyz = np.full(shape, np.nan)
@@ -144,7 +144,7 @@ def ecf2geod(
 def ecf2geod(
     x: ArrayLike, y: ArrayLike, z: ArrayLike, *, units: str = ..., output: Literal["split"], algorithm: str = ...
 ) -> tuple[_N, _N, _N]: ...
-def ecf2geod(  # noqa: C901
+def ecf2geod(
     x: ArrayLike,
     y: ArrayLike | None = None,
     z: ArrayLike | None = None,
@@ -261,13 +261,13 @@ def ecf2geod(  # noqa: C901
         assert np.all(q > 0), "Q must be greater than zero, you need to avoid places very close to the center of the Earth."
         u    = p / np.sqrt(q)  # q > 0 required
         v    = b**2 * u**2 / q
-        P    = 27 * v * s / q
-        Q    = (np.sqrt(P + 1) + np.sqrt(P)) ** (2 / 3)
+        P    = 27 * v * s / q  # noqa: N806
+        Q    = (np.sqrt(P + 1) + np.sqrt(P)) ** (2 / 3)  # noqa: N806
         t    = (1 + Q + 1 / Q) / 6
         c    = np.sqrt(u**2 - 1 + 2 * t)
         w    = (c - u) / 2
         zz   = np.sign(z) * np.sqrt(q) * (w + np.sqrt(np.sqrt(t**2 + v) - u * w - t / 2 - 1 / 4))
-        Ne   = a * np.sqrt(1 + eps2 * zz**2 / b**2)
+        Ne   = a * np.sqrt(1 + eps2 * zz**2 / b**2)  # noqa: N806
         ang  = (eps2 + 1) * zz / Ne
         lat  = np.arcsin(ang, out=np.full(ang.shape, np.nan), where=np.abs(ang) <= 1.0)
         lon  = np.arctan2(y, x)

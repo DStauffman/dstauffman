@@ -156,9 +156,8 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertEqual(keys, {"log_level", "use_display", "use_plotting"})
 
     def test_no_display(self) -> None:
-        with capture_output() as ctx:
-            with patch("sys.argv", ["name.py", "-nodisp"]):
-                flags = dcs.process_command_line_options()
+        with capture_output() as ctx, patch("sys.argv", ["name.py", "-nodisp"]):
+            flags = dcs.process_command_line_options()
         output = ctx.get_output()
         ctx.close()
         self.assertFalse(flags.use_display)
@@ -167,9 +166,8 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertEqual(output, "Running without displaying any plots.")
 
     def test_no_plotting(self) -> None:
-        with capture_output() as ctx:
-            with patch("sys.argv", ["name.py", "-noplot"]):
-                flags = dcs.process_command_line_options()
+        with capture_output() as ctx, patch("sys.argv", ["name.py", "-noplot"]):
+            flags = dcs.process_command_line_options()
         output = ctx.get_output()
         ctx.close()
         self.assertTrue(flags.use_display)
@@ -178,18 +176,16 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertEqual(output, "Running without making any plots.")
 
     def test_log_level1(self) -> None:
-        with patch("dstauffman.parser.logger") as mocker:
-            with patch("sys.argv", ["name.py", "-l8"]):
-                flags = dcs.process_command_line_options()
+        with patch("dstauffman.parser.logger") as mocker, patch("sys.argv", ["name.py", "-l8"]):
+            flags = dcs.process_command_line_options()
         self.assertTrue(flags.use_display)
         self.assertTrue(flags.use_plotting)
         self.assertEqual(flags.log_level, LogLevel.L8)
         mocker.log.assert_called_once_with(dcs.parser.LogLevel.L8, "Configuring Log Level at: %s", LogLevel.L8)
 
     def test_log_level2(self) -> None:
-        with patch("dstauffman.parser.logger") as mocker:
-            with patch("sys.argv", ["name.py", "-linfo"]):
-                flags = dcs.process_command_line_options()
+        with patch("dstauffman.parser.logger") as mocker, patch("sys.argv", ["name.py", "-linfo"]):
+            flags = dcs.process_command_line_options()
         self.assertTrue(flags.use_display)
         self.assertTrue(flags.use_plotting)
         self.assertEqual(flags.log_level, logging.INFO)
@@ -197,9 +193,8 @@ class Test_process_command_line_options(unittest.TestCase):
 
     def test_everything(self) -> None:
         logger = logging.getLogger("dstauffman.parser")  # Note: alternative syntax for mocker
-        with patch.object(logger, "log") as mocker:
-            with patch("sys.argv", ["name.py", "-l5", "-nodisp", "-noplot"]):
-                flags = dcs.process_command_line_options()
+        with patch.object(logger, "log") as mocker, patch("sys.argv", ["name.py", "-l5", "-nodisp", "-noplot"]):
+            flags = dcs.process_command_line_options()
         self.assertFalse(flags.use_display)
         self.assertFalse(flags.use_plotting)
         self.assertEqual(flags.log_level, LogLevel.L5)

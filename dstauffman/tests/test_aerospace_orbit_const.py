@@ -44,7 +44,7 @@ class Test_orbits_all_values(unittest.TestCase):
     def test_missing(self) -> None:
         for field in vars(space.orbit_const):
             if field.isupper():
-                self.assertTrue(field in self.master, "Test is missing: {}".format(field))
+                self.assertTrue(field in self.master, f"Test is missing: {field}")
 
 
 # %% Unit test execution

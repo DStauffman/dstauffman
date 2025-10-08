@@ -3,9 +3,10 @@
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 import copy
 from pathlib import Path
-from typing import Callable, ClassVar, TYPE_CHECKING
+from typing import ClassVar, TYPE_CHECKING
 
 import numpy as np
 
@@ -29,11 +30,11 @@ class MyData(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     ver: str
 
     # fmt: off
-    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], MyData]]  # noqa: F821
-    save: Callable[[Path | None, DefaultNamedArg(dict, "meta"), DefaultNamedArg(set[str] | None, "exclusions")], None]  # noqa: F821
+    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], MyData]]  # noqa: F821, RUF100
+    save: Callable[[Path | None, DefaultNamedArg(dict, "meta"), DefaultNamedArg(set[str] | None, "exclusions")], None]
     # fmt: on
 
-    def __init__(self, num: int = 0, ver: str = ""):
+    def __init__(self, num: int = 0, ver: str = "") -> None:
         self.time = np.empty(num)
         self.data = np.empty(num)
         self.ver = ver
@@ -43,8 +44,8 @@ class MyCollection(dict, metaclass=dcs.SaveAndLoad):
     """Class based wrapper that is just a simple dictionary."""
 
     # fmt: off
-    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], MyData]]  # noqa: F821
-    save: Callable[[Path | None, DefaultNamedArg(dict, "meta"), DefaultNamedArg(set[str] | None, "exclusions")], None]  # noqa: F821
+    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], MyData]]  # noqa: F821, RUF100
+    save: Callable[[Path | None, DefaultNamedArg(dict, "meta"), DefaultNamedArg(set[str] | None, "exclusions")], None]
     # fmt: on
 
 
@@ -68,7 +69,7 @@ if __name__ == "__main__":
     out_dict1 = {k: v for k, v in vars(out1).items() if not lg.is_dunder(k)}
 
     dcs.compare_two_dicts(meta, meta1, names=["meta", "meta1"])
-    dcs.compare_two_dicts(data1, out_dict1, exclude={"ver",}, names=["data1", "out1"])  # fmt: skip
+    dcs.compare_two_dicts(data1, out_dict1, exclude={"ver"}, names=["data1", "out1"])  # fmt: skip
 
     # %% Example 2
     data2 = {}
@@ -82,7 +83,7 @@ if __name__ == "__main__":
     for key, value in out_dict2.items():
         out_dict2[key] = {k: v for k, v in vars(value).items() if not lg.is_dunder(k)}
 
-    dcs.compare_two_dicts(data2, out_dict2, exclude={"ver",}, names=["data2", "out2"])  # fmt: skip
+    dcs.compare_two_dicts(data2, out_dict2, exclude={"ver"}, names=["data2", "out2"])  # fmt: skip
 
     # %% Example 3
     data3 = MyData(num_pts)

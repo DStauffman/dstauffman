@@ -60,8 +60,8 @@ def run_docstrings(files: list[Path], verbose: bool = False) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
-    except Exception:  # pylint: disable=broad-exception-caught
+        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
+    except Exception:  # pylint: disable=broad-exception-caught  # noqa: S110, BLE001
         pass
     else:
         suppress_plots()
@@ -70,7 +70,7 @@ def run_docstrings(files: list[Path], verbose: bool = False) -> int:
     # loop through and test each file
     for file in files:
         if verbose:
-            print("")
+            print()
             print("******************************")
             print("******************************")
             print(f'Testing "{file}":')
@@ -107,8 +107,8 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
-    except Exception:  # pylint: disable=broad-exception-caught
+        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
+    except Exception:  # pylint: disable=broad-exception-caught  # noqa: S110, BLE001
         pass
     else:
         suppress_plots()
@@ -146,8 +146,8 @@ def run_pytests(folder: Path, *args: str, **kwargs: Any) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
-    except Exception:  # pylint: disable=broad-exception-caught
+        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
+    except Exception:  # pylint: disable=broad-exception-caught  # noqa: S110, BLE001
         pass
     else:
         suppress_plots()
@@ -155,18 +155,15 @@ def run_pytests(folder: Path, *args: str, **kwargs: Any) -> int:
     # open a qapp
     qapp: QApplication | QCoreApplication | None
     try:
-        from qtpy.QtWidgets import QApplication  # pylint: disable=import-outside-toplevel
+        from qtpy.QtWidgets import QApplication  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
     except ModuleNotFoundError:
         qapp = None
     except ImportError:
         qapp = None
     else:
-        if QApplication.instance() is None:
-            qapp = QApplication(sys.argv)
-        else:
-            qapp = QApplication.instance()
+        qapp = QApplication(sys.argv) if QApplication.instance() is None else QApplication.instance()
     # run tests using pytest
-    exit_code = pytest.main([str(folder), "-rfEsP"] + list(*args), **kwargs)
+    exit_code = pytest.main([str(folder), "-rfEsP", *list(*args)], **kwargs)
     # close the qapp
     if qapp is not None:
         qapp.closeAllWindows()  # type: ignore[attr-defined]

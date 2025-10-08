@@ -35,7 +35,7 @@ from dstauffman.plotting.generic import (
     make_time_plot,
 )
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
-from dstauffman.plotting.support import ColorMap, ExtraPlotter, fig_ax_factory, get_nondeg_colorlists, get_rms_indices, plot_phases  # fmt: skip
+from dstauffman.plotting.support import ColorMap, ExtraPlotter, fig_ax_factory, get_nondeg_colorlists, get_rms_indices, plot_phases
 
 if HAVE_MPL:
     from matplotlib.axes import Axes
@@ -233,7 +233,7 @@ def plot_quaternion(
     return_err: Literal[True],
     **kwargs: Unpack[_KfQuatKwargs],
 ) -> tuple[_Figs, dict[str, _N]]: ...
-def plot_quaternion(  # noqa: C901
+def plot_quaternion(
     description: str,
     time_one: _Times | None,
     time_two: _Times | None,
@@ -318,7 +318,7 @@ def plot_quaternion(  # noqa: C901
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
-    if is_date_1 or is_date_2 and not is_date_o:
+    if is_date_1 or (is_date_2 and not is_date_o):
         this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
         this_opts.convert_dates("sec", old_form=opts.time_base)
@@ -423,7 +423,7 @@ def plot_attitude(
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfQuatKwargs],
 ) -> tuple[_Figs, dict[str, _N]]: ...
-def plot_attitude(  # noqa: C901
+def plot_attitude(
     kf1: Kf | None = None,
     kf2: Kf | None = None,
     *,
@@ -509,7 +509,7 @@ def plot_attitude(  # noqa: C901
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
-    if is_date_1 or is_date_2 and not is_date_o:
+    if is_date_1 or (is_date_2 and not is_date_o):
         this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
         this_opts.convert_dates("sec", old_form=opts.time_base)
@@ -660,7 +660,7 @@ def plot_position(
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfDiffKwargs],
 ) -> tuple[_Figs, dict[str, _N]]: ...
-def plot_position(  # noqa: C901
+def plot_position(
     kf1: Kf | None = None,
     kf2: Kf | None = None,
     *,
@@ -741,7 +741,7 @@ def plot_position(  # noqa: C901
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
-    if is_date_1 or is_date_2 and not is_date_o:
+    if is_date_1 or (is_date_2 and not is_date_o):
         this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
         this_opts.convert_dates("sec", old_form=opts.time_base)
@@ -1023,7 +1023,7 @@ def plot_innovations(  # noqa: C901
 
     # aliases and defaults
     num_chan = 0
-    for key in fields.keys():
+    for key in fields:
         if getattr(kf1, key) is not None:
             temp = getattr(kf1, key).shape[0]
         elif getattr(kf2, key) is not None:
@@ -1047,7 +1047,7 @@ def plot_innovations(  # noqa: C901
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
-    if is_date_1 or is_date_2 and not is_date_o:
+    if is_date_1 or (is_date_2 and not is_date_o):
         this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
         this_opts.convert_dates("sec", old_form=opts.time_base)
@@ -1093,7 +1093,7 @@ def plot_innovations(  # noqa: C901
             printed = True
         # make plots
         if "Normalized" in sub_description:
-            units = "σ"
+            units = "σ"  # noqa: RUF001
             this_second_units = "unity"
         else:
             this_second_units = second_units  # type: ignore[assignment]
@@ -1205,9 +1205,9 @@ def plot_innovations(  # noqa: C901
             )
         if plot_by_number and field_one is not None and ~np.all(np.isnan(field_one)):
             this_number = None
-            quad_name: str | None = None
-            for quad, quad_name in number_field.items():
+            for quad in number_field:
                 if hasattr(kf1, quad):
+                    quad_name = number_field[quad]
                     this_number = getattr(kf1, quad)
                     break
             if this_number is not None:
@@ -1242,14 +1242,15 @@ def plot_innovations(  # noqa: C901
                 )
         if plot_by_number and field_two is not None and ~np.all(np.isnan(field_two)):
             this_number = None
-            for quad, quad_name in number_field.items():
+            for quad in number_field:
                 if hasattr(kf2, quad):
+                    quad_name = number_field[quad]
                     this_number = getattr(kf2, quad)
                     break
             if this_number is not None:
-                num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}  # type: ignore[operator]
+                num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}
                 figs += make_categories_plot(  # type: ignore[misc]
-                    full_description + " by " + quad_name,  # type: ignore[operator]
+                    full_description + " by " + quad_name,
                     kf2.time,
                     field_two,
                     this_number,
@@ -1378,10 +1379,7 @@ def plot_innov_fplocs(
             innovs = kf1.innov[:, mask]  # type: ignore[index]
     else:
         ix = get_rms_indices(kf1.time, xmin=t_bounds[0], xmax=t_bounds[1])
-        if mask is None:
-            this_mask = ix["one"]
-        else:
-            this_mask = mask & ix["one"]
+        this_mask = ix["one"] if mask is None else mask & ix["one"]
         fplocs = kf1.fploc[:, this_mask]
         innovs = kf1.innov[:, this_mask]  # type: ignore[index]
 
@@ -1485,7 +1483,7 @@ def plot_covariance(
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfDiffKwargs],
 ) -> tuple[_Figs, dict[str, dict[str, _N]]]: ...
-def plot_covariance(  # noqa: C901
+def plot_covariance(
     kf1: Kf | None = None,
     kf2: Kf | None = None,
     *,
@@ -1568,7 +1566,7 @@ def plot_covariance(  # noqa: C901
 
     # aliases and defaults
     num_chan = 0
-    for key in fields.keys():
+    for key in fields:
         if getattr(kf1, key) is not None:
             temp = getattr(kf1, key).shape[0]
         elif getattr(kf2, key) is not None:
@@ -1594,7 +1592,7 @@ def plot_covariance(  # noqa: C901
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
-    if is_date_1 or is_date_2 and not is_date_o:
+    if is_date_1 or (is_date_2 and not is_date_o):
         this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
         this_opts.convert_dates("sec", old_form=opts.time_base)
@@ -1635,13 +1633,13 @@ def plot_covariance(  # noqa: C901
             this_units = units if isinstance(units, str) else units[ix]
             this_2units = second_units[ix] if isinstance(second_units, list) else second_units
             this_ylabel = description + f" [{this_units}]"
-            states = np.atleast_1d(states)
+            states_array = np.atleast_1d(states)
             if hasattr(kf1, "active") and kf1.active is not None:
-                (this_state_nums1, this_state_rows1, found_rows1) = intersect(kf1.active, states, return_indices=True)  # type: ignore[call-overload]
+                (this_state_nums1, this_state_rows1, found_rows1) = intersect(kf1.active, states_array, return_indices=True)  # type: ignore[call-overload]
             else:
                 this_state_nums1 = np.array([], dtype=int)
             if hasattr(kf2, "active") and kf2.active is not None:
-                (this_state_nums2, this_state_rows2, found_rows2) = intersect(kf2.active, states, return_indices=True)  # type: ignore[call-overload]
+                (this_state_nums2, this_state_rows2, found_rows2) = intersect(kf2.active, states_array, return_indices=True)  # type: ignore[call-overload]
             else:
                 this_state_nums2 = np.array([], dtype=int)
             this_state_nums = np.union1d(this_state_nums1, this_state_nums2)

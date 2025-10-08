@@ -538,8 +538,8 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
                                 oe.w = w
                                 oe.vo = nu
                                 oe.type = space.OrbitType.elliptic  # if E < 0 else space.OrbitType.parabolic if E == 0 else
-                                oe.equatorial = True if i == 0 else False
-                                oe.circular = True if e == 0 else False
+                                oe.equatorial = i == 0
+                                oe.circular = e == 0
                                 (r, v) = space.oe_2_rv(oe)
                                 oe2 = space.rv_2_oe(r, v)
                                 np.testing.assert_array_almost_equal(oe.a, oe2.a, err_msg="a is different")

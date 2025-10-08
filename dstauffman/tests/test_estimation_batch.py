@@ -45,13 +45,12 @@ class SimParams(Frozen):
         self.phase     = phase
         # fmt: on
 
-    def __eq__(self, other: Any) -> bool:  # pragma: no cover
+    def __eq__(self, other: object) -> bool:  # pragma: no cover
         if not isinstance(other, type(self)):
             return False
-        for key in vars(self):
-            if np.any(getattr(self, key) != getattr(other, key)):
-                return False
-        return True
+        return all(not np.any(getattr(self, key) != getattr(other, key)) for key in vars(self))
+
+    __hash__ = None  # type: ignore[assignment]
 
 
 # Functions - _get_truth_index
@@ -82,7 +81,7 @@ def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: floa
 
 
 # Functions - cost_wrapper
-def cost_wrapper(results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams) -> _N:
+def cost_wrapper(results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams) -> _N:  # noqa: ARG001  # fmt: skip
     r"""Example Cost wrapper for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
@@ -103,7 +102,7 @@ def get_parameter(sim_params: SimParams, *, names: list[str]) -> _N:
         if hasattr(sim_params, name):
             values[ix] = getattr(sim_params, name)
         else:  # pragma: no cover
-            raise ValueError('Bad parameter name: "{}".'.format(name))
+            raise ValueError(f'Bad parameter name: "{name}".')
     return values
 
 
@@ -116,7 +115,7 @@ def set_parameter(sim_params: SimParams, *, names: list[str], values: _N) -> Non
         if hasattr(sim_params, name):
             setattr(sim_params, name, values[ix])
         else:  # pragma: no cover
-            raise ValueError('Bad parameter name: "{}".'.format(name))
+            raise ValueError(f'Bad parameter name: "{name}".')
 
 
 # %% estimation.OptiOpts
@@ -282,7 +281,7 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.assertTrue(lines[1].startswith("  begin_params = None"))
 
     def test_pprint(self) -> None:
-        self.bpe_results.param_names = ["a".encode("utf-8")]
+        self.bpe_results.param_names = [b"a"]
         self.bpe_results.begin_params = [1.0]  # type: ignore[assignment]
         self.bpe_results.final_params = [2.0]  # type: ignore[assignment]
         with capture_output() as ctx:

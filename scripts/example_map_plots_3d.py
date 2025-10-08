@@ -16,7 +16,7 @@ import dstauffman.plotting as plot
 def _extra_plotter_factory() -> plot.ExtraPlotter:
     """Create a plotter to highlight the zero latitude and longitudes."""
 
-    def _extra_plotter(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument
+    def _extra_plotter(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument  # noqa: ARG001
         az = np.linspace(0, 2 * np.pi, 100)
         el = np.zeros_like(az)
         rad = np.full(az.shape, space.EARTH["a"])
@@ -64,7 +64,7 @@ if __name__ == "__main__":
     lla_events: tuple[tuple[float, float, float], ...] = ((lon[10], lat[10], alt[10]),)
     lla_annotations: tuple[str, ...] = ("ISS",)
     fig4 = plot.plot_map_3d(None, lat, lon, alt, land_colors="same", color_by=color_by, cbar_colormap="spring",
-        title="Event", lla_events=lla_events, lla_annotations=lla_annotations)  # fmt: skip  # noqa: E128
+        title="Event", lla_events=lla_events, lla_annotations=lla_annotations)  # fmt: skip
 
     # orbit with multiple events and custom colors
     m = len(lat) // 2
@@ -76,8 +76,8 @@ if __name__ == "__main__":
     map_colors2["Mexico"] = 0
     map_colors2["Canada"] = 5
     fig5 = plot.plot_map_3d(None, lat, lon, alt, land_colors="multi", color_by=color_by, map_colors=map_colors2,
-        title="Custom Colors", lla_events=lla_events, lla_annotations=lla_annotations, lla_colors=lla_colors,  # noqa: E128
-        background="xkcd:cyan", border="xkcd:yellow", land_colormap="tab10")  # fmt: skip  # noqa: E128
+        title="Custom Colors", lla_events=lla_events, lla_annotations=lla_annotations, lla_colors=lla_colors,
+        background="xkcd:cyan", border="xkcd:yellow", land_colormap="tab10")  # fmt: skip
 
     # map with labels and extra plotter
     extra_plotter = _extra_plotter_factory()

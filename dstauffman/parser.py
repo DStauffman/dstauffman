@@ -11,11 +11,11 @@ Notes
 from __future__ import annotations
 
 import argparse
+from collections.abc import Callable
 from dataclasses import dataclass
 import doctest
 import logging
 import sys
-from typing import Callable
 import unittest
 
 from slog import activate_logging, LogLevel, ReturnCodes
@@ -54,10 +54,7 @@ def main() -> int:
 def parse_wrapper(args: list[str]) -> tuple[str, argparse.Namespace]:
     r"""Wrapper function to parse out the command name from the rest of the arguments."""
     # check for no command option
-    if len(args) >= 1:
-        command = args[0]
-    else:
-        command = "help"
+    command = args[0] if len(args) >= 1 else "help"
     # check for alternative forms of help with the base dcs command
     if command in {"--help", "-h"}:
         command = "help"
@@ -96,7 +93,7 @@ def parse_commands(command: str, args: list[str]) -> argparse.Namespace:
 
     """
     # delayed import of commands
-    import dstauffman.commands as commands  # pylint: disable=import-outside-toplevel
+    from dstauffman import commands  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
 
     # check for valid commands
     if command in _VALID_COMMANDS:
@@ -112,7 +109,7 @@ def parse_commands(command: str, args: list[str]) -> argparse.Namespace:
 def execute_command(command: str, args: argparse.Namespace) -> int:
     r"""Executes the given command."""
     # delayed import of commands
-    import dstauffman.commands as commands  # pylint: disable=import-outside-toplevel
+    from dstauffman import commands  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
 
     # check for valid commands
     if command in _VALID_COMMANDS:
@@ -183,7 +180,7 @@ def process_command_line_options(log_start: bool | str | None = None) -> _Flags:
 
     # do operations based on those settings
     if use_plotting and not use_display:
-        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
+        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel  # noqa: PLC0415
 
         suppress_plots()
 

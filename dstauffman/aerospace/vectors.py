@@ -10,13 +10,15 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 import doctest
-from typing import Callable, Literal, overload, TYPE_CHECKING, TypedDict
+from typing import Literal, overload, TYPE_CHECKING, TypedDict
 
 try:
     from typing import NotRequired, Unpack
 except ImportError:
     from typing_extensions import NotRequired, Unpack  # for Python v3.10
+
 import unittest
 
 from nubs import ncjit
@@ -500,11 +502,10 @@ def interp_vector(
             func = lambda x, xp, yp, **kwargs: linear_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
         else:
             func = lambda x, xp, yp, **kwargs: linear_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
+    elif x_is_datetime:
+        func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
     else:
-        if x_is_datetime:
-            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
-        else:
-            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
+        func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
     # fmt: on
 
     if yp.ndim == 1:

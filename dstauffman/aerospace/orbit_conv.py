@@ -7,6 +7,8 @@ Notes
 
 """
 
+# ruff: noqa: N803, N806
+
 # %% Imports
 from __future__ import annotations
 
@@ -335,7 +337,7 @@ def anomaly_mean_2_eccentric(M: _FN, e: _FN) -> np.floating | _N:
     if l1 == 1 and l2 == 1:
         E = root(lambda E: _anomalies(E, M, e), PI).x[0]
     else:
-        E = np.array([root(lambda E: _anomalies(E, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)])  # fmt: skip  # pylint: disable=cell-var-from-loop
+        E = np.array([root(lambda E: _anomalies(E, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)])  # fmt: skip  # pylint: disable=cell-var-from-loop  # noqa: B023
     # mod with 2*pi in case a different solution was found
     E = np.mod(E, TAU)
     return E  # type: ignore[no-any-return]
@@ -370,7 +372,7 @@ def anomaly_mean_2_hyperbolic(M: _FN, e: _FN) -> np.floating | _N:
     if l1 == 1 and l2 == 1:
         F = root(lambda F: _anomalies(F, M, e), PI).x[0]
     else:
-        F = np.fromiter((root(lambda F: _anomalies(F, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)), float, count=max(l1, l2))  # fmt: skip  # pylint: disable=cell-var-from-loop
+        F = np.fromiter((root(lambda F: _anomalies(F, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)), float, count=max(l1, l2))  # fmt: skip  # pylint: disable=cell-var-from-loop  # noqa: B023
     # mod with 2*pi in case a different solution was found
     F = np.mod(F, TAU)
     return F  # type: ignore[no-any-return]
@@ -448,10 +450,7 @@ def anomaly_true_2_hyperbolic(nu: _FN, e: _FN) -> np.floating | _N:
     ix = nu > PI
     # correct nu if it falls in lower half plane
     if np.any(ix):
-        if np.size(ix) == 1:
-            F = -F
-        else:
-            F = np.negative(F, where=ix, out=F)
+        F = -F if np.size(ix) == 1 else np.negative(F, where=ix, out=F)
     return F
 
 

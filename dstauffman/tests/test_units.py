@@ -46,7 +46,7 @@ class Test_Constants(unittest.TestCase):
     def test_missing(self) -> None:
         for field in vars(dcs.units):
             if field.isupper() and not field.startswith("_"):
-                self.assertTrue(field in self.master, "Test is missing: {}".format(field))
+                self.assertTrue(field in self.master, f"Test is missing: {field}")
 
 
 # %% get_factors
@@ -135,11 +135,11 @@ class Test_get_factors(unittest.TestCase):
         labels = ["amin", "asec", "mas", "µas", "asec^2"]
         for fact, exp_mult, exp_label in zip(names, mults, labels):
             (mult, label) = dcs.get_factors(fact)
-            self.assertAlmostEqual(mult, exp_mult, 14, "Bad multiplication factor for {}".format(fact))
-            self.assertEqual(label, exp_label, "Bad label for {}".format(fact))
+            self.assertAlmostEqual(mult, exp_mult, 14, f"Bad multiplication factor for {fact}")
+            self.assertEqual(label, exp_label, f"Bad label for {fact}")
             (mult, label) = dcs.get_factors(fact, inverse=True)
-            self.assertAlmostEqual(mult, 1 / exp_mult, 12, "Bad inverse multiplication factor for {}".format(fact))
-            self.assertEqual(label, exp_label, "Bad inverse label for {}".format(fact))
+            self.assertAlmostEqual(mult, 1 / exp_mult, 12, f"Bad inverse multiplication factor for {fact}")
+            self.assertEqual(label, exp_label, f"Bad inverse label for {fact}")
 
     def test_percentage(self) -> None:
         (mult, label) = dcs.get_factors("percentage")

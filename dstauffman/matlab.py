@@ -9,6 +9,8 @@ Notes
 
 """
 
+# ruff: noqa: N803, N806
+
 # %% Imports
 from __future__ import annotations
 
@@ -39,7 +41,7 @@ _EPS: Final = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-1
 
 
 # %% load_matlab
-def load_matlab(  # noqa: C901
+def load_matlab(
     filename: str | Path,
     varlist: list[str] | set[str] | tuple[str, ...] | None = None,
     *,
@@ -193,7 +195,7 @@ def orth(A: _M) -> _M:
     # calculate a tolerance based on the first eigenvalue (instead of just using a small number)
     tol = np.max(A.shape) * S[0] * _EPS
     # sum the number of eigenvalues that are greater than the calculated tolerance
-    r = np.count_nonzero(S > tol, axis=0)
+    r = np.count_nonzero(tol < S, axis=0)
     # return the columns corresponding to the non-zero eigenvalues
     Q = Q[:, np.arange(r)]
     return Q
@@ -427,7 +429,7 @@ def prepend(vec: _B, new: bool) -> _B: ...
 def prepend(vec: _I, new: int) -> _I: ...
 @overload
 def prepend(vec: _N, new: float) -> _N: ...
-def prepend(vec: _B | _I | _N, new: bool | int | float) -> _B | _I | _N:
+def prepend(vec: _B | _I | _N, new: bool | float) -> _B | _I | _N:
     r"""
     Add a value to the beginning of an array.
 
@@ -472,7 +474,7 @@ def postpend(vec: _B, new: bool) -> _B: ...
 def postpend(vec: _I, new: int) -> _I: ...
 @overload
 def postpend(vec: _N, new: float) -> _N: ...
-def postpend(vec: _B | _I | _N, new: bool | int | float) -> _B | _I | _N:
+def postpend(vec: _B | _I | _N, new: bool | float) -> _B | _I | _N:
     r"""
     Add a value to the beginning of an array.
 

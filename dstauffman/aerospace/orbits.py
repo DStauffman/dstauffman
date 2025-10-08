@@ -7,13 +7,15 @@ Notes
 
 """
 
+# ruff: noqa: N803, N806
+
 # %% Imports
 from __future__ import annotations
 
 import copy
 import datetime
 import doctest
-from typing import Any, Literal, overload, TYPE_CHECKING
+from typing import Literal, overload, TYPE_CHECKING
 import unittest
 
 from slog import IntEnumPlus, is_dunder
@@ -117,7 +119,7 @@ class Elements(Frozen):
 
     """
 
-    def __init__(self, num: int = 0):
+    def __init__(self, num: int = 0) -> None:
         is_single = num == 1
         # fmt: off
         self.a: _FN          = np.nan if is_single else np.full(num, np.nan)
@@ -137,7 +139,7 @@ class Elements(Frozen):
         self.t: np.datetime64 | _D = NP_NAT if is_single else np.full(num, NP_NAT, dtype=NP_DATETIME_FORM)
         # fmt: on
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         # if not of the same type, then they are not equal
         if not isinstance(other, type(self)):
             return False
@@ -155,6 +157,8 @@ class Elements(Frozen):
                 return False
         # if it made it all the way through the fields, then things must be equal
         return True
+
+    __hash__ = None  # type: ignore[assignment]
 
     def __len__(self) -> int:
         return np.size(self.a)
@@ -174,10 +178,7 @@ class Elements(Frozen):
                     setattr(self, key, value)
             return elements2  # TODO: make a copy?
         # concatenate fields
-        if inplace:
-            elements = self
-        else:
-            elements = copy.deepcopy(self)
+        elements = self if inplace else copy.deepcopy(self)
         if np.size(elements2.a) == 0:
             return elements
         for key, value in vars(self).items():
@@ -247,7 +248,7 @@ def _fix_instab(x: _N, precision: float) -> None:
 
 
 # %% Functions - two_line_elements
-def two_line_elements(line1: str, line2: str) -> Elements:  # noqa: C901
+def two_line_elements(line1: str, line2: str) -> Elements:
     r"""
     Convert two-line elements to elements structure.
 
@@ -634,10 +635,7 @@ def oe_2_rv(
 
     # % calculations
     # parameter
-    if np.all(~np.isnan(elements.p)):
-        p = elements.p
-    else:
-        p = _inf_multiply(a, (1.0 - e**2))
+    p = elements.p if np.all(~np.isnan(elements.p)) else _inf_multiply(a, 1.0 - e**2)
 
     # magnitude of r in PQW frame
     r_mag = _zero_divide(p, (1.0 + e * np.cos(nu)))

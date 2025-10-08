@@ -14,7 +14,7 @@ from dstauffman import HAVE_KERAS, HAVE_NUMPY
 import dstauffman.aerospace as space
 
 if HAVE_KERAS:
-    import keras.ops as ops
+    from keras import ops
 if HAVE_NUMPY:
     import numpy as np
 

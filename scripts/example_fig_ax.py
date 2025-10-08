@@ -56,7 +56,7 @@ if __name__ == "__main__":
     if comb_plots:
         fig = fig_ax[0][0]
         figmenu(fig)
-        assert fig1 is fig2 and fig1 is fig3 and fig1 is fig4 and fig1 is fig, "All figures should be identical."
+        assert fig1 is fig2 and fig1 is fig3 and fig1 is fig4 and fig1 is fig, "All figures should be identical."  # noqa: PT018
     else:
         figmenu([fig1, fig2, fig3, fig4])
         assert fig1 is not fig2

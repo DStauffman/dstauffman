@@ -1,11 +1,11 @@
 r"""Runs speed comparisons for the any and all commands."""
 
 # %% Imports
-from IPython import get_ipython  # type: ignore[import-not-found, unused-ignore]
+from IPython import get_ipython  # type: ignore[import-not-found]
 import numpy as np
 import pandas as pd
 
-import nubs as nubs  # noqa: F401  # pylint: disable=unused-import
+import nubs as nubs  # pylint: disable=unused-import  # noqa: F401, RUF100
 
 # %% Results
 TEXT = r"""i = None, any(x)

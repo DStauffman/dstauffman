@@ -7,6 +7,8 @@ Notes
 
 """  # pylint: disable=too-many-lines
 
+# ruff: noqa: N803, N806
+
 # %% Imports
 from __future__ import annotations
 
@@ -374,10 +376,10 @@ def ijk_2_rdr(ijk: _N) -> _N:
 
 
 # %% Functions - ijk_2_sez
-def ijk_2_sez(ijk: _N, geo_loc: _N, time_jd: _N) -> _N:  # noqa: C901
+def ijk_2_sez(ijk: _N, geo_loc: _N, time_jd: _N) -> _N:
     r"""Converts IJK coordinates to SEZ coordinates."""
 
-    def _find_D(L: _FN, theta: _FN) -> _N:
+    def _find_D(L: _FN, theta: _FN) -> _N:  # noqa: N802
         r"""Calculate the IJK to SEZ transformation matrix from L and theta."""
         # fmt: off
         return np.array([
@@ -516,10 +518,10 @@ def sez_2_aer(sez: _N) -> _N:
 
 
 # %% Functions - sez_2_ijk
-def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:  # noqa: C901
+def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:
     r"""Converts SEZ coordinates to IJK coordinates."""
 
-    def _find_D(L: _FN, theta: _FN) -> _N:
+    def _find_D(L: _FN, theta: _FN) -> _N:  # noqa: N802
         r"""Calculate the SEZ to IJK transformation matrix from L and theta."""
         # fmt: off
         return np.array([

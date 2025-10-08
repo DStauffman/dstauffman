@@ -7,6 +7,8 @@ Notes
 
 """
 
+# ruff: noqa: N803, N806
+
 # %% Imports
 from __future__ import annotations
 
@@ -73,12 +75,8 @@ def calculate_kalman_gain(
     """
     # calculate the innovation covariance
     Pz = H @ P @ H.T + R
-    if use_inverse:
-        # explicit version with inverse
-        K = (P @ H.T) @ np.linalg.inv(Pz)
-    else:
-        # implicit solver
-        K = mat_divide(Pz.T, (P @ H.T).T).T
+    # potentially use explicit version with inverse, or implicit solver without it
+    K = (P @ H.T) @ np.linalg.inv(Pz) if use_inverse else mat_divide(Pz.T, (P @ H.T).T).T
     # return desired results
     if return_innov_cov:
         return (K, Pz)
@@ -283,10 +281,7 @@ def propagate_covariance(P: _M, phi: _M, Q: _M, *, gamma: _M | None = None, inpl
     0.002
 
     """
-    if gamma is None:
-        out = phi @ P @ phi.T + Q
-    else:
-        out = phi @ P @ phi.T + gamma @ Q @ gamma.T
+    out = phi @ P @ phi.T + Q if gamma is None else phi @ P @ phi.T + gamma @ Q @ gamma.T
     if inplace:
         P[:] = out
         return P

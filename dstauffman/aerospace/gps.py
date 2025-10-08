@@ -32,10 +32,7 @@ GPS_DATE_ZERO = datetime.datetime(1980, 1, 6, 0, 0, 0)
 ONE_DAY       = 86400  # fmt: skip
 DAYS_PER_WEEK = 7
 WEEK_ROLLOVER = 1024
-if HAVE_NUMPY:
-    NP_GPS_DATE_ZERO = np.datetime64(GPS_DATE_ZERO, NP_DATETIME_UNITS)
-else:
-    NP_GPS_DATE_ZERO = None  # type: ignore[assignment]
+NP_GPS_DATE_ZERO = np.datetime64(GPS_DATE_ZERO, NP_DATETIME_UNITS) if HAVE_NUMPY else None
 
 
 # %% Mypy support - _assert_never
@@ -373,15 +370,15 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
 
 # %% Functions - gps_to_datetime
 @overload
-def gps_to_datetime(week: int | _I, time: int | float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
+def gps_to_datetime(week: int | _I, time: float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
 @overload
 def gps_to_datetime(
-    week: int | _I, time: int | float | _I | _N, form: Literal["datetime"] = ...
+    week: int | _I, time: float | _I | _N, form: Literal["datetime"] = ...
 ) -> datetime.datetime | list[datetime.datetime]: ...
 @overload
-def gps_to_datetime(week: int | _I, time: int | float | _I | _N, form: Literal["numpy"]) -> np.datetime64 | _D: ...
+def gps_to_datetime(week: int | _I, time: float | _I | _N, form: Literal["numpy"]) -> np.datetime64 | _D: ...
 def gps_to_datetime(
-    week: int | _I, time: int | float | _I | _N, form: Literal["datetime", "numpy"] = "datetime"
+    week: int | _I, time: float | _I | _N, form: Literal["datetime", "numpy"] = "datetime"
 ) -> datetime.datetime | list[datetime.datetime] | np.datetime64 | _D:
     r"""
     Converts a GPS week and time to a Python datetime.
@@ -450,6 +447,7 @@ def gps_to_datetime(
                 date_gps.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
         # fmt: on
     elif form == "numpy":
+        assert NP_GPS_DATE_ZERO is not None
         start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY  # type: ignore[assignment]
         date_gps = start_week + time * NP_ONE_SECOND  # type: ignore[operator]
     else:
@@ -458,7 +456,7 @@ def gps_to_datetime(
 
 
 # %% Functions - get_gps_to_utc_offset
-def get_gps_to_utc_offset(days_since_gps_date_zero: int | float | _I | _N) -> _N:
+def get_gps_to_utc_offset(days_since_gps_date_zero: float | _I | _N) -> _N:
     """
     Calculate the GPS to UTC offset given the (fractional) number of days since GPS origin.
 
@@ -524,21 +522,21 @@ def get_gps_to_utc_offset(days_since_gps_date_zero: int | float | _I | _N) -> _N
 
 # %% Functions - gps_to_utc_datetime
 @overload
-def gps_to_utc_datetime(week: int | _I, time: int | float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
+def gps_to_utc_datetime(week: int | _I, time: float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
 @overload
 def gps_to_utc_datetime(
     week: int | _I,
-    time: int | float | _I | _N,
+    time: float | _I | _N,
     gps_to_utc_offset: int | _I | None,
     form: Literal["datetime"] = ...,
 ) -> datetime.datetime | list[datetime.datetime]: ...
 @overload
 def gps_to_utc_datetime(
-    week: int | _I, time: int | float | _I | _N, gps_to_utc_offset: int | _I | None, form: Literal["numpy"]
+    week: int | _I, time: float | _I | _N, gps_to_utc_offset: int | _I | None, form: Literal["numpy"]
 ) -> np.datetime64 | _D: ...
 def gps_to_utc_datetime(
     week: int | _I,
-    time: int | float | _I | _N,
+    time: float | _I | _N,
     gps_to_utc_offset: int | _I | None = None,
     form: Literal["datetime", "numpy"] = "datetime",
 ) -> datetime.datetime | list[datetime.datetime] | np.datetime64 | _D:
@@ -625,6 +623,7 @@ def gps_to_utc_datetime(
                 date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
         # fmt: on
     elif form == "numpy":
+        assert NP_GPS_DATE_ZERO is not None
         start_week_np = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
         date_utc = start_week_np + (time + gps_to_utc_offset) * NP_ONE_SECOND
     else:

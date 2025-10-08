@@ -67,11 +67,11 @@ kf2.att[3, 4] += 50e-6
 kf2.att    = space.quat_norm(kf2.att)
 kf2.pos    = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
 kf2.vel    = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100
-kf2.covar  = kf1.covar + 1e-9 * prng.random(*kf1.covar.shape)
+kf2.covar  = kf1.covar + 1e-9 * prng.random(kf1.covar.shape)
 kf2.active = kf1.active
 
 ix              = np.hstack((np.arange(7), np.arange(8, num_innovs)))
-kf2.innov.name  = "Sensor 1"
+kf2.innov.name  = "Sensor 2"
 kf2.innov.time  = kf1.innov.time[ix]
 kf2.innov.innov = kf1.innov.innov[:, ix] + 1e-8 * prng.random((num_axes, ix.size))
 kf2.innov.norm  = kf1.innov.norm[:, ix] + 0.1 * prng.random((num_axes, ix.size))

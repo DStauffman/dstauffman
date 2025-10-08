@@ -89,7 +89,7 @@ class Test_load_matlab(unittest.TestCase):
 
     def test_cell_arrays(self) -> None:
         out = dcs.load_matlab(self.filename4, varlist=("cdat",))
-        self.assertEqual(out.keys(), {"cdat",})  # fmt: skip
+        self.assertEqual(out.keys(), {"cdat"})  # fmt: skip
         np.testing.assert_array_equal(out["cdat"][0], self.row_nums_1d)
         np.testing.assert_array_equal(out["cdat"][1], self.col_nums_1d)
         np.testing.assert_array_equal(out["cdat"][2], self.mat_nums)

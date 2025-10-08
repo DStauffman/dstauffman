@@ -67,7 +67,7 @@ def _get_sub_level(this_sub: Any, part: str) -> Any:
     this_index = sub_parts[1].split("]")[0]
     try:
         this_key: int | str = int(this_index)
-    except Exception:  # pylint: disable=broad-exception-caught
+    except Exception:  # pylint: disable=broad-exception-caught  # noqa: BLE001
         this_key = this_index.replace('"', "").replace("'", "")
     this_value = temp_sub[this_key]
     if len(sub_parts) > 2:
@@ -115,7 +115,7 @@ def _check_valid_param_name(param: Any, name: str) -> bool:
     while level < len(parts):
         try:
             this_sub = _get_sub_level(this_sub, parts[level])
-        except Exception:  # pylint: disable=broad-exception-caught
+        except Exception:  # pylint: disable=broad-exception-caught  # noqa: BLE001
             return False
         level += 1
     # if we got here, then all the subpieces exist
@@ -221,7 +221,7 @@ def set_parameter(param: Any, names: list[str], values: list[Any]) -> None:
         this_index = sub_parts[1].split("]")[0]
         try:
             this_key: int | str = int(this_index)
-        except Exception:  # pylint: disable=broad-exception-caught
+        except Exception:  # pylint: disable=broad-exception-caught  # noqa: BLE001
             this_key = this_index.replace('"', "").replace("'", "")
         # set the value once on the last level
         if len(sub_parts) > 2:

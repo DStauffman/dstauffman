@@ -23,7 +23,7 @@ if dcs.HAVE_NUMPY:
 else:
     from math import inf, isnan, nan  # type: ignore[assignment]
 if dcs.HAVE_MPL:
-    import matplotlib.dates as dates
+    from matplotlib import dates
 
 
 # %% get_np_time_units

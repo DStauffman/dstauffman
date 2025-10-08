@@ -27,6 +27,7 @@ classifiers = [
     "Programming Langauge :: Python :: 3.11",
     "Programming Langauge :: Python :: 3.12",
     "Programming Langauge :: Python :: 3.13",
+    "Programming Langauge :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Astronomy",
     "Topic :: Scientific/Engineering :: Information Analysis",
@@ -58,7 +59,7 @@ dstauffman = ["CHANGELOG.md", "LICENSE.txt", "pyproject.toml", "README.rst", "*.
 
 [tool.black]
 line-length = 128
-target_version = ["py313"]
+target_version = ["py314"]
 include = '\.pyi?$'
 
 [tool.coverage.run]
@@ -168,7 +169,7 @@ add-ignore = ["D102", "D105", "D204"]
 include = ["pyproject.toml", "dstauffman/**/*.py", "scripts/**/*.py"]
 line-length = 128
 indent-width = 4
-target-version = "py313"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -180,120 +181,37 @@ ignore = [
     "D401",  # first line of docstring should be in imperative mood
     "D417",  # temp, fix these
     "E501",  # line too long, (use black to manage this)
-    "B007",
-    "B010",
-    "B018",
-    "B023",
-    "B026",
-    "B028",
-    "B030",
-    "B905",
-    "F841",
-    "G001",
+    "B028",  # no explicit stacklevel keyword argument
+    "B905",  # zip without an explicit strict parameter
     "I001",  # Import block is un-sorted or un-formatted (use isort to manage this)
-    "N801",
-    "N802",
-    "N803",
-    "N806",
-    "N812",
-    "N816",
-    "S101",
-    "S106",
-    "S107",
-    "S110",
-    "S603",
-    "S606",
-    "S607",
+    "S101",  # Use of assert
     "T201",  # `print` found
-    "ANN204",
-    "ANN401",
-    "ARG001",
-    "ARG005",
-    "ARG002",
-    "BLE001",
-    "COM812",
-    "COM819",
-    "DTZ001",
-    "DTZ005",
-    "DTZ007",
-    "EM101",
-    "EM102",
-    "EM103",
-    "ERA001",
-    "FBT001",
-    "FBT002",
-    "FBT003",
+    "ANN401",  # dynamically typed expressions (Any) are disallowed in kwargs
+    "COM812",  # Add trailing comma
+    "DTZ001",  # datetime called without a tzinfo argument
+    "DTZ005",  # datetime.now called without a tz argument
+    "EM101",  # exception must not use string literal
+    "EM102",  # exception must not use f-string
+    "ERA001",  # found commented-out code
+    "FBT001",  # boolean type in positional argument
+    "FBT002",  # boolean default in positional argument
+    "FBT003",  # boolean value in functional call
     "FIX002",  # line contains TODO
-    "FURB105",
-    "ICN001",
-    "ISC003",
-    "PD002",
-    "PERF401",
-    "PERF403",
-    "PIE790",
-    "PIE810",
-    "PLC0206",
-    "PLC0208",
-    "PLC0414",
-    "PLC0415",
-    "PLR0402",
-    "PLR0911",
-    "PLR0912",
-    "PLR0913",
-    "PLR0915",
-    "PLR1714",
-    "PLR1730",
-    "PLR2004",
-    "PLR5501",
-    "PLW0603",
-    "PLW1641",
-    "PLW2901",
+    "PLC0414",  # import alias does not rename original package
+    "PLR0912",  # too many branches
+    "PLR0913",  # too many arguments in function definition
+    "PLR0915",  # too many statements
+    "PLR2004",  # magic value
     "PT009",  # Use assert instead of unittest assertEqual
-    "PT018",
-    "PT027",
-    "PYI032",
-    "PYI041",
-    "PYI050",
-    "RET504",
-    "RUF001",
-    "RUF005",
-    "RUF021",
-    "RUF028",
-    "RUF034",
-    "RUF100",
-    "SIM102",
-    "SIM103",
-    "SIM105",
-    "SIM108",
-    "SIM110",
-    "SIM117",
-    "SIM118",
-    "SIM210",
-    "SIM300",
-    "SLF001",
-    "TC001",
-    "TC002",
-    "TC003",
+    "PT027",  # Use raises instead of assertRaises
+    "RET504",  # Unnecessary assignment before return
+    "TC001",  # Move application import into type checking block
+    "TC002",  # Move third party import into type checking block
+    "TC003",  # Move standard library import into type checking block
     "TD002",  # Missing author in TODO
     "TD003",  # Missing issue link in TODO
-    "TD005",
-    "TRY002",
-    "TRY003",
-    "TRY004",
-    "TRY203",
-    "TRY300",
-    "UP004",
-    "UP006",
-    "UP012",
-    "UP015",
-    "UP017",
-    "UP032",
-    "UP034",
-    "UP035",
-    "UP037",
-    "UP043",
-    "UP047",
-    "YTT204",
+    "TRY003",  # Avoid specifying long messages outside exceptions
+    "UP015",  # Unnecessary mode argument
 ]
 
 [tool.ruff.lint.mccabe]
@@ -301,7 +219,7 @@ max-complexity = 30
 
 [tool.ruff.lint.per-file-ignores]
 "dstauffman/**/__init__.py" = ["F401"]
-"dstauffman/tests/*" = ["D102", "D205", "D400", "D415", "N801", "N802", "N806", "RUF059"]
+"dstauffman/tests/*" = ["D102", "D205", "D400", "D415", "N801", "N802", "N806", "ARG002", "ARG005", "PIE790", "RUF059", "SLF001"]
 "scripts/*.py" = ["INP001"]
 
 [tool.ruff.format]
@@ -309,3 +227,29 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.ty.environment]
+python-version = "3.14"
+root = ["./dstauffman"]
+
+# Strict rules for source code
+[[tool.ty.overrides]]
+include = ["dstauffman", "scripts"]
+
+[tool.ty.overrides.rules]
+invalid-argument-type = "ignore"
+invalid-assignment = "ignore"
+invalid-return-type = "ignore"
+invalid-type-form = "ignore"
+missing-argument = "ignore"
+possibly-unbound-import = "ignore"
+unknown-argument = "ignore"
+unresolved-attribute = "ignore"
+unresolved-import = "ignore"
+
+# Relax rules for test files
+[[tool.ty.overrides]]
+include = ["**/tests/test_*.py"]
+
+[tool.ty.overrides.rules]
+unresolved-import = "ignore"

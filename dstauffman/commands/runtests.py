@@ -119,20 +119,16 @@ def execute_tests(args: argparse.Namespace) -> int:
         # run the docstring tests
         files = list_python_files(folder, recursive=True)
         return_code = run_docstrings(files, verbose=verbose)
+    elif use_pytest:
+        # run the unittests using pytest, with or without coverage
+        return_code = run_coverage(folder, cov_file=cov_file, report=False) if coverage else run_pytests(folder)  # ["-n", "auto"]  # fmt: skip
     else:
-        if use_pytest:
-            # run the unittests using pytest
-            if coverage:
-                return_code = run_coverage(folder, cov_file=cov_file, report=False)
-            else:
-                return_code = run_pytests(folder)  # ["-n", "auto"]
-        else:
-            if coverage:
-                print("Unable to run coverage with the unittest tool, please try pytest instead.")
-                return ReturnCodes.no_coverage_tool
-            # run the unittests using unittest (which is core python)
-            test_names = library if library is not None else "dstauffman.tests"
-            return_code = run_unittests(test_names)
+        if coverage:
+            print("Unable to run coverage with the unittest tool, please try pytest instead.")
+            return ReturnCodes.no_coverage_tool
+        # run the unittests using unittest (which is core python)
+        test_names = library if library is not None else "dstauffman.tests"
+        return_code = run_unittests(test_names)
     return return_code
 
 
@@ -220,14 +216,14 @@ def execute_coverage(args: argparse.Namespace) -> int:
             print(f'Coverage report not found at: "{filename}".')
             return ReturnCodes.bad_command
         if platform.system() == "Darwin":
-            subprocess.call(["open", str(filename)])
+            subprocess.call(["open", str(filename)])  # noqa: S603, S607
         # TODO: as of 2022-04, mypy v0.942 fails to recognize platform.system() == "Windows"
         # elif platform.system() == "Windows":
         elif sys.platform == "win32":
             assert platform.system() == "Windows"
-            os.startfile(filename)
+            os.startfile(filename)  # noqa: S606
         else:
-            subprocess.call(["xdg-open", str(filename)])
+            subprocess.call(["xdg-open", str(filename)])  # noqa: S603, S607
     return return_code
 
 

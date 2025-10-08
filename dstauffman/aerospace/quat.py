@@ -10,14 +10,16 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 import doctest
 import logging
-from typing import Callable, Final, TYPE_CHECKING, TypedDict
+from typing import Final, TYPE_CHECKING, TypedDict
 
 try:
     from typing import NotRequired, Unpack
 except ImportError:
     from typing_extensions import NotRequired, Unpack  # for Python v3.10
+
 import unittest
 
 from slog import LogLevel
@@ -75,7 +77,7 @@ def suppress_quat_checks() -> None:
     >>> suppress_quat_checks()
 
     """
-    global _USE_ASSERTIONS  # pylint: disable=global-statement
+    global _USE_ASSERTIONS  # pylint: disable=global-statement  # noqa: PLW0603
     _USE_ASSERTIONS = False
 
 
@@ -94,14 +96,12 @@ def unsuppress_quat_checks() -> None:
     >>> unsuppress_quat_checks()
 
     """
-    global _USE_ASSERTIONS  # pylint: disable=global-statement
+    global _USE_ASSERTIONS  # pylint: disable=global-statement  # noqa: PLW0603
     _USE_ASSERTIONS = True
 
 
 # %% Functions - quat_assertions
-def quat_assertions(  # noqa: C901
-    quat: _Q, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False
-) -> None:
+def quat_assertions(quat: _Q, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False) -> None:
     r"""
     Check assertions about valid quaternions.
 
@@ -169,19 +169,19 @@ def quat_assertions(  # noqa: C901
             else:
                 raise QuatAssertionError("NaNs are not allowed in quaternion.")
         ix = ~np.isnan(quat[0, :])
-        if not (np.all(-1 <= quat[0, ix]) and np.all(quat[0, ix] <= 1)):
+        if not (np.all(quat[0, ix] >= -1) and np.all(quat[0, ix] <= 1)):
             raise QuatAssertionError(
                 f'Quaternion has bad range in x value, min: "{np.min(quat[0, ix])}", max:"{np.max(quat[0, ix])}"'
             )
-        if not (np.all(-1 <= quat[1, ix]) and np.all(quat[1, ix] <= 1)):
+        if not (np.all(quat[1, ix] >= -1) and np.all(quat[1, ix] <= 1)):
             raise QuatAssertionError(
                 f'Quaternion has bad range in y value, min: "{np.min(quat[1, ix])}", max:"{np.max(quat[1, ix])}"'
             )
-        if not (np.all(-1 <= quat[2, ix]) and np.all(quat[2, ix] <= 1)):
+        if not (np.all(quat[2, ix] >= -1) and np.all(quat[2, ix] <= 1)):
             raise QuatAssertionError(
                 f'Quaternion has bad range in z value, min: "{np.min(quat[2, ix])}", max:"{np.max(quat[2, ix])}"'
             )
-        if not (np.all(0 <= quat[3, ix]) and np.all(quat[3, ix] <= 1)):
+        if not (np.all(quat[3, ix] >= 0) and np.all(quat[3, ix] <= 1)):
             raise QuatAssertionError(
                 f'Quaternion has bad range in s value, min: "{np.min(quat[3, ix])}", max:"{np.max(quat[3, ix])}"'
             )
@@ -519,9 +519,7 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
 
 
 # %% Functions - quat_from_euler
-def quat_from_euler(  # noqa: C901
-    angles: ArrayLike, seq: ArrayLike | None = None, **kwargs: Unpack[_QuatAssertionKwargs]
-) -> _Q:
+def quat_from_euler(angles: ArrayLike, seq: ArrayLike | None = None, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -622,7 +620,7 @@ def quat_from_euler(  # noqa: C901
 
 
 # %% Functions - quat_interp
-def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:  # noqa: C901
+def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
 
@@ -680,20 +678,16 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
     if num == 0:
         # optimization for when ti is empty
         return qout
-    if num == 1:
+    if num == 1 and ti in time:
         # optimization for simple use case(s), where ti is a scalar and contained in time
-        if ti in time:
-            ix = np.where(ti == time)[0]
-            if not ix:  # pragma: no branch
-                qout = quat[:, ix]
-                return qout
+        ix = np.where(ti == time)[0]
+        if not ix:  # pragma: no branch
+            qout = quat[:, ix]
+            return qout
 
     # Check time bounds
     # check for desired times that are outside the time vector
-    if len(time) == 0:
-        ix_exclusive = np.ones(ti.shape, dtype=bool)
-    else:
-        ix_exclusive = (ti < time[0]) | (ti > time[-1])
+    ix_exclusive = np.ones(ti.shape, dtype=bool) if len(time) == 0 else (ti < time[0]) | (ti > time[-1])
     if np.any(ix_exclusive):
         if inclusive:
             raise ValueError("Desired time not found within input time vector.")
@@ -868,11 +862,10 @@ def quat_mult(a: _Q, b: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     if a.size * b.size == 0:
         if min(a.shape[0], b.shape[0]) == 0:
             c: _Q = np.array([])
+        elif a.size == 0:
+            c = np.zeros(a.shape)
         else:
-            if a.size == 0:
-                c = np.zeros(a.shape)
-            else:
-                c = np.zeros(b.shape)
+            c = np.zeros(b.shape)
         quat_assertions(c, **kwargs)
         return c
     # single quaternion inputs case
@@ -1075,7 +1068,7 @@ def quat_times_vector(quat: _Q, v: _N) -> _Q:
 
 
 # %% Functions - quat_to_euler
-def quat_to_euler(  # noqa: C901
+def quat_to_euler(
     quat: _Q, seq: tuple[int, int, int] | list[int] | _N | None = None, **kwargs: Unpack[_QuatAssertionKwargs]
 ) -> _N:
     r"""
@@ -1224,11 +1217,10 @@ def quat_to_euler(  # noqa: C901
         # Compute angles
         if s1_c2 == 0 and c1_c2 == 0:
             theta1 = 0
+        elif group == 1:
+            theta1 = np.arctan2(-s1_c2, c1_c2)
         else:
-            if group == 1:
-                theta1 = np.arctan2(-s1_c2, c1_c2)
-            else:
-                theta1 = np.arctan2( s1_c2, c1_c2)  # fmt: skip
+            theta1 = np.arctan2( s1_c2, c1_c2)  # fmt: skip
         # compute sin and cos
         s1 = np.sin(theta1)
         c1 = np.cos(theta1)
@@ -1292,10 +1284,7 @@ def convert_att_quat_to_body_rate(
         # Note: could return NaNs instead?
         raise QuatAssertionError("Must have a time history of quaternions to calculate rate.")
     _, delta_error = quat_angle_diff(quat[:, :-1], quat[:, 1:], **kwargs)
-    if is_datetime(time):
-        dt = np.diff(time) / NP_ONE_SECOND
-    else:
-        dt = np.diff(time)
+    dt = np.diff(time) / NP_ONE_SECOND if is_datetime(time) else np.diff(time)
     rates = delta_error / dt
     if append:
         return postpend(rates, rates[..., -1:])  # type: ignore[call-overload, no-any-return]

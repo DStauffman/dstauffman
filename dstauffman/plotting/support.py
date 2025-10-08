@@ -10,6 +10,8 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
+import contextlib
 import datetime
 import doctest
 from functools import partial
@@ -22,12 +24,13 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Callable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
+from typing import Any, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
 
 try:
     from typing import NotRequired
 except ImportError:
     from typing_extensions import NotRequired  # for Python v3.10
+
 import unittest
 import warnings
 
@@ -63,10 +66,10 @@ from dstauffman import (
 
 if HAVE_MPL:
     import matplotlib as mpl
+    from matplotlib import colors
     from matplotlib.axes import Axes
     from matplotlib.backends.backend_pdf import PdfPages
     import matplotlib.cm as cmx
-    import matplotlib.colors as colors
 
     # Newer date stamps on axes, done here as this is the lowest level of the plotting submodule
     from matplotlib.dates import ConciseDateConverter, date2num
@@ -218,11 +221,11 @@ class _HoverButton(QPushButton):
                 self.setIcon(this_arg)
                 self.setIconSize(QSize(24, 24))
 
-    def enterEvent(self, event: Any) -> None:  # pylint: disable=unused-argument
+    def enterEvent(self, event: Any) -> None:  # pylint: disable=unused-argument  # noqa: N802, ARG002
         r"""Draw border on hover."""
         self.setStyleSheet("border: 1px; border-style: solid;")  # pragma: no cover
 
-    def leaveEvent(self, event: Any) -> None:  # pylint: disable=unused-argument
+    def leaveEvent(self, event: Any) -> None:  # pylint: disable=unused-argument  # noqa: N802, ARG002
         r"""Delete border after hover."""
         self.setStyleSheet("border: 0px;")  # pragma: no cover
 
@@ -263,10 +266,7 @@ class MyCustomToolbar:
         if not _HAVE_DISPLAY:
             return
         # check to see if a QApplication exists, and if not, make one
-        if QApplication.instance() is None:
-            self.qapp = QApplication(sys.argv)  # pragma: no cover
-        else:
-            self.qapp = QApplication.instance()  # type: ignore[assignment]
+        self.qapp = QApplication(sys.argv) if QApplication.instance() is None else QApplication.instance()
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
@@ -292,11 +292,11 @@ class MyCustomToolbar:
         fig.canvas.toolbar.addWidget(self.btn_close_all)  # type: ignore[attr-defined]
         self.btn_close_all.clicked.connect(self._close_all)
 
-    def _close_all(self, *args: Any) -> None:  # pylint: disable=unused-argument
+    def _close_all(self, *args: Any) -> None:  # pylint: disable=unused-argument  # noqa: ARG002
         r"""Close all the currently open plots."""
         close_all()
 
-    def next_plot(self, *args: Any) -> None:  # pylint: disable=unused-argument
+    def next_plot(self, *args: Any) -> None:  # pylint: disable=unused-argument  # noqa: ARG002
         r"""Bring up the next plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
@@ -307,17 +307,14 @@ class MyCustomToolbar:
             # find the active figure within the list
             if this_fig == all_figs[i]:
                 # find the next figure, with allowances for rolling over the list
-                if i < len(all_figs) - 1:
-                    next_fig = all_figs[i + 1]
-                else:
-                    next_fig = all_figs[0]
+                next_fig = all_figs[i + 1] if i < len(all_figs) - 1 else all_figs[0]
         # set the appropriate active figure
         fig = plt.figure(next_fig)
         # make it the active window
         assert fig.canvas.manager is not None
         fig.canvas.manager.window.raise_()  # type: ignore[attr-defined]
 
-    def prev_plot(self, *args: Any) -> None:  # pylint: disable=unused-argument
+    def prev_plot(self, *args: Any) -> None:  # pylint: disable=unused-argument  # noqa: ARG002
         r"""Bring up the previous plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
@@ -328,10 +325,7 @@ class MyCustomToolbar:
             # find the active figure within the list
             if this_fig == all_figs[i]:
                 # find the next figure, with allowances for rolling over the list
-                if i > 0:
-                    prev_fig = all_figs[i - 1]
-                else:
-                    prev_fig = all_figs[-1]
+                prev_fig = all_figs[i - 1] if i > 0 else all_figs[-1]
         # set the appropriate active figure
         fig = plt.figure(prev_fig)
         # make it the active window
@@ -381,8 +375,8 @@ class ColorMap(Frozen):
     def __init__(
         self,
         colormap: _CM | ColorMap | None = DEFAULT_COLORMAP,
-        low: int | float = 0,
-        high: int | float = 1,
+        low: float = 0,
+        high: float = 1,
         num_colors: int | None = None,
     ) -> None:
         self.num_colors = num_colors
@@ -421,7 +415,7 @@ class ColorMap(Frozen):
         # must initialize the empty scalar mapplable to show the colorbar correctly
         self.smap.set_array([])
 
-    def get_color(self, value: float | int | np.floating | np.int_) -> tuple[float, float, float, float]:
+    def get_color(self, value: float | np.floating | np.int_) -> tuple[float, float, float, float]:
         r"""Get the color based on the scalar value."""
         return self.smap.to_rgba(value)  # type: ignore[arg-type, return-value]
 
@@ -457,7 +451,7 @@ class ColorMap(Frozen):
         try:
             # for when PIL is not installed
             pnginfo = PngInfo()
-        except Exception:  # pylint: disable=broad-exception-caught
+        except Exception:  # pylint: disable=broad-exception-caught  # noqa: BLE001
             return None
         pnginfo.add_text("Title", title)
         pnginfo.add_text("Description", title)
@@ -494,9 +488,9 @@ def is_notebook() -> bool:
             return True  # Jupyter notebook or qtconsole
         if shell == "TerminalInteractiveShell":
             return False  # Terminal running IPython
-        return False  # Other unknown type (?)
     except NameError:
         return False  # Likely standard Python interpreter
+    return False  # Other unknown type (?)
 
 
 # %% Functions - close_all
@@ -531,14 +525,13 @@ def close_all(fig: _FigOrListFig | None = None) -> None:
             for this_fig in plt.get_fignums():
                 plt.figure(this_fig).clear()
                 plt.close(this_fig)
+        elif isinstance(fig, Figure):
+            fig.clear()
+            plt.close(fig)
         else:
-            if isinstance(fig, Figure):
-                fig.clear()
-                plt.close(fig)
-            else:
-                for this_fig in fig:  # type: ignore[assignment]
-                    this_fig.clear()  # type: ignore[attr-defined]
-                    plt.close(this_fig)
+            for this_fig in fig:  # type: ignore[assignment]
+                this_fig.clear()  # type: ignore[attr-defined]
+                plt.close(this_fig)
     gc.collect()
 
 
@@ -633,11 +626,7 @@ def ignore_plot_data(data: _Data | None, ignore_empties: bool, col: int | None =
     if not ignore_empties:
         return False
     # otherwise determine if ignoring by seeing if data is all zeros or nans
-    if col is None:
-        ignore = np.all((data == 0) | np.isnan(data))
-    else:
-        ignore = np.all((data[:, col] == 0) | np.isnan(data[:, col]))  # type: ignore[call-overload, index]
-    return ignore  # type: ignore[return-value]
+    return np.all((data == 0) | np.isnan(data)) if col is None else np.all((data[:, col] == 0) | np.isnan(data[:, col]))  # type: ignore[call-overload, index, return-value]  # fmt: skip
 
 
 # %% Functions - whitten
@@ -664,7 +653,7 @@ def whitten(color: tuple[float, ...], white: tuple[float, ...] = (1.0, 1.0, 1.0,
 
     """
     # apply the shift
-    new_color = tuple((c * (1 - dt) + w * dt for (c, w) in zip(color, white)))
+    new_color = tuple(c * (1 - dt) + w * dt for (c, w) in zip(color, white))
     return new_color
 
 
@@ -721,13 +710,11 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> str | tuple[st
             # special case when you have a displayless backend, check the suptitle, then the title
             # from the first axes
             throw_warning = True
-            if (sup := fig._suptitle) is not None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+            if (sup := fig._suptitle) is not None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
                 raw_title = sup.get_text()
             else:
-                try:
+                with contextlib.suppress(Exception):
                     raw_title = fig.axes[0].get_title()
-                except Exception:  # pylint: disable=broad-exception-caught
-                    pass
         if raw_title is None:
             raw_title = "None"
     # by this point raw_title should always be set to something, either "None" or "image" or a valid value
@@ -738,7 +725,9 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> str | tuple[st
 
 
 # %% Functions - resolve_name
-def resolve_name(name: str, force_win: bool | None = None, rep_token: str = "_", strip_classification: bool = True) -> str:
+def resolve_name(
+    name: str, force_win: bool | None = None, rep_token: str = "_", strip_classification: bool = True  # noqa: S107
+) -> str:
     r"""
     Resolves the given name to something that can be saved on the current OS.
 
@@ -771,10 +760,7 @@ def resolve_name(name: str, force_win: bool | None = None, rep_token: str = "_",
     bad_chars_unix = ["/", "\n"]
 
     # determine OS and thus which characters are bad
-    if force_win is None:
-        is_windows = platform.system() == "Windows"
-    else:
-        is_windows = force_win
+    is_windows = platform.system() == "Windows" if force_win is None else force_win
     bad_chars = bad_chars_win if is_windows else bad_chars_unix
 
     # initialize output
@@ -854,10 +840,7 @@ def storefig(
 
     """
     # make sure figs is a list
-    if isinstance(fig, list):
-        figs = fig
-    else:
-        figs = [fig]
+    figs = fig if isinstance(fig, list) else [fig]
     # make sure folder is a Path
     if isinstance(folder, str):
         folder = Path(folder).resolve()
@@ -938,10 +921,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
     if not prefix:
         return
     # force figs to be a list
-    if isinstance(fig, list):
-        figs = fig
-    else:
-        figs = [fig]
+    figs = fig if isinstance(fig, list) else [fig]
     # loop through figures
     for this_fig in figs:
         # get the manager
@@ -951,7 +931,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
         this_canvas_title = manager.get_window_title()
         manager.set_window_title(prefix + " - " + this_canvas_title)
         # update the suptitle (if it exists)
-        if (sup := this_fig._suptitle) is not None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+        if (sup := this_fig._suptitle) is not None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
             sup.set_text(prefix + " - " + sup.get_text())
         elif process_all or sup is None:
             # get axes list and loop through them
@@ -967,7 +947,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
 
 
 # %% Functions - disp_xlimits
-def disp_xlimits(  # noqa: C901
+def disp_xlimits(
     fig_or_axis: Figure | Axes | list[Figure | Axes], xmin: _Time | None = None, xmax: _Time | None = None
 ) -> None:
     r"""
@@ -1021,7 +1001,7 @@ def disp_xlimits(  # noqa: C901
         elif isinstance(this, Axes):
             ax.append(this)
         else:
-            raise ValueError("Unexpected item that is neither a figure nor axes.")
+            raise TypeError("Unexpected item that is neither a figure nor axes.")
     # loop through axes
     for this_axis in ax:
         # get xlimits for this axis
@@ -1029,17 +1009,11 @@ def disp_xlimits(  # noqa: C901
         (old_xmin, old_xmax) = this_axis.get_xlim()
         # set the new limits
         if xmin is not None:
-            if is_datetime(xmin):  # type: ignore[arg-type]
-                new_xmin = np.maximum(date2num(xmin), old_xmin)
-            else:
-                new_xmin = np.max([xmin, old_xmin])
+            new_xmin = np.maximum(date2num(xmin), old_xmin) if is_datetime(xmin) else np.max([xmin, old_xmin])  # type: ignore[arg-type]
         else:
             new_xmin = old_xmin
         if xmax is not None:
-            if is_datetime(xmax):  # type: ignore[arg-type]
-                new_xmax = np.minimum(date2num(xmax), old_xmax)
-            else:
-                new_xmax = np.min([xmax, old_xmax])
+            new_xmax = np.minimum(date2num(xmax), old_xmax) if is_datetime(xmax) else np.min([xmax, old_xmax])  # type: ignore[arg-type]
         else:
             new_xmax = old_xmax
         # check for bad conditions
@@ -1052,7 +1026,7 @@ def disp_xlimits(  # noqa: C901
 
 
 # %% Functions - zoom_ylim
-def zoom_ylim(  # noqa: C901
+def zoom_ylim(
     ax: Axes,
     time: _Times | None = None,
     data: _Data | None = None,
@@ -1290,11 +1264,7 @@ def get_screen_resolution() -> tuple[int, int]:
     if not _HAVE_DISPLAY:
         return (0, 0)
     # check to see if a QApplication exists, and if not, make one
-    app: QApplication
-    if QApplication.instance() is None:
-        app = QApplication(sys.argv)  # pragma: no cover
-    else:
-        app = QApplication.instance()  # type: ignore[assignment]
+    app: QApplication = QApplication(sys.argv) if QApplication.instance() is None else QApplication.instance()  # type: ignore[assignment]
     # query the resolution
     screen_resolution = app.screens()[0].geometry()
     # pull out the desired information
@@ -1351,7 +1321,7 @@ def show_zero_ylim(ax: Axes) -> None:
 
 
 # %% Functions - plot_second_units_wrapper
-def plot_second_units_wrapper(ax: Axes, second_units: int | float | tuple[str, float] | None) -> Axes | None:
+def plot_second_units_wrapper(ax: Axes, second_units: float | tuple[str, float] | None) -> Axes | None:
     r"""
     Wrapper to plot_second_yunits that allows numeric or dict options.
 
@@ -1402,7 +1372,7 @@ def plot_second_units_wrapper(ax: Axes, second_units: int | float | tuple[str, f
             label = second_units[0]
             value = second_units[1]
         # check if we got a no-op value
-        if not np.isnan(value) and value != 0 and value != 1:
+        if not np.isnan(value) and value not in {0, 1}:
             # if all is good, build the new label and call the lower level function
             old_label = ax.get_ylabel()
             ix1 = old_label.find("[")
@@ -1468,7 +1438,7 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
 
 
 # %% Functions - get_rms_indices
-def get_rms_indices(  # noqa: C901
+def get_rms_indices(
     time_one: _Times | None = None,
     time_two: _Times | None = None,
     time_overlap: _Times | None = None,
@@ -1528,17 +1498,13 @@ def get_rms_indices(  # noqa: C901
         r"""Determines if the given time should be processed."""
         if is_datetime(time):
             # if datetime, it's either the datetime.datetime version, or np.datetime64 version
-            if isinstance(time, datetime.datetime):
-                # process if any of the data is in the bound
-                process = func(time, t_bound)
-            else:
-                process = not np.isnat(time)  # type: ignore[arg-type]
+            # process if any of the data is in the bound
+            process = func(time, t_bound) if isinstance(time, datetime.datetime) else not np.isnat(time)  # type: ignore[arg-type]
+        elif time is None:
+            process = False
         else:
-            if time is None:
-                process = False
-            else:
-                process = not np.isnan(time) and not np.isinf(time) and func(time, t_bound)  # type: ignore[arg-type]
-        return process  # type: ignore[no-any-return]
+            process = not np.isnan(time) and not np.isinf(time) and func(time, t_bound)  # type: ignore[arg-type]
+        return process
 
     # TODO: functionalize this more so there is less repeated code
     # initialize output
@@ -1563,14 +1529,13 @@ def get_rms_indices(  # noqa: C901
             # have only time 1
             t_min = np.min(time_one)  # type: ignore[arg-type]
             t_max = np.max(time_one)  # type: ignore[arg-type]
+    elif have2:
+        # have only time 2
+        t_min = np.min(time_two)  # type: ignore[arg-type]
+        t_max = np.max(time_two)  # type: ignore[arg-type]
     else:
-        if have2:
-            # have only time 2
-            t_min = np.min(time_two)  # type: ignore[arg-type]
-            t_max = np.max(time_two)  # type: ignore[arg-type]
-        else:
-            # have neither time 1 nor time 2
-            raise AssertionError("At least one time vector must be given.")
+        # have neither time 1 nor time 2
+        raise AssertionError("At least one time vector must be given.")
     p1_min: _B
     p2_min: _B
     p3_min: _B
@@ -1609,7 +1574,7 @@ def get_rms_indices(  # noqa: C901
         if have3:
             p3_max = np.ones(time_overlap.shape, dtype=bool)  # type: ignore[union-attr]
         ix["pts"].append(t_max)
-    assert len(ix["pts"]) == 2 and ix["pts"][0] <= ix["pts"][1], f'Time points aren\'t as expected: "{ix["pts"]}"'
+    assert len(ix["pts"]) == 2 and ix["pts"][0] <= ix["pts"][1], f'Time points aren\'t as expected: "{ix["pts"]}"'  # noqa: PT018  # fmt: skip
     # calculate indices
     if have1:
         ix["one"] = p1_min & p1_max
@@ -1686,7 +1651,7 @@ def plot_vert_lines(
 
 
 # %% plot_phases
-def plot_phases(  # noqa: C901
+def plot_phases(
     ax: Axes,
     times: _D | _N | list[float] | list[np.datetime64] | tuple[_D, _D] | tuple[_N, _N] | tuple[float, float],
     colormap: _CM | ColorMap | None = "tab10",
@@ -1762,10 +1727,7 @@ def plot_phases(  # noqa: C901
         if labels is not None:
             if group_all:
                 assert isinstance(labels, str), "Labels must be a string if grouping all."
-                if use_legend:
-                    this_label = labels if i == 0 else ""
-                else:
-                    this_label = labels
+                this_label = (labels if i == 0 else "") if use_legend else labels
             else:
                 assert isinstance(labels, list), "Labels must be a list if not grouping all."
                 this_label = labels[i]
@@ -1845,20 +1807,17 @@ def get_classification(classify: str) -> tuple[str, str]:
 
     # get the classification based solely on the first letter and check that it is valid
     classification = classify[0]
-    assert classification in frozenset({"U", "C", "S", "T"}), f'Unexpected classification of "{classification}" found'
+    assert classification in ("U", "C", "S", "T"), f'Unexpected classification of "{classification}" found'
 
     # pull out anything past the first // as the caveat(s)
     slashes = classify.find("//")
-    if slashes == -1:
-        caveat = ""
-    else:
-        caveat = classify[slashes:]
+    caveat = "" if slashes == -1 else classify[slashes:]
 
     return (classification, caveat)
 
 
 # %% Functions - plot_classification
-def plot_classification(  # noqa: C901
+def plot_classification(
     ax: Axes, classification: str = "U", *, caveat: str = "", test: bool = False, location: str = "figure"
 ) -> None:
     r"""
@@ -2040,10 +1999,7 @@ def align_plots(fig: _FigOrListFig, pos: tuple[int, int] | None = None) -> None:
 
     """
     # force figs to be a list
-    if isinstance(fig, list):
-        figs = fig
-    else:
-        figs = [fig]
+    figs = fig if isinstance(fig, list) else [fig]
     # initialize position if given
     x_pos: int | None = None
     y_pos: int | None = None
@@ -2062,7 +2018,7 @@ def align_plots(fig: _FigOrListFig, pos: tuple[int, int] | None = None) -> None:
 
 
 # %% Functions - z_from_ci
-def z_from_ci(ci: int | float) -> float:
+def z_from_ci(ci: float) -> float:
     r"""
     Calculates the Z score that matches the desired confidence interval.
 
@@ -2094,7 +2050,7 @@ def z_from_ci(ci: int | float) -> float:
 
 
 # %% Functions - ci_from_z
-def ci_from_z(z: int | float) -> float:
+def ci_from_z(z: float) -> float:
     r"""
     Calculates the confidence interval that matches the Z score.
 
@@ -2174,6 +2130,7 @@ def save_figs_to_pdf(
         img_bufs = []
         img_list = []
         for fig in figs:
+            plt.figure(fig)
             img_buf = io.BytesIO()
             plt.savefig(img_buf, format="png")
             img_list.append(Image.open(img_buf))
@@ -2364,7 +2321,7 @@ def fig_ax_factory(
     sharex: bool,
     passthrough: Literal[True],
 ) -> tuple[None, ...]: ...
-def fig_ax_factory(  # noqa: C901
+def fig_ax_factory(
     num_figs: int | None = None,
     num_axes: int | tuple[int, int] = 1,
     *,
@@ -2446,11 +2403,10 @@ def fig_ax_factory(  # noqa: C901
             fig_ax = tuple((figs[f], axes[f]) for f in range(num_figs))  # type: ignore[misc]
         else:
             fig_ax = tuple((figs[f], axes[f][i]) for f in range(num_figs) for i in range(num_axes))  # type: ignore[index, misc]
-    else:
-        if layout == "rowwise":
-            fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for i in range(num_row) for j in range(num_col))  # type: ignore[call-overload, index]
-        elif layout == "colwise":
-            fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[call-overload, index]
+    elif layout == "rowwise":
+        fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for i in range(num_row) for j in range(num_col))  # type: ignore[call-overload, index]
+    elif layout == "colwise":
+        fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[call-overload, index]
     return fig_ax
 
 
@@ -2494,7 +2450,7 @@ def extra_plotter_factory(t_events: dict[str, np.datetime64], c_events: dict[str
 
     """
 
-    def _extra_plotter(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument
+    def _extra_plotter(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument  # noqa: ARG001
         keys = list(t_events.keys())
         times: _D = np.array([t_events[key] for key in keys], dtype=NP_DATETIME_FORM)
         colormap = ColorMap(colors.ListedColormap([c_events[key] for key in keys]))

@@ -13,7 +13,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 import dstauffman as dcs
-import dstauffman.commands as commands
+from dstauffman import commands
 
 
 # %% commands.parse_tests

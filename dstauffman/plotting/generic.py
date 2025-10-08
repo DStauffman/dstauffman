@@ -10,15 +10,17 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 import datetime
 import doctest
 import logging
-from typing import Any, Callable, Iterable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
+from typing import Any, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
 
 try:
     from typing import NotRequired
 except ImportError:
     from typing_extensions import NotRequired  # for Python v3.10
+
 import unittest
 
 from slog import LogLevel
@@ -198,7 +200,8 @@ def _build_diff_indices(
         # only have times2
         return _build_indices(times2, rms_xmin, rms_xmax, label="two")
     # have both times and times2
-    assert times1 is not None and times2 is not None
+    assert times1 is not None
+    assert times2 is not None
     assert time_overlap is not None, "Must have overlap time when you have both times1 and times2."
     same_time = len({id(time) for time in times1}) == 1 and len({id(time) for time in times2}) == 1
     for i, (this_time1, this_time2, this_overlap) in enumerate(zip(times1, times2, time_overlap)):
@@ -272,11 +275,10 @@ def _get_ylabels(
             ylabels = [f"{elements[i]} [{units}]" for i in range(num_channels)]
         else:
             ylabels = [""] * (num_channels - 1) + [f"{description} [{units}]"]
+    elif isinstance(ylabel, list):
+        ylabels = ylabel
     else:
-        if isinstance(ylabel, list):
-            ylabels = ylabel
-        else:
-            ylabels = [ylabel] * num_channels if single_lines else [""] * (num_channels - 1) + [ylabel]
+        ylabels = [ylabel] * num_channels if single_lines else [""] * (num_channels - 1) + [ylabel]
     return ylabels
 
 
@@ -410,7 +412,7 @@ def _draw_lines(
 
 
 # %% Functions - make_time_plot
-def make_time_plot(  # noqa: C901
+def make_time_plot(
     description: str,
     time: _Times,
     data: _Data,
@@ -550,7 +552,7 @@ def make_time_plot(  # noqa: C901
             else:
                 this_label += f" ({func_name}: {value})"
         _draw_lines(datashaders, this_time, this_data, plot_func, this_axes, symbol=symbol,  # type: ignore[arg-type]
-            markersize=4, color=cm.get_color(i), label=this_label, zorder=9, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
+            markersize=4, color=cm.get_color(i), label=this_label, zorder=9, use_datashader=use_datashader)  # fmt: skip
         xlim = _label_x(this_axes, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
@@ -926,16 +928,15 @@ def make_difference_plot(  # noqa: C901
                 else:
                     fig_ax = _create_figure(1, 2, 1, description=description)
                     fig_ax = tuple(item for temp in fig_ax for item in [temp] * num_channels)
-            else:
-                if single_lines1:
-                    if single_lines2:
-                        fig_ax = _create_figure(1, num_channels, 1, description=description) + _create_figure(1, num_channels, 1, description=description + " Difference")  # fmt: skip
-                    else:
-                        fig_ax = _create_figure(1, num_channels, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description + " Difference")  # fmt: skip
-                elif single_lines2:
-                    fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + _create_figure(1, num_channels, 1, description=description + " Difference")  # fmt: skip
+            elif single_lines1:
+                if single_lines2:
+                    fig_ax = _create_figure(1, num_channels, 1, description=description) + _create_figure(1, num_channels, 1, description=description + " Difference")  # fmt: skip
                 else:
-                    fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description + " Difference")  # fmt: skip
+                    fig_ax = _create_figure(1, num_channels, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description + " Difference")  # fmt: skip
+            elif single_lines2:
+                fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + _create_figure(1, num_channels, 1, description=description + " Difference")  # fmt: skip
+            else:
+                fig_ax = num_channels * _create_figure(1, 1, 1, description=description) + num_channels * _create_figure(1, 1, 1, description=description + " Difference")  # fmt: skip
         else:
             fig_ax = _create_figure(1, num_channels if single_lines1 else 1, 1, description=description)
             if not single_lines1:
@@ -975,7 +976,7 @@ def make_difference_plot(  # noqa: C901
                 else:
                     this_label += f" ({func_name}: {value})"
             _draw_lines(datashaders, this_time, this_data, plot_func, this_axes, symbol=symbol_one, markersize=4,  # type: ignore[arg-type]
-                color=cm.get_color(i), label=this_label, zorder=this_zorder, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
+                color=cm.get_color(i), label=this_label, zorder=this_zorder, use_datashader=use_datashader)  # fmt: skip
         this_label = f"{name_two} {elements[i]}" if name_two else f"{elements[i]}"
         if have_data_two:
             this_time2 = times2[i]
@@ -987,7 +988,7 @@ def make_difference_plot(  # noqa: C901
                 else:
                     this_label += f" ({func_name}: {value})"
             _draw_lines(datashaders, this_time2, this_data2, plot_func, this_axes, symbol=symbol_two, markersize=4,  # type: ignore[arg-type]
-                color=cm.get_color(i + color_offset), label=this_label, zorder=this_zorder + 1, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
+                color=cm.get_color(i + color_offset), label=this_label, zorder=this_zorder + 1, use_datashader=use_datashader)  # fmt: skip
         xlim = _label_x(this_axes, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
         zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         if plot_zero:
@@ -1022,7 +1023,7 @@ def make_difference_plot(  # noqa: C901
                 else:
                     this_label += f" ({func_name}: {value})"
             lines = _draw_lines(datashaders, time_overlap[i], diffs[i], plot_func, this_axes, symbol=".-", markersize=4,
-                color=cm.get_color(i + color_offset), label=this_label, zorder=this_zorder, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
+                color=cm.get_color(i + color_offset), label=this_label, zorder=this_zorder, use_datashader=use_datashader)  # fmt: skip
             if bool(datashaders) and bool(lines):
                 lines[0].set_linestyle("none")
             if show_extra and i == ix_diff[-1]:
@@ -1307,7 +1308,7 @@ def make_quaternion_plot(
 
 
 # %% Functions - make_error_bar_plot
-def make_error_bar_plot(  # noqa: C901
+def make_error_bar_plot(
     description: str,
     time: _Times,
     data: _Data,
@@ -1529,7 +1530,7 @@ def make_error_bar_plot(  # noqa: C901
 
 
 # %% Functions - make_bar_plot
-def make_bar_plot(  # noqa: C901
+def make_bar_plot(
     description: str,
     time: _Times,
     data: _Data,
@@ -1926,7 +1927,7 @@ def make_categories_plot(  # noqa: C901
             this_cat_ix = np.argmax(cat == cat_keys)
             this_color = cm.get_color(i * len(cat_keys) + this_cat_ix)
             lines = _draw_lines(datashaders, this_time[this_cats], this_data[this_cats], plot_func, sub_axes, symbol=".",
-                markersize=6, markerfacecolor=this_color, color=this_color, label=cat_label, zorder=3, use_datashader=use_datashader)  # fmt: skip  # noqa: E128
+                markersize=6, markerfacecolor=this_color, color=this_color, label=cat_label, zorder=3, use_datashader=use_datashader)  # fmt: skip
             if bool(lines):
                 lines[0].set_linestyle("none" if bool(datashaders) or not single_lines else "-")
         xlim = _label_x(this_axes, disp_xmin, disp_xmax, time_is_date, time_units, start_date)
@@ -1959,7 +1960,7 @@ def make_categories_plot(  # noqa: C901
 
     # add legend at the very end once everything has been done
     if legend_loc.lower() != "none":
-        for fig, ax in zip(figs, axes):
+        for ax in axes:
             for this_axes in ax:
                 this_axes.legend(loc=legend_loc)
 
@@ -1967,7 +1968,7 @@ def make_categories_plot(  # noqa: C901
 
 
 # %% make_connected_sets
-def make_connected_sets(  # noqa: C901
+def make_connected_sets(
     description: str,
     points: _M,
     innovs: _M | None,
@@ -2067,7 +2068,7 @@ def make_connected_sets(  # noqa: C901
 
     # get index to subset of points for datashading
     if use_datashader:
-        assert HAVE_PANDAS and HAVE_DS, "You must have pandas and datashader to run datashader plots."
+        assert HAVE_PANDAS and HAVE_DS, "You must have pandas and datashader to run datashader plots."  # noqa: PT018
         if points.shape[1] < datashader_pts:
             ix = np.arange(points.shape[1])
         else:
@@ -2141,7 +2142,7 @@ def make_connected_sets(  # noqa: C901
     else:
         (fig, ax) = fig_ax
     assert fig.canvas.manager is not None
-    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
         fig.canvas.manager.set_window_title(description + extra_text)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())

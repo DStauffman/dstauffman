@@ -64,7 +64,7 @@ def print_version() -> int:
     try:
         version = ".".join(str(x) for x in version_info)
         return_code = ReturnCodes.clean
-    except Exception:  # pylint: disable=broad-exception-caught
+    except Exception:  # pylint: disable=broad-exception-caught  # noqa: BLE001
         version = "unknown"
         return_code = ReturnCodes.bad_version
     print(version)
@@ -132,7 +132,7 @@ def parse_version(input_args: list[str]) -> argparse.Namespace:
 
 
 # %% Functions - execute_help
-def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument
+def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument  # noqa: ARG001
     r"""
     Executes the help command.
 
@@ -158,7 +158,7 @@ def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-arg
 
 
 # %% Functions - execute_version
-def execute_version(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument
+def execute_version(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument  # noqa: ARG001
     r"""
     Executes the version command.
 

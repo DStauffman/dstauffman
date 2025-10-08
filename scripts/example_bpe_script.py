@@ -33,20 +33,19 @@ if TYPE_CHECKING:
 class SimParams(dcs.Frozen):
     r"""Simulation model parameters."""
 
-    def __init__(self, time: _N, *, magnitude: float, frequency: float, phase: float):
+    def __init__(self, time: _N, *, magnitude: float, frequency: float, phase: float) -> None:
         self.time = time
         self.magnitude = magnitude
         self.frequency = frequency
         self.phase = phase
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         r"""Allows classes to compare contents to determine if equal."""
         if not isinstance(other, SimParams):
             return False
-        for key in vars(self):
-            if np.any(getattr(self, key) != getattr(other, key)):
-                return False
-        return True
+        return all(not np.any(getattr(self, key) != getattr(other, key)) for key in vars(self))
+
+    __hash__ = None  # type: ignore[assignment]
 
     def __repr__(self) -> str:
         r"""Detailed string representation."""
@@ -81,9 +80,7 @@ def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: floa
 
 
 # %% Functions - cost_wrapper
-def cost_wrapper(  # pylint: disable=unused-argument
-    results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams
-) -> _N:
+def cost_wrapper(results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams) -> _N:  # pylint: disable=unused-argument  # noqa: ARG001  # fmt: skip
     r"""Calculate innovations (cost) for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
@@ -190,7 +187,7 @@ if __name__ == "__main__":
         # fmt: on
 
         # make model plots
-        extra_plotter = lambda fig, ax: ax[0].plot(  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731
+        extra_plotter = lambda fig, ax: ax[0].plot(  # pylint: disable=unnecessary-lambda-assignment  # noqa: E731, ARG005
             truth_time, truth_data, ".-", color="xkcd:black", zorder=8, label="Observed"
         )
         f1 = plot.plot_time_history("Output vs. Time", time, results, opts=opts, extra_plotter=extra_plotter)

@@ -10,9 +10,10 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 import datetime
 from pathlib import Path
-from typing import Any, Callable, ClassVar
+from typing import Any, ClassVar
 
 import numpy as np
 
@@ -33,11 +34,11 @@ class Results(Frozen, metaclass=SaveAndLoad):
     """Custom class using datetime64's that can be saved and loaded from HDF5 files."""
 
     # fmt: off
-    load: ClassVar[Callable[[Path | None], Results]]  # noqa: F821
-    save: Callable[[Path | None], None]  # noqa: F821
+    load: ClassVar[Callable[[Path | None], Results]]
+    save: Callable[[Path | None], None]
     # fmt: on
 
-    def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None):
+    def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None) -> None:
         self.time = np.arange(num)
         self.data = np.random.default_rng().random(self.time.shape)
         self.date = np.full(self.time.shape, NP_NAT)
@@ -49,7 +50,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
         self.date = self.date.astype(np.int64)
         return {}
 
-    def _save_restore_hdf5(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    def _save_restore_hdf5(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument  # noqa: ARG002
         self.date = self.date.astype(NP_DATETIME_FORM)
 
 

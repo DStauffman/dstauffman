@@ -23,7 +23,7 @@ from dstauffman.units import get_time_factor, ONE_DAY
 from dstauffman.utils import is_datetime
 
 if HAVE_MPL:
-    import matplotlib.dates as dates
+    from matplotlib import dates
 if HAVE_NUMPY:
     import numpy as np
 
@@ -92,10 +92,7 @@ def get_np_time_units(date: np.datetime64 | np.timedelta64 | str) -> str | None:
 
     """
     # convert the type to a string
-    if isinstance(date, str):
-        unit_str = date
-    else:
-        unit_str = str(date.dtype)
+    unit_str = date if isinstance(date, str) else str(date.dtype)
     # parse for a name and units in brackets
     matches = re.split(r"\[(.*)\]$", unit_str)
     form = matches[0]
@@ -179,10 +176,7 @@ def round_datetime(dt: datetime.datetime | None = None, /, round_to_sec: int = 6
     seconds = (dt - dt.min).seconds
     # round to the nearest whole second
     rounding: float
-    if floor:
-        rounding = seconds // round_to_sec * round_to_sec
-    else:
-        rounding = (seconds + round_to_sec / 2) // round_to_sec * round_to_sec
+    rounding = seconds // round_to_sec * round_to_sec if floor else (seconds + round_to_sec / 2) // round_to_sec * round_to_sec
     # return the rounded result
     return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
 
@@ -240,10 +234,7 @@ def round_np_datetime(
     date_in_int: _I = date_in.astype(np.int64)  # type: ignore[assignment]
     dt_int: _I = time_delta.astype(np.int64)  # type: ignore[assignment]
     # quantize to the desired unit
-    if floor:
-        quants = date_in_int // dt_int
-    else:
-        quants = date_in_int // dt_int + ((date_in_int % dt_int) // (dt_int // 2))
+    quants = date_in_int // dt_int if floor else date_in_int // dt_int + date_in_int % dt_int // (dt_int // 2)
     # scale and convert back to datetime outputs
     date_out: _D = (dt_int * quants).astype(date_in.dtype)
     return date_out
@@ -291,10 +282,7 @@ def round_num_datetime(date_in: _N, /, time_delta: float, floor: bool = False) -
     if (max_date / time_delta) > (0.01 / np.finfo(float).eps):
         warnings.warn("This function may have problems if time_delta gets too small.")
     quants = date_in / time_delta
-    if floor:
-        rounded = np.floor(quants)
-    else:
-        rounded = np.round(quants)
+    rounded = np.floor(quants) if floor else np.round(quants)
     date_out: _N = rounded * time_delta
     return date_out
 
@@ -407,7 +395,7 @@ def convert_date(  # noqa: C901
     # fmt: off
     date_forms = {"datetime", "numpy", "matplotlib"}
     # TODO: allow time forms for "min", "hr", "day", "month", "year", etc.
-    time_forms = {"sec",}
+    time_forms = {"sec"}
     # fmt: on
     all_forms = date_forms | time_forms
     # data checks
@@ -427,19 +415,18 @@ def convert_date(  # noqa: C901
     if form != "datetime" and old_form != "datetime":
         date = np.asanyarray(date)
         is_actual_date = np.any(isfinite(date))  # type: ignore[assignment]
+    # determine if you have real dates to process
+    elif date is None:
+        is_actual_date = False
+    elif isinstance(date, (datetime.datetime, datetime.date)):
+        is_actual_date = True
+    elif isinstance(date, list):
+        # Note: this assumes all entries of the list are the same
+        is_actual_date = len(date) > 0 and isinstance(date[0], (datetime.datetime, datetime.date))
+    elif isinstance(date, (int, float)):
+        is_actual_date = isfinite(date)
     else:
-        # determine if you have real dates to process
-        if date is None:
-            is_actual_date = False
-        elif isinstance(date, (datetime.datetime, datetime.date)):
-            is_actual_date = True
-        elif isinstance(date, list):
-            # Note: this assumes all entries of the list are the same
-            is_actual_date = len(date) > 0 and isinstance(date[0], (datetime.datetime, datetime.date))
-        elif isinstance(date, (int, float)):
-            is_actual_date = isfinite(date)
-        else:
-            is_actual_date = np.any(isfinite(date))  # type: ignore[assignment]
+        is_actual_date = np.any(isfinite(date))  # type: ignore[assignment]
     # check for bad date_zero
     if form in time_forms or (old_form in time_forms and is_actual_date):
         if date_zero is None:
@@ -492,7 +479,7 @@ def convert_date(  # noqa: C901
         if form == "datetime":
             out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.timezone.utc) if is_num else None  # fmt: skip
             # When Python v3.11 and newer:
-            # out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.UTC) if is_num else None  # fmt: skip
+            # out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.UTC) if is_num else None
         elif form == "matplotlib":
             out = dates.date2num(date)
         elif form in time_forms:  # pragma: no branch
@@ -521,7 +508,7 @@ def convert_date(  # noqa: C901
 
 
 # %% Functions - convert_time_units
-def convert_time_units(time: int | float, old_unit: str, new_unit: str) -> int | float:
+def convert_time_units(time: float, old_unit: str, new_unit: str) -> int | float:
     r"""
     Converts the given time history from the old units to the new units.
 
@@ -640,7 +627,7 @@ def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_U
 
 
 # %% Functions - convert_num_dt_to_np
-def convert_num_dt_to_np(dt: int | float, /, units: str = "sec", np_units: str = NP_TIMEDELTA_FORM) -> np.timedelta64:
+def convert_num_dt_to_np(dt: float, /, units: str = "sec", np_units: str = NP_TIMEDELTA_FORM) -> np.timedelta64:
     r"""
     Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
 

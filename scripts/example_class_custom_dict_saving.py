@@ -10,9 +10,10 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 import datetime
 from pathlib import Path
-from typing import Callable, ClassVar, TYPE_CHECKING
+from typing import ClassVar, TYPE_CHECKING
 
 import numpy as np
 
@@ -37,11 +38,11 @@ class Results(Frozen, metaclass=SaveAndLoad):
     meta: dict[str, str]
 
     # fmt: off
-    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], Results]]  # noqa: F821
-    save: Callable[[Path | None], None]  # noqa: F821
+    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], Results]]  # noqa: F821, RUF100
+    save: Callable[[Path | None], None]
     # fmt: on
 
-    def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None, name: str = ""):
+    def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None, name: str = "") -> None:
         self.time = np.arange(num)
         self.data = np.random.default_rng().random(self.time.shape)
         self.date = np.full(self.time.shape, NP_NAT)

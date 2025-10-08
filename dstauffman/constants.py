@@ -32,7 +32,7 @@ try:
 except ModuleNotFoundError:
     HAVE_H5PY = False
 try:
-    import matplotlib
+    import matplotlib  # noqa: ICN001
 
     assert matplotlib  # not really used, but it silences the warnings
     HAVE_MPL = True

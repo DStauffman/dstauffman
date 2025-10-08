@@ -97,7 +97,7 @@ def get_map_data(source: str = "110m") -> tuple[dict[str, _M], dict[str, tuple[f
 
 
 # %% Functions - plot_map
-def plot_map(  # noqa: C901
+def plot_map(
     map_data: dict[str, _M] | None = None,
     lat: _N | None = None,
     lon: _N | None = None,
@@ -153,10 +153,7 @@ def plot_map(  # noqa: C901
     # checks
     assert units in {"deg", "rad"}, "Unexpected units"
     assert latlon_units in {"deg", "rad"}, "Unexpected lat/lon units"
-    if units == "deg":
-        latlon_scale = 1.0 if latlon_units == "deg" else RAD2DEG
-    else:
-        latlon_scale = 1.0 if latlon_units == "rad" else DEG2RAD
+    latlon_scale = (1.0 if latlon_units == "deg" else RAD2DEG) if units == "deg" else 1.0 if latlon_units == "rad" else DEG2RAD
 
     # load data
     if map_data is None:
@@ -278,7 +275,7 @@ def plot_map(  # noqa: C901
 
 
 # %% Functions - plot_map_3d
-def plot_map_3d(  # noqa: C901
+def plot_map_3d(
     map_data: dict[str, _M] | None = None,
     lat: _N | None = None,
     lon: _N | None = None,

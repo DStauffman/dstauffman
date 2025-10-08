@@ -20,6 +20,7 @@ try:
     from typing import NotRequired
 except ImportError:
     from typing_extensions import NotRequired  # for Python v3.10
+
 import unittest
 
 from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS, NP_DATETIME_UNITS, NP_NAT
@@ -27,9 +28,9 @@ import dstauffman.plotting as plot
 
 if HAVE_MPL:
     import matplotlib as mpl
+    from matplotlib import colors
     from matplotlib.axes import Axes
     import matplotlib.cm as cmx
-    import matplotlib.colors as colors
     from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
@@ -516,11 +517,11 @@ class Test_plotting_resolve_name(unittest.TestCase):
 
     def test_different_replacements(self) -> None:
         bad_name = 'new <>:"/\\|?*text'
-        new_name = plot.resolve_name(bad_name, force_win=True, rep_token="X")
+        new_name = plot.resolve_name(bad_name, force_win=True, rep_token="X")  # noqa: S106
         self.assertEqual(new_name, "new XXXXXXXXXtext")
         new_name = plot.resolve_name(bad_name, force_win=True, rep_token="")
         self.assertEqual(new_name, "new text")
-        new_name = plot.resolve_name(bad_name, force_win=True, rep_token="YY")
+        new_name = plot.resolve_name(bad_name, force_win=True, rep_token="YY")  # noqa: S106
         self.assertEqual(new_name, "new YYYYYYYYYYYYYYYYYYtext")
 
     def test_newlines(self) -> None:
@@ -605,12 +606,10 @@ class Test_plotting_storefig(unittest.TestCase):
     def test_bad_folder(self) -> None:
         with self.assertRaises(ValueError):
             plot.storefig(self.fig, "X:\\non_existant_path", show_warn=self.show_warn)
-        # TODO:
-        pass
+        pass  # TODO: add some more tests
 
     def test_bad_plot_type(self) -> None:
-        # TODO:
-        pass
+        pass  # TODO: write this
 
     def test_bad_characters(self) -> None:
         # change to bad name
@@ -1017,14 +1016,14 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
 
     def test_nominal(self) -> None:
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap, xmin=self.xmin, xmax=self.xmax)
-        for key in ix.keys():
+        for key in ix:
             np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_only_time_one(self) -> None:
         self.exp["two"] = np.array([], dtype=bool)
         self.exp["overlap"] = np.array([], dtype=bool)
         ix = plot.get_rms_indices(self.time_one, None, None, xmin=self.xmin, xmax=self.xmax)
-        for key in ix.keys():
+        for key in ix:
             np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_no_bounds(self) -> None:
@@ -1033,7 +1032,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         self.exp["overlap"].fill(True)
         self.exp["pts"] = [0, 12]
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap)
-        for key in ix.keys():
+        for key in ix:
             np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_datetime64(self) -> None:
@@ -1170,7 +1169,7 @@ class Test_plotting_plot_classification(unittest.TestCase):
         plot.plot_classification(self.ax, "U", caveat="//TEXT STR")
 
     def test_options(self) -> None:
-        for opt in {"C", "S", "T", "TS"}:
+        for opt in ("C", "S", "T", "TS"):
             plot.plot_classification(self.ax, opt, test=True, location="figure")
 
     def test_bad_option(self) -> None:
@@ -1208,7 +1207,7 @@ class Test_plotting_z_from_ci(unittest.TestCase):
     def test_nominal(self) -> None:
         for ci, exp_z in zip(self.cis, self.zs):
             z = plot.z_from_ci(ci)
-            self.assertTrue(abs(z - exp_z) < 0.001, "{} and {} are more than 0.001 from each other.".format(z, exp_z))
+            self.assertTrue(abs(z - exp_z) < 0.001, f"{z} and {exp_z} are more than 0.001 from each other.")
 
 
 # %% plotting.ci_from_z

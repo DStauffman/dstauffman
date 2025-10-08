@@ -11,16 +11,19 @@ Notes
 
 """  # pylint: disable=too-many-lines
 
+# ruff: noqa: N806
+
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 from copy import deepcopy
 import doctest
 from itertools import repeat
 import logging
 from pathlib import Path
 import time
-from typing import Any, Callable, ClassVar, Literal, overload, TYPE_CHECKING
+from typing import Any, ClassVar, Literal, overload, TYPE_CHECKING
 import unittest
 
 from nubs import ncjit
@@ -110,17 +113,15 @@ class OptiOpts(Frozen):
         self.max_cores: int | None  = None  # set to a number to parallelize, use -1 for all
         # fmt: on
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         r"""Check for equality based on the values of the fields."""
         # if not of the same type, then they are not equal
         if not isinstance(other, type(self)):
             return False
         # loop through the fields, and if any are not equal, then it's not equal
-        for key in vars(self):
-            if getattr(self, key) != getattr(other, key):
-                return False
-        # if it made it all the way through the fields, then things must be equal
-        return True
+        return all(getattr(self, key) == getattr(other, key) for key in vars(self))
+
+    __hash__ = None  # type: ignore[assignment]
 
 
 # %% OptiParam
@@ -174,7 +175,7 @@ class OptiParam(Frozen):
         max_: float = inf,
         minstep: float = 1e-4,
         typical: float = 1.0,
-    ):
+    ) -> None:
         self.name = name
         self.best = best
         self.min_ = min_
@@ -182,7 +183,7 @@ class OptiParam(Frozen):
         self.minstep = minstep
         self.typical = typical
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         r"""Check for equality between two OptiParam instances."""
         # if not of the same type, then they are not equal
         if not isinstance(other, type(self)):
@@ -195,6 +196,8 @@ class OptiParam(Frozen):
                 return False
         # if it made it all the way through the fields, then things must be equal
         return True
+
+    __hash__ = None  # type: ignore[assignment]
 
     @staticmethod
     def get_array(opti_param: list[OptiParam], type_: str = "best") -> _N:
@@ -232,7 +235,7 @@ class OptiParam(Frozen):
         return out
 
     @staticmethod
-    def get_names(opti_param: list["OptiParam"]) -> list[str]:
+    def get_names(opti_param: list[OptiParam]) -> list[str]:
         r"""
         Get the names of the optimization parameters as a list.
 
@@ -264,7 +267,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
 
     """
 
-    save: Callable[[Path | None], None]  # noqa: F821
+    save: Callable[[Path | None], None]
 
     def __init__(self) -> None:
         # fmt: off
@@ -396,7 +399,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
 
     """
 
-    load: ClassVar[Callable[[Path | None], "CurrentResults"]]
+    load: ClassVar[Callable[[Path | None], CurrentResults]]
     save: Callable[[Path | None], None]
 
     def __init__(self) -> None:
@@ -486,20 +489,19 @@ def _calc_sum_squares(data: ArrayLike, axis: int | None = None, keepdims: bool =
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
         out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)
-    else:
-        # check for all NaNs case
-        if np.all(np.isnan(data)):
-            if axis is None:
-                out = np.nan
-            else:
-                assert isinstance(data, np.ndarray)
-                if keepdims:
-                    shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
-                else:
-                    shape = (*data.shape[:axis], *data.shape[axis + 1 :])
-                out = np.full(shape, np.nan)
+    # check for all NaNs case
+    elif np.all(np.isnan(data)):
+        if axis is None:
+            out = np.nan
         else:
-            out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
+            assert isinstance(data, np.ndarray)
+            if keepdims:
+                shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
+            else:
+                shape = (*data.shape[:axis], *data.shape[axis + 1 :])
+            out = np.full(shape, np.nan)
+    else:
+        out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
     # return the result
     return out  # type: ignore[return-value]
 
@@ -621,13 +623,13 @@ def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: dict[str
         innovs = _function_wrapper(
             model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, cost_args=opti_opts.cost_args, model_args=model_args
         )
-    except Exception as e:  # pylint: disable=broad-except
+    except Exception as e:  # pylint: disable=broad-except  # noqa: BLE001
         return MultipassExceptionWrapper(e)
     return innovs
 
 
 # %% _finite_differences
-def _finite_differences(  # noqa: C901
+def _finite_differences(
     opti_opts: OptiOpts,
     model_args: dict[str, Any],
     bpe_results: BpeResults,
@@ -958,46 +960,45 @@ def _double_dogleg(
         new_delta_param = delta_param.copy()
         step_type = "Newton"
         step_scale = 1.0
+    # Compute a step somewhere on the dog leg
+    elif trust_radius / newton_len >= relaxed_newton_len:
+        # Step is along the Newton direction and has length equal to trust radius
+        step_scale = trust_radius / newton_len
+        step_type = "restrained Newton"
+        new_delta_param = step_scale * delta_param
+    elif cauchy_len > trust_radius:
+        # Cauchy step is outside trust region so take gradient step
+        step_scale = trust_radius / cauchy_len
+        step_type = "gradient"
+        new_delta_param = -(trust_radius / gradient_len) * gradient
     else:
-        # Compute a step somewhere on the dog leg
-        if trust_radius / newton_len >= relaxed_newton_len:
-            # Step is along the Newton direction and has length equal to trust radius
-            step_scale = trust_radius / newton_len
-            step_type = "restrained Newton"
-            new_delta_param = step_scale * delta_param
-        elif cauchy_len > trust_radius:
-            # Cauchy step is outside trust region so take gradient step
-            step_scale = trust_radius / cauchy_len
-            step_type = "gradient"
-            new_delta_param = -(trust_radius / gradient_len) * gradient
-        else:
-            # Take a dogleg step between relaxed Newton and Cauchy steps
-            # This will be on a line between the Cauchy point and the relaxed
-            # Newton point such that the distance from the initial point
-            # and the restrained point is equal to the trust radius.
+        # Take a dogleg step between relaxed Newton and Cauchy steps
+        # This will be on a line between the Cauchy point and the relaxed
+        # Newton point such that the distance from the initial point
+        # and the restrained point is equal to the trust radius.
 
-            # Cauchy point is at the predicted minimum of the function along the
-            # gradient search direction
-            cauchy_pt = -cauchy_len / gradient_len * gradient
-            new_minus_cau = relaxed_newton_len * delta_param - cauchy_pt
-            cau_dot_new_minus_cau = cauchy_pt.T @ new_minus_cau
-            cau_len_sq = cauchy_pt.T @ cauchy_pt
-            new_minus_cau_len_sq = new_minus_cau.T @ new_minus_cau
-            tr_sq_minus_cau_sq = trust_radius**2 - cau_len_sq
-            discr = np.sqrt(cau_dot_new_minus_cau**2 + new_minus_cau_len_sq * tr_sq_minus_cau_sq)
-            # Compute weighting between Newton and Cauchy steps
-            # Weighting = 1 gives Newton step
-            # Weighting = 0 gives Cauchy step
-            if cau_dot_new_minus_cau < 0:
-                # angle between Cauchy and Newton-Cauchy is greater than 90 deg
-                new_cau_weighting = (discr - cau_dot_new_minus_cau) / new_minus_cau_len_sq
-            else:
-                # angle between Cauchy and Newton-Cauchy is less than 90 deg
-                new_cau_weighting = tr_sq_minus_cau_sq / (cau_dot_new_minus_cau + discr)
-            # save these results
-            step_scale = float(new_cau_weighting)
-            step_type = "Newton-Cauchy"
-            new_delta_param = cauchy_pt + new_cau_weighting * new_minus_cau
+        # Cauchy point is at the predicted minimum of the function along the
+        # gradient search direction
+        cauchy_pt = -cauchy_len / gradient_len * gradient
+        new_minus_cau = relaxed_newton_len * delta_param - cauchy_pt
+        cau_dot_new_minus_cau = cauchy_pt.T @ new_minus_cau
+        cau_len_sq = cauchy_pt.T @ cauchy_pt
+        new_minus_cau_len_sq = new_minus_cau.T @ new_minus_cau
+        tr_sq_minus_cau_sq = trust_radius**2 - cau_len_sq
+        discr = np.sqrt(cau_dot_new_minus_cau**2 + new_minus_cau_len_sq * tr_sq_minus_cau_sq)
+        # Compute weighting between Newton and Cauchy steps
+        # Weighting = 1 gives Newton step
+        # Weighting = 0 gives Cauchy step
+        if cau_dot_new_minus_cau < 0:
+            # angle between Cauchy and Newton-Cauchy is greater than 90 deg
+            new_cau_weighting = (discr - cau_dot_new_minus_cau) / new_minus_cau_len_sq
+        else:
+            # angle between Cauchy and Newton-Cauchy is less than 90 deg
+            new_cau_weighting = tr_sq_minus_cau_sq / (cau_dot_new_minus_cau + discr)
+        # save these results
+        step_scale = float(new_cau_weighting)
+        step_type = "Newton-Cauchy"
+        new_delta_param = cauchy_pt + new_cau_weighting * new_minus_cau
 
     # calculate the new step length for output
     step_len: float = norm(new_delta_param)  # type: ignore[assignment]
@@ -1006,7 +1007,7 @@ def _double_dogleg(
 
 
 # %% _dogleg_search
-def _dogleg_search(  # pylint: disable=too-many-positional-arguments  # noqa: C901
+def _dogleg_search(  # pylint: disable=too-many-positional-arguments
     opti_opts: OptiOpts,
     model_args: dict[str, Any],
     bpe_results: BpeResults,
@@ -1112,10 +1113,7 @@ def _dogleg_search(  # pylint: disable=too-many-positional-arguments  # noqa: C9
 
         # evaluate the cost function at the new parameter values
         sum_sq_innov = _calc_sum_squares(innovs, ignore_nans=True)
-        if opti_opts.is_max_like:
-            trial_cost = 0.5 * (sum_sq_innov + log_det_B)
-        else:
-            trial_cost = 0.5 * sum_sq_innov
+        trial_cost = 0.5 * (sum_sq_innov + log_det_B) if opti_opts.is_max_like else 0.5 * sum_sq_innov
 
         # check if this step actually an improvement
         assert cur_results.cost is not None
@@ -1147,25 +1145,24 @@ def _dogleg_search(  # pylint: disable=too-many-positional-arguments  # noqa: C9
                 step_resolution = "Constrained step yielded some improvement, so try still longer step."
                 # fmt: on
 
+        # Candidate step yielded no improvement
+        elif tried_expanding:
+            # Give up the search
+            try_again = False
+            trust_radius /= opti_opts.grow_radius
+            step_resolution = "Worse result after expanding, so accept previous restrained step."
         else:
-            # Candidate step yielded no improvement
-            if tried_expanding:
-                # Give up the search
-                try_again = False
-                trust_radius /= opti_opts.grow_radius
-                step_resolution = "Worse result after expanding, so accept previous restrained step."
+            # There is still hope. Reduce step size.
+            tried_shrinking = True
+            if step_type == "Newton":
+                # A Newton step failed.
+                trust_radius = opti_opts.shrink_radius * step_len
             else:
-                # There is still hope. Reduce step size.
-                tried_shrinking = True
-                if step_type == "Newton":
-                    # A Newton step failed.
-                    trust_radius = opti_opts.shrink_radius * step_len
-                else:
-                    # Some other type of step failed.
-                    trust_radius *= opti_opts.shrink_radius
-                step_resolution = "Bad step rejected, try still smaller step."
-                num_shrinks += 1
-                try_again = True
+                # Some other type of step failed.
+                trust_radius *= opti_opts.shrink_radius
+            step_resolution = "Bad step rejected, try still smaller step."
+            num_shrinks += 1
+            try_again = True
 
         logger.log(LogLevel.L8, " Tried a %s step of length: %s, (with scale: %s).", step_type, step_len, step_scale)
         logger.log(LogLevel.L8, " New trial cost: %s", trial_cost)
@@ -1238,7 +1235,7 @@ def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M,
     # Compute values of un-normalized parameters.
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_="typical")
-        normalize_matrix = np.diag((1 / param_typical))
+        normalize_matrix = np.diag(1 / param_typical)
     else:
         normalize_matrix = np.eye(num_params)
 
@@ -1277,7 +1274,7 @@ def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M,
 
 
 # %% validate_opti_opts
-def validate_opti_opts(opti_opts: OptiOpts) -> bool:  # noqa: C901
+def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     r"""
     Validate the optimization options.
 
@@ -1314,17 +1311,17 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:  # noqa: C901
     logger.log(LogLevel.L5, "Validating optimization options.")
     # Must have specified all parameters
     if not callable(opti_opts.model_func):
-        raise AssertionError("Model function must be callable.")
+        raise AssertionError("Model function must be callable.")  # noqa: TRY004
     if not isinstance(opti_opts.model_args, dict):
-        raise AssertionError("Model args must be a dictionary.")
+        raise AssertionError("Model args must be a dictionary.")  # noqa: TRY004
     if not callable(opti_opts.cost_func):
-        raise AssertionError("Cost function must be callable.")
+        raise AssertionError("Cost function must be callable.")  # noqa: TRY004
     if not isinstance(opti_opts.cost_args, dict):
-        raise AssertionError("Cost args must be a dictionary.")
+        raise AssertionError("Cost args must be a dictionary.")  # noqa: TRY004
     if not callable(opti_opts.get_param_func):
-        raise AssertionError("Get parameters function must be callable.")
+        raise AssertionError("Get parameters function must be callable.")  # noqa: TRY004
     if not callable(opti_opts.set_param_func):
-        raise AssertionError("Get paramaters function must be callable.")
+        raise AssertionError("Get paramaters function must be callable.")  # noqa: TRY004
     if opti_opts.output_folder is not None and not isinstance(opti_opts.output_folder, Path):
         raise AssertionError("Use None or pathlib.Path, not str for output_folder.")
     if opti_opts.output_results is not None and not isinstance(opti_opts.output_results, Path):
@@ -1343,7 +1340,7 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:  # noqa: C901
 
 
 # %% run_bpe
-def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:  # noqa: C901
+def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:
     r"""
     Run the batch parameter estimator with the given model optimization options.
 
@@ -1404,10 +1401,7 @@ def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:  # noqa: C901
     model_args = deepcopy(opti_opts.model_args)
 
     # run an optional initialization function
-    if opti_opts.start_func is not None:
-        init_saves = opti_opts.start_func(**model_args)
-    else:
-        init_saves = {}
+    init_saves = opti_opts.start_func(**model_args) if opti_opts.start_func is not None else {}
 
     # future calculations
     hessian_log_det_b = 0  # TODO: calculate somewhere later
@@ -1444,10 +1438,9 @@ def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:  # noqa: C901
     logger.log(LogLevel.L5, " Initial cost: %s", cur_results.cost)
 
     # Set-up saving: check that the folder exists
-    if is_saving:
-        if opti_opts.output_folder is not None and not opti_opts.output_folder.is_dir():
-            # if the folder doesn't exist, then create it
-            make_dir(opti_opts.output_folder)  # pragma: no cover
+    if is_saving and opti_opts.output_folder is not None and not opti_opts.output_folder.is_dir():
+        # if the folder doesn't exist, then create it
+        make_dir(opti_opts.output_folder)  # pragma: no cover
 
     # Do some stuff
     convergence = False

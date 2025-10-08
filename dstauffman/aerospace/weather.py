@@ -81,7 +81,7 @@ def read_kp_ap_etc_data(filename: Path) -> pd.DataFrame:
     # fmt: on
     df = pd.read_table(filename, names=names, sep=r"\s+", comment="#")
     # convert year-month-day to a GMT value
-    df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)
+    df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)  # noqa: PD002
     df.insert(0, "GMT", pd.to_datetime(df[["year", "month", "day"]]))
     return df
 
@@ -92,13 +92,13 @@ def read_kp_ap_nowcast(filename: Path) -> pd.DataFrame:
     names = ["YYY", "MM", "DD", "hour_start", "hour_middle", "days", "days_m", "Kp", "ap", "D"]
     df = pd.read_table(filename, names=names, sep=r"\s+", comment="#")
     # convert year-moth-day to a GMT value (including hour)
-    df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)
+    df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)  # noqa: PD002
     df.insert(0, "GMT", pd.to_datetime(df[["year", "month", "day"]]) + pd.to_timedelta(df.hour_start, "hour"))
     return df
 
 
 # %% Functions - load_solar_cycles
-def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
+def read_solar_cycles(filename: Path) -> pd.DataFrame:
     """Read the solar cycle history."""
 
     def _get_duration(text: str) -> int | float:
@@ -115,7 +115,7 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
             return NP_NAT
         if text.startswith("("):
             return NP_NAT
-        return datetime.datetime.strptime(text.strip(), "%Y-%m")
+        return datetime.datetime.strptime(text.strip(), "%Y-%m")  # noqa: DTZ007
 
     def _remove_parens(text: str) -> int | float:
         if not text:

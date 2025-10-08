@@ -10,8 +10,9 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from collections.abc import Callable
 import pathlib
-from typing import Callable, ClassVar, TYPE_CHECKING
+from typing import ClassVar, TYPE_CHECKING
 import unittest
 
 from slog import capture_output
@@ -37,7 +38,7 @@ if TYPE_CHECKING:
 
 # %% Locals classes for testing
 class _Example_Frozen(dcs.Frozen):
-    def __init__(self, dummy: int | None = None):
+    def __init__(self, dummy: int | None = None) -> None:
         self.field_one: int | str = 1
         self.field_two: int = 2
         self.field_ten: int = 10
@@ -47,15 +48,15 @@ class _Example_Frozen(dcs.Frozen):
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     load: ClassVar[
         Callable[
-            [pathlib.Path | None, DefaultNamedArg(bool, "return_meta")],  # noqa: F821
+            [pathlib.Path | None, DefaultNamedArg(bool, "return_meta")],  # noqa: F821, RUF100
             _Example_SaveAndLoad,
         ]
     ]
     save: Callable[
         [
             pathlib.Path | None,
-            DefaultNamedArg(dict, "meta"),  # noqa: F821
-            DefaultNamedArg(set, "exclusions"),  # noqa: F821
+            DefaultNamedArg(dict, "meta"),  # noqa: F821, RUF100
+            DefaultNamedArg(set, "exclusions"),  # noqa: F821, RUF100
         ],
         None,
     ]
@@ -73,7 +74,7 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
         self.z = None
 
 
-class _Example_No_Override(object, metaclass=dcs.SaveAndLoad):
+class _Example_No_Override(metaclass=dcs.SaveAndLoad):
     @staticmethod
     def save() -> int:
         return 1
@@ -83,21 +84,17 @@ class _Example_No_Override(object, metaclass=dcs.SaveAndLoad):
         return 2
 
 
-class _Example_Times(object):
-    def __init__(self, time: _N, data: _N, name: str = "name"):
+class _Example_Times:
+    def __init__(self, time: _N, data: _N, name: str = "name") -> None:
         self.time = time
         self.data = data
         self.name = name
 
     def chop(self, ti: float = -inf, tf: float = inf) -> None:
-        dcs.chop_time(
-            self, ti=ti, tf=tf, time_field="time", exclude=frozenset({"name",})  # fmt: skip
-        )
+        dcs.chop_time(self, ti=ti, tf=tf, time_field="time", exclude=frozenset({"name"}))
 
     def subsample(self, skip: int = 30, start: int = 0) -> None:
-        dcs.subsample_class(
-            self, skip=skip, start=start, skip_fields=frozenset({"name",})  # fmt: skip
-        )
+        dcs.subsample_class(self, skip=skip, start=start, skip_fields=frozenset({"name"}))
 
 
 # %% save_hdf5 & load_hdf5 - mostly covered by SaveAndLoad
@@ -113,8 +110,8 @@ class Test_save_and_load_hdf5(unittest.TestCase):
         df = DataFrame(data)
         dcs.save_hdf5(df, self.filename)
         data2 = dcs.load_hdf5(None, self.filename)
-        for key in data.keys():
-            np.testing.assert_array_equal(data[key], getattr(data2, key))
+        for key, value in data.items():
+            np.testing.assert_array_equal(value, getattr(data2, key))
 
     def tearDown(self) -> None:
         self.filename.unlink(missing_ok=True)
@@ -297,7 +294,7 @@ class Test_Frozen(unittest.TestCase):
         temp = _Example_Frozen(dummy=5)
         temp.field_one = "not one"
         temp.dummy = 10
-        setattr(temp, "dummy", 15)
+        setattr(temp, "dummy", 15)  # noqa: B010
         self.assertTrue(True)
 
     def test_new_attr(self) -> None:

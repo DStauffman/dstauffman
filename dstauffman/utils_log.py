@@ -60,9 +60,9 @@ def fix_rollover(data: _N, roll: float, axis: int) -> _N: ...
 def fix_rollover(data: _I, roll: int, axis: int | None, check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _I: ...
 @overload
 def fix_rollover(data: _N, roll: float, axis: int | None, check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _N: ...
-def fix_rollover(  # noqa: C901
+def fix_rollover(
     data: _I | _N,
-    roll: int | float,
+    roll: float,
     axis: int | None = None,
     check_accel: bool = False,
     **kwargs: Unpack[_OutlierKwArgs],
@@ -76,8 +76,12 @@ def fix_rollover(  # noqa: C901
         Raw input data with rollovers
     roll : int or float
         Range over which the data rolls over
-    axis : int
+    axis : int, optional
         Axes to unroll over
+    check_accel : bool, optional, default is False
+        Whether to check the second derivative for acceleration rollovers
+    **kwargs, from {"num_iters", "return_stats", "inplace", "hardmax"}
+        Additional keyword arguments to be passed to remove outliers function
 
     Returns
     -------

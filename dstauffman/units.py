@@ -172,8 +172,8 @@ def get_time_factor(unit: str) -> int:
 
 
 # %% Functions - get_unit_conversion
-def get_unit_conversion(  # noqa: C901
-    conversion: str | int | float | _nf | tuple[str, float] | tuple[str, _nf] | None, units: str = ""
+def get_unit_conversion(
+    conversion: str | float | _nf | tuple[str, float] | tuple[str, _nf] | None, units: str = ""
 ) -> tuple[str, float]:
     r"""
     Acts as a wrapper to unit conversions for legends in plots and for scaling second axes.
@@ -222,7 +222,7 @@ def get_unit_conversion(  # noqa: C901
     if isinstance(conversion, (int, float)):
         return ("", conversion)
     if not isinstance(conversion, str):
-        assert isinstance(conversion, tuple) and len(conversion) == 2, "Expect a tuple with exactly two elements."
+        assert isinstance(conversion, tuple) and len(conversion) == 2, "Expect a tuple with exactly two elements."  # noqa: PT018  # fmt: skip
         return (conversion[0], float(conversion[1]))
     if conversion == "percentage":
         return ("%", 100)

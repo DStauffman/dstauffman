@@ -7,6 +7,8 @@ Notes
 
 """
 
+# ruff: noqa: N803, N806
+
 # %% Imports
 from __future__ import annotations
 
