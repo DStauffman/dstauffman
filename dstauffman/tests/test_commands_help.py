@@ -29,7 +29,7 @@ class Test_commands_print_help(unittest.TestCase):
             commands.print_help()
         output = ctx.get_output()
         ctx.close()
-        expected_header = output.startswith("#######\ndstauffman\n#######\n")
+        expected_header = output.startswith("##########\ndstauffman\n##########\n")
         self.assertTrue(expected_header)
 
     def test_specify_file(self) -> None:
@@ -103,7 +103,7 @@ class Test_commands_execute_help(unittest.TestCase):
             commands.execute_help(self.args)
         output = ctx.get_output()
         ctx.close()
-        expected_header = output.startswith("#######\ndstauffman\n#######\n")
+        expected_header = output.startswith("##########\ndstauffman\n##########\n")
         self.assertTrue(expected_header)
 
 
