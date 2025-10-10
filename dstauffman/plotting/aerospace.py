@@ -35,7 +35,7 @@ from dstauffman.plotting.generic import (
     make_time_plot,
 )
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
-from dstauffman.plotting.support import ColorMap, ExtraPlotter, fig_ax_factory, get_nondeg_colorlists, get_rms_indices, plot_phases
+from dstauffman.plotting.support import ColorMap, ExtraPlotter, fig_ax_factory, get_nondeg_colorlists, get_rms_indices, plot_phases  # fmt: skip
 
 if HAVE_MPL:
     from matplotlib.axes import Axes
