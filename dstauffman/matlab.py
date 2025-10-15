@@ -59,6 +59,8 @@ def load_matlab(
         Name of the variables to load
     squeeze : bool, optional, default is True
         Whether to squeeze any singleton vectors down a dimension
+    enums : dict[str, Any], optional
+        Decoder ring for Matlab enums, as the details of how they are actually saved is magic
 
     Returns
     -------
@@ -256,7 +258,7 @@ def subspace(A: _M, B: _M) -> float:
 
 
 # %% Functions - ecdf
-def ecdf(y: float | list[float] | _N, /) -> tuple[_N, _N]:
+def ecdf(y: float | list[float] | _N, /) -> tuple[_N, _N]:  # noqa: D417
     r"""
     Calculate the empirical cumulative distribution function, as in Matlab's ecdf function.
 

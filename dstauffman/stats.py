@@ -386,6 +386,10 @@ def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.Generator, inplace
         Input mask
     prob : float
         Probability to apply to mask
+    prng : class numpy.random.Generator
+        Pseudo-random number generator
+    inplace : bool, optional, default is False
+        Whether to apply probablity to the mask inplace
 
     Returns
     -------

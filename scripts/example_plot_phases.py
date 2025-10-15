@@ -3,7 +3,6 @@
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
 import datetime
 from typing import TYPE_CHECKING
 
@@ -13,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman import convert_datetime_to_np, NP_ONE_SECOND
-from dstauffman.plotting import COLOR_LISTS, make_time_plot, plot_phases
+from dstauffman.plotting import COLOR_LISTS, ExtraPlotter, make_time_plot, plot_phases
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -24,11 +23,11 @@ if TYPE_CHECKING:
 # %% Functions
 def extra_plotter_func(
     time_phases: _D, labels: str = "Times", group_all: bool = True, use_legend: bool = False
-) -> Callable[[Figure, Axes], None]:
+) -> ExtraPlotter:
     """Wrapper to the plot_phases to be passed into other functions."""
 
-    def _plot_phases(fig: Figure, ax: Axes) -> None:  # pylint: disable=unused-argument  # noqa: ARG001
-        for this_axes in ax:  # type: ignore[attr-defined]
+    def _plot_phases(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument  # noqa: ARG001
+        for this_axes in ax:
             plot_phases(this_axes, time_phases, labels=labels, group_all=group_all, use_legend=use_legend)
 
     return _plot_phases
@@ -70,5 +69,5 @@ if __name__ == "__main__":
         time_units="numpy",
         elements=("Sin", "Cos"),
         label_vert_lines=False,
-        extra_plotter=extra_plotter,  # type: ignore[arg-type]
+        extra_plotter=extra_plotter,
     )

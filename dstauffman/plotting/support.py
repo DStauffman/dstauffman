@@ -739,6 +739,8 @@ def resolve_name(
         Flag to it to Windows or Unix methods, mostly for testing
     rep_token : str, optional
         Character to use to replace the bad ones with, default is underscore
+    strip_classification: bool, optional, default is True
+        Whether to strip the classification out of the name when producing the new name
 
     Returns
     -------
@@ -1670,6 +1672,16 @@ def plot_phases(
         Figure axes
     times : (1xN) or (2xN) list of times, if it has two rows, then the second are the end points
          otherwise assume the sections are continuous.
+    colormap : str or matplotlib.colors.Colormap, optional
+        Name of colormap to use, if specified, overrides the opts.colormap
+    labels : list of str or str, optional
+        Labels to use on each phase, or single label for them all if grouped
+    group_all : bool, optional, default is False
+        Whether to group all the phases together into a single legend entry
+    use_legend : bool, optional, default is False
+        Whether to inlude the phases in the legend
+    transparency : float, optional, default is 0.2
+        How transparent to make the phases, 1.0 makes them completely opaque
 
     Examples
     --------
@@ -1980,6 +1992,8 @@ def align_plots(fig: _FigOrListFig, pos: tuple[int, int] | None = None) -> None:
     ----------
     fig : list or single instance of matplotlib.Figure
         List of figures to align together
+    pos : tuple[int, int], optional
+        Position in pixels to move the plot to, if not given, uses whatever the first plot had
 
     Notes
     -----
@@ -2096,6 +2110,8 @@ def save_figs_to_pdf(
         Figures to save, None means save all open figures
     filename : str, optional
         Name of the file to save the figures to, defaults to "figs.pdf" in the current folder
+    rasterized : bool, optional, default is False
+        Whether to rasterize to pixels the pages in the PDF instead of using a vector format
 
     Notes
     -----

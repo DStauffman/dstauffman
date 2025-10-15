@@ -49,8 +49,10 @@ def calculate_kalman_gain(
         Measurement Update Matrix
     R : () ndarray
         Measurement Noise Matrix
-    use_inverse : bool, optional
-        Whether to explicitly calculate the inverse or not, default is False
+    use_inverse : bool, optional, default is False
+        Whether to explicitly calculate the inverse or not
+    return_innov_cov : bool, optional, default is False
+        Whether to additionally return the innovation covariance
 
     Returns
     -------

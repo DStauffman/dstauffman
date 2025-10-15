@@ -85,7 +85,7 @@ def _check_valid_param_name(param: Any, name: str) -> bool:
     ----------
     param : class Parameters
         Model parameters
-    names : str
+    name : str
         Name of the parameters you want to check
 
     Returns

@@ -64,6 +64,14 @@ def int2bin(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char:
     ----------
     num : int
         number to convert
+    pad : int, optional, default is 0
+        How many digits to pad with the pad_char
+    sep : int, optional, default is 0
+        How many times to repeat the sep_char for separations
+    pad_char : str, optional, default is "0"
+        The character to use to pad
+    sep_char : str, optional, default is "_"
+        The character to use to separate sections
 
     Returns
     -------
@@ -101,6 +109,16 @@ def int2hex(num: int, *, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_ch
     ----------
     num : int
         number to convert
+    pad : int, optional, default is 0
+        How many digits to pad with the pad_char
+    sep : int, optional, default is 0
+        How many times to repeat the sep_char for separations
+    pad_char : str, optional, default is "0"
+        The character to use to pad
+    sep_char : str, optional, default is "_"
+        The character to use to separate sections
+    upper : bool, optional, default is False
+        Whether to use upper or lowercase hex
 
     Returns
     -------
@@ -169,12 +187,14 @@ def read_bit_stream(file: BinaryIO, num_lines: int = 10, reset: bool = False, en
 
     Parameters
     ----------
-    fid :
+    file : class BinaryIO
         data stream
     num_lines : int
         Number of lines (64 bits at a time) to read
     reset : bool, default is False
         Whether to reset back to where you started
+    endian : str, optional, default is "big", from {"native", "big", "small"}
+        Endianness to use when reading the file
 
     Examples
     --------

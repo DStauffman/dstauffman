@@ -2015,6 +2015,8 @@ def make_connected_sets(
         Amount to scale the colorbar legend
     colormap : str, optional
         Name to use instead of the default colormaps, which depend on the mode
+    use_datashader : str, optional
+        Whether to use datashader calculate colors by pixels for large datasets
     add_quiver : bool, optional, default is False
         Whether to add matplotlib quiver lines to the plot
     quiver_scale : float, optional

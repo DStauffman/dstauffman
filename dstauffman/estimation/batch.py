@@ -428,6 +428,8 @@ def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
     ----------
     new_line : bool, optional
         Whether to include a newline in the print statement
+    level : int or LogLevel
+        Level of logging
 
     Examples
     --------
@@ -461,6 +463,8 @@ def _calc_sum_squares(data: ArrayLike, axis: int | None = None, keepdims: bool =
     keepdims : bool, optional
         If true, the axes which are reduced are left in the result as dimensions with size one.
         With this option, the result will broadcast correctly against the original `data`.
+    ignore_nans : bool, optional, default is False
+        Whether to ignore NaNs when doing the sum
 
     Returns
     -------
@@ -596,7 +600,12 @@ def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: dict[str
 
     Parameters
     ----------
-    TBD
+    opti_opts : class OptiOpts
+        Optimization parameters
+    msg : str
+        Message to log when executing the function wrapper
+    model_args : dict[str, Any]
+        Model arguments by name to pass into wrapped model function
 
     Returns
     -------
@@ -775,9 +784,12 @@ def _levenberg_marquardt(jacobian: _M, innovs: _N, lambda_: float = 0.0) -> _N:
 
     Parameters
     ----------
-    jacobian :
-    lambda_  :
-    innovs   :
+    jacobian : 2D numpy.ndarray
+        Jacobian matrix
+    innovs   : 1D numpy.ndarray
+        Innovation history as a flattened array
+    lambda_  : float
+        Lambda parameters, conveying how much certainty is in the system
 
     Returns
     -------
@@ -1191,8 +1203,8 @@ def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M,
         Optimization options
     bpe_results : class BpeResults
         Batch Parameter Estimator results
-    jacobian :
-
+    jacobian : 2D numpy.ndarray
+        Jacobian matrix
     normalized : bool, optional, default is False
         Whether to normalize the change in the parameter values
 

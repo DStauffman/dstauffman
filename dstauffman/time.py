@@ -144,6 +144,8 @@ def round_datetime(dt: datetime.datetime | None = None, /, round_to_sec: int = 6
         time to round, default now.
     round_to_sec : int
         Closest number of seconds to round to, default 60 seconds (i.e. rounds to nearest minute)
+    floor : bool, optional default is False
+        Whether to floor the time, instead of rounding to the nearest dt
 
     Returns
     -------
@@ -600,7 +602,7 @@ def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_U
 
     Parameters
     ----------
-    time : datetime.timedelta
+    dt : datetime.timedelta
         time duration
     units : str, optional
         Units to use within numpy.datetime64
@@ -637,6 +639,8 @@ def convert_num_dt_to_np(dt: float, /, units: str = "sec", np_units: str = NP_TI
         time duration [sec]
     units : str, optional
         Units to use within numpy.datetime64
+    np_units : str, option
+        Optional units to convert the numpy.datetime64 to at the end
 
     Returns
     -------

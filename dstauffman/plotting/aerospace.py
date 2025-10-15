@@ -266,6 +266,8 @@ def plot_quaternion(
         Whether to skip the setup_plots step, in case you are manually adding to an existing axis
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
+    **kwargs : dict
+        Additional keyword arguments to override plotting options or pass to lower level plot function
 
     Returns
     -------
@@ -448,6 +450,10 @@ def plot_attitude(
         Plotting options
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
+    fields : dict[str, str], optional
+        Fields to plot, default is covar and Covariance
+    **kwargs : dict
+        Additional keyword arguments to override plotting options or pass to lower level plot function
 
     Returns
     -------
@@ -685,6 +691,10 @@ def plot_position(
         Plotting options
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
+    fields : dict[str, str], optional
+        Fields to plot, default is covar and Covariance
+    **kwargs : dict
+        Additional keyword arguments to override plotting options or pass to lower level plot function
 
     Returns
     -------
@@ -1509,6 +1519,12 @@ def plot_covariance(
         Plotting options
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
+    groups : iterable of ints
+        How to group plots based on state numbers
+    fields : dict[str, str], optional
+        Fields to plot, default is covar and Covariance
+    **kwargs : dict
+        Additional keyword arguments to override plotting options or pass to lower level plot function
 
     Returns
     -------
@@ -1772,7 +1788,7 @@ def plot_tci(
         Time
     data : (N,)
         Thermosphere Climate Index data
-    solar_cyles : (A,) optional
+    solar_cycles : (A,) optional
         Solar cycle start times
     solar_labels : (A,) list of str
         Solar cycle labels

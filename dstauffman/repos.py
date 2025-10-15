@@ -131,6 +131,10 @@ def run_pytests(folder: Path, *args: str, **kwargs: Any) -> int:
     ----------
     folder : class pathlib.Path
         Folder to process for test cases
+    *args : Any
+        Additional position arguments to pass to pytest.main
+    **kwargs : dict
+        Additional keyword arguments to pass to pytest.main
 
     Returns
     -------

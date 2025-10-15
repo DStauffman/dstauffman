@@ -253,6 +253,8 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
             (3) for z-axis
     angle : array_like
         angle of rotation in radians
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -321,6 +323,8 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_Qu
         Unit vector(s)
     angle : float or (N, ) numpy.ndarray of float
         angle of rotation(s) in radians
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -385,6 +389,8 @@ def quat_from_rotation_vector(rv: ArrayLike, **kwargs: Unpack[_QuatAssertionKwar
     ----------
     rv: (3, ) on (3, N) numpy.ndarray of float
         vector(s) where the magnitude gives the amount of rotation
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -433,6 +439,8 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
         quaternion one
     quat2 : ndarray (4,) or (4, N)
         quaternion two
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -536,6 +544,8 @@ def quat_from_euler(angles: ArrayLike, seq: ArrayLike | None = None, **kwargs: U
             1 = X axis, or roll
             2 = Y axis, or pitch
             3 = Z axis, or yaw
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -634,6 +644,8 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
         desired time of interpolation, also monotonically increasing [sec]
     inclusive : bool {True, False}, optional
         Whether ti must be only inclusive to the `time` vector.
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -765,6 +777,8 @@ def quat_inv(q1: _Q, inplace: bool = False, **kwargs: Unpack[_QuatAssertionKwarg
         input quaternion
     inplace : bool, optional, default is False
         Whether to modify the input in-place
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -820,6 +834,8 @@ def quat_mult(a: _Q, b: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
         input quaternion one
     b : ndarray, (4,) or (4, N)
         input quaternion two
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -919,6 +935,8 @@ def quat_norm(x: _Q, /, inplace: bool = False, **kwargs: Unpack[_QuatAssertionKw
         input quaternion
     inplace : bool, optional, default is False
         Whether to modify the input in-place
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -967,6 +985,8 @@ def quat_prop(quat: _Q, delta_ang: _N, *, renorm: bool = True, **kwargs: Unpack[
         Whether to modify the input in-place
     renorm : bool {True, False}, optional
         Whether to renormalize the propagated quaternion
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -1083,6 +1103,8 @@ def quat_to_euler(
             1 = X axis, or roll
             2 = Y axis, or pitch
             3 = Z axis, or yaw
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------
@@ -1255,6 +1277,10 @@ def convert_att_quat_to_body_rate(
         Time vector
     quat : (4, N)
         Attitude quaternion history
+    append : bool, optional, default is True
+        Whether to append the final rate to keep the length unchanged
+    **kwargs : dict
+        Additional keyword arguments to pass to quat_assertions
 
     Returns
     -------

@@ -52,6 +52,8 @@ def bsl(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
         input bit stream as a matrix
     shift : int
         number of bits to shift
+    inplace : bool, optional, default is False
+        Whether to do the bitshift inplace
 
     Returns
     -------
@@ -93,6 +95,8 @@ def bsr(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
         input bit stream as a matrix
     shift : int
         number of bits to shift
+    inplace : bool, optional, default is False
+        Whether to do the bitshift inplace
 
     Returns
     -------
@@ -133,6 +137,8 @@ def prn_01_to_m11(bits: _I, *, inplace: bool = False) -> _I:
     ----------
     bits : (N, ) ndarray
         PRN sequence of 0's and 1's
+    inplace : bool, optional, default is False
+        Whether to do the bitshift inplace
 
     Returns
     -------
@@ -246,14 +252,19 @@ def correlate_prn(prn1: _I, prn2: _I, shift: int | _I, form: Literal["zero-one",
 
     Parameters
     ----------
-    prn1  : psuedo-random number stream 1
-    prn2  : psuedo-random number stream 2
-    shift : bit shift between codes
-    form  : "zero-one" or "one-one"
+    prn1  : class numpy.random.Generator
+        psuedo-random number stream 1
+    prn2  : class numpy.random.Generator
+        psuedo-random number stream 2
+    shift : int
+        bit shift between codes
+    form  : str, from {"zero-one", "one-one"}
+        Whether using values of 0 to 1, or 1 to -1
 
     Returns
     -------
-    cor   : correlation
+    cor   : float
+        correlation between two given PRNs
 
     See Also
     --------
@@ -392,6 +403,8 @@ def gps_to_datetime(
         GPS week [week]
     time : (N, ) ndarray
         GPS time of week [sec]
+    form : str, optional, default is "datetime", from {"datetime", "numpy"}
+        form of the date to return
 
     Returns
     -------
@@ -555,6 +568,8 @@ def gps_to_utc_datetime(
         GPS time of week [sec]
     gps_to_utc_offset : int, optional
         gps to UTC leap second correction [sec]
+    form : str, optional, default is "datetime", from {"datetime", "numpy"}
+        form of the date to return
 
     Returns
     -------

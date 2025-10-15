@@ -130,6 +130,38 @@ def plot_map(
         Additional Latitude track to plot, optional [rad]
     lon : (N, )
         Additional Longitude track to plot, optional [rad]
+    title : str, optional, default is "Orbit"
+        Title to put on the plot
+    units : str, optional, default is "deg", from {"deg", "rad"}
+        Units for map data
+    latlon_units : str, optional, default is "rad", from {"deg", "rad"}
+        Units for lattitude and longitude inputs
+    opts : class Opts
+        Plotting options
+    xy_events : iterable of tuple[float, float], optional
+        Series of lat/lon event locations
+    xy_annotations : iterable of str, optional
+        Series of event labels
+    xy_colors : iterable of str, optional
+        Series of event color strings
+    land_colors : str, optional, default is "same"
+        Whether to color all the countries the same or no colors or multicolored
+    color_by : tuple[str, _N], optional
+        What data to color the orbit by, usually altitude
+    cbar_colormap: str| ColorMap, optional
+        Colormap used to color the orbit
+    map_labels : dict[str, tuple[float, float]], optional
+        Dict of label and lat/lon positions
+    map_colors : dict[str, int | str], optional
+        Colors or index to colors for each country location
+    dir_skip : int, optional
+        How many points to skip when subsampling the orbit
+    extra_plotter : protocol ExtraPlotter
+        A function to pass into plotting routines to plot vertical lines at the given events
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots call
+    **kwargs : dict
+        Additional arguments for saving, classification, and map options
 
     Returns
     -------
@@ -312,6 +344,40 @@ def plot_map_3d(
         Additional Longitude data to plot, optional [rad]
     alt : (N,)
         Additional altitude data to plot, optional [m]
+    title : str, optional, default is "Orbit"
+        Title to put on the plot
+    units : str, optional, default is "deg", from {"deg", "rad"}
+        Units for map data
+    latlon_units : str, optional, default is "rad", from {"deg", "rad"}
+        Units for lattitude and longitude inputs
+    earth_units : str, optional, default is "m"
+        Units for altitude
+    opts : class Opts
+        Plotting options
+    lla_events : iterable of tuple[float, float, float], optional
+        Series of lat/lon/alt event locations
+    lla_annotations : iterable of str, optional
+        Series of event labels
+    lla_colors : iterable of str, optional
+        Series of event color strings
+    land_colors : str, optional, default is "same"
+        Whether to color all the countries the same or no colors or multicolored
+    color_by : tuple[str, _N], optional
+        What data to color the orbit by, usually altitude
+    cbar_colormap: str| ColorMap, optional
+        Colormap used to color the orbit
+    map_labels : dict[str, tuple[float, float]], optional
+        Dict of label and lat/lon positions
+    map_colors : dict[str, int | str], optional
+        Colors or index to colors for each country location
+    dir_skip : int, optional
+        How many points to skip when subsampling the orbit
+    extra_plotter : protocol ExtraPlotter
+        A function to pass into plotting routines to plot vertical lines at the given events
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots call
+    **kwargs : dict
+        Additional arguments for saving, classification, and map options
 
     Returns
     -------

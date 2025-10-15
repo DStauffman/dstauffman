@@ -646,7 +646,9 @@ def plot_time_difference(
         Whether to skip the setup_plots step, in case you are manually adding to an existing axis
     save_plot : bool, optional
         Ability to overide the option in opts
-    kwargs : dict
+    return_err : bool, optional, default is False
+        Whether the function should return the error differences in addition to the figure handles
+    **kwargs : dict
         Remaining keyword arguments will be passed to make_time_plot
 
     Returns
@@ -1027,6 +1029,8 @@ def plot_bar_breakdown(
         If non-zero, then calculate a sliding mean over the given number of data points
     sub_by : int, optional, default is 0
         If non-zero, then only plot zero sub_by time point, holding values in-between
+    **kwargs : dict
+        Additional keyword arguments to overide Opts
 
     Returns
     -------
@@ -1219,6 +1223,8 @@ def plot_histogram(  # noqa: C901
         Figure and axis to use, otherwise create new ones
     skip_setup_plots : bool, optional, default is False
         Whether to skip the setup_plots step, in case you are manually adding to an existing axis
+    **kwargs : dict
+        Additional plotting arguments to override Opts, from {"legend_loc"}
 
     Returns
     -------
@@ -1423,7 +1429,8 @@ def setup_plots(figs: Figure | _Figs, opts: Opts, *, skip_tight: bool = False) -
         List of figures
     opts : class Opts
         Optional plotting controls
-    plot_type : optional, {"time", "time_no_yscale", "dist", "dist_no_yscale"}
+    skip_tight : bool, optional, default is False
+        Whether to skip the tight layout when formatting
 
     Notes
     -----

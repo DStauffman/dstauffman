@@ -495,8 +495,12 @@ def quat_prop_single(quat: _Q, delta_ang: _V, use_approx: bool = False, inplace:
         normalized input quaternion
     delta_ang : ndarray, (3,)
         delta angles in x, y, z order [rad]
+    use_approx : bool, optional, default is False
+        Whether to use a simpler approximation option
     inplace : bool, optional, default is False
         Whether to modify the input in-place
+    renorm : bool, optional, default is True
+        Whether to renormalize the result after propagation
 
     Returns
     -------

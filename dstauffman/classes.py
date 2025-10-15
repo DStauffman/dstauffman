@@ -115,11 +115,15 @@ def save_hdf5(
         Instance that this method is added to, otherwise, use a dictionary
     filename : str
         Name of the file to save
+    file : class h5py.File, optional
+        An optional already existing file to save the contents to
+    base_group : str, optional, default is "self"
+        The base group to save the content in
     meta : dict, optional
         Meta information to write to the file attributes
     exclusions : set, optional
         Fieldnames to not write out to disk
-    kwargs : dict, optional
+    **kwargs : dict
         Extra arguments to pass to the HDF5 dataset creation
 
     Notes
@@ -234,8 +238,12 @@ def load_hdf5(  # type: ignore[misc]
 
     Parameters
     ----------
+    cls : Class
+        Class that this method will be added to (typically via metaclass)
     filename : str
         Name of the file to load
+    return_meta : bool, optional, defaults to False
+        Return any meta information found in the file
 
     Notes
     -----
@@ -312,12 +320,16 @@ def save_method(
 
     Parameters
     ----------
+    self : class instance or dict
+        Instance that this method is added to, otherwise, use a dictionary
     filename : class pathlib.Path
         Name of the file to save
     meta : dict, optional
         Meta information to save to the file, keys are strings, values can be anything saveable to HDF5 datasets
     exclusions : set, optional
         Names of fields to exclude when saving to file
+    **kwargs : dict
+        Keyword arguments to pass along to custom restore function
 
     """
     # exit if no filename is given
@@ -356,10 +368,14 @@ def load_method(
 
     Parameters
     ----------
+    cls : Class
+        Class that this method will be added to (typically via metaclass)
     filename : class pathlib.Path
         Name of the file to load
     return_meta : bool, optional, defaults to False
         Return any meta information found in the file
+    **kwargs : dict
+        Keyword arguments to pass along to custom restore function
 
     """
     if filename is None:

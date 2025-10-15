@@ -179,7 +179,6 @@ ignore = [
     "D203",  # one blank line required before class docstring
     "D212",  # multiline docstring summary should start at the first line
     "D401",  # first line of docstring should be in imperative mood
-    "D417",  # temp, fix these
     "E501",  # line too long, (use black to manage this)
     "B028",  # no explicit stacklevel keyword argument
     "B905",  # zip without an explicit strict parameter
