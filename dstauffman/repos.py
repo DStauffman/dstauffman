@@ -209,7 +209,7 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Path | None = N
 
     # Get information on the test folder
     test_folder = get_tests_dir()
-    data_file = test_folder / ".coverage" if cov_file is None else Path(cov_file)
+    data_file = test_folder / ".coverage" if cov_file is None else Path(cov_file).resolve()
     config_file = get_root_dir().parent / "pyproject.toml"
     cov_folder = test_folder / "coverage_html_report"
 

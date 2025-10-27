@@ -1108,7 +1108,7 @@ def zoom_ylim(
     if is_datetime(time):
         time = date2num(time)
     # find the relevant time indices
-    ix_time = (time >= t_start) & (time <= t_final)  # type: ignore[call-overload, operator]
+    ix_time = (time >= t_start) & (time <= t_final)  # type: ignore[operator]
     # exit if no data is in this time window
     if ~np.any(ix_time):
         warnings.warn("No data matched the given time interval.")
@@ -1546,11 +1546,11 @@ def get_rms_indices(
     p3_max: _B
     if _process(xmin, t_max, operator.lt):  # type: ignore[arg-type]
         if have1:
-            p1_min = time_one >= xmin  # type: ignore[assignment, call-overload, operator]
+            p1_min = time_one >= xmin  # type: ignore[assignment, operator]
         if have2:
-            p2_min = time_two >= xmin  # type: ignore[assignment, call-overload, operator]
+            p2_min = time_two >= xmin  # type: ignore[assignment, operator]
         if have3:
-            p3_min = time_overlap >= xmin  # type: ignore[assignment, call-overload, operator]
+            p3_min = time_overlap >= xmin  # type: ignore[assignment, operator]
         ix["pts"].append(np.maximum(xmin, t_min))  # type: ignore[arg-type]
     else:
         if have1:
@@ -1562,11 +1562,11 @@ def get_rms_indices(
         ix["pts"].append(t_min)
     if _process(xmax, t_min, operator.gt):  # type: ignore[arg-type]
         if have1:
-            p1_max = time_one <= xmax  # type: ignore[assignment, call-overload, operator]
+            p1_max = time_one <= xmax  # type: ignore[assignment, operator]
         if have2:
-            p2_max = time_two <= xmax  # type: ignore[assignment, call-overload, operator]
+            p2_max = time_two <= xmax  # type: ignore[assignment, operator]
         if have3:
-            p3_max = time_overlap <= xmax  # type: ignore[assignment, call-overload, operator]
+            p3_max = time_overlap <= xmax  # type: ignore[assignment, operator]
         ix["pts"].append(np.minimum(xmax, t_max))  # type: ignore[arg-type]
     else:
         if have1:
@@ -2100,6 +2100,7 @@ def save_figs_to_pdf(
     filename: Path = Path("figs.pdf"),
     *,
     rasterized: bool = False,
+    dpi: int | tuple[int, int] | None = None,
 ) -> None:
     r"""
     Saves the given figures to a PDF file.
@@ -2112,6 +2113,8 @@ def save_figs_to_pdf(
         Name of the file to save the figures to, defaults to "figs.pdf" in the current folder
     rasterized : bool, optional, default is False
         Whether to rasterize to pixels the pages in the PDF instead of using a vector format
+    dpi : int or tuple[int, int], optional
+        Pixels per inch for each dimension of the plot
 
     Notes
     -----
@@ -2139,6 +2142,12 @@ def save_figs_to_pdf(
     assert len(figs) > 0, "There must be at least one figure to create a PDF from."
 
     creation_date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    if dpi is None:
+        dpi = 2 * (int(plt.rcParams["figure.dpi"]),)
+    elif isinstance(dpi, int):
+        dpi = (dpi, dpi)
+    else:
+        pass
 
     # Created PDF (rasterized form)
     if rasterized:
@@ -2152,14 +2161,13 @@ def save_figs_to_pdf(
             img_list.append(Image.open(img_buf))
             img_bufs.append(img_buf)
         # save to PDF
-        dpi = int(plt.rcParams["figure.dpi"])
-        resolution = [int(x * dpi) for x in plt.rcParams["figure.figsize"]]
+        resolution = max(int(x * d) for x, d in zip(plt.rcParams["figure.figsize"], dpi))  # TODO: why is max necessary?
         img_list[0].save(
             filename,
             "PDF",
             save_all=True,
             append_images=img_list[1:],
-            dpi=[dpi, dpi],
+            dpi=dpi,
             resolution=resolution,
             title="PDF Figures",
             author=get_username(),
