@@ -21,7 +21,7 @@ def _extra_plotter_factory() -> plot.ExtraPlotter:
         el = np.zeros_like(az)
         rad = np.full(az.shape, space.EARTH["a"])
         x1, y1, z1 = space.sph2cart(az, el, rad)
-        x2, y2, z2 = space.sph2cart(el, az, rad)
+        x2, y2, z2 = space.sph2cart(el, az, rad)  # pylint: disable=arguments-out-of-order
         for this_axes in ax:
             this_axes.plot(x1, y1, z1, color="xkcd:brick red", linewidth=2, label="Prime Meridian")
             this_axes.plot(x2, y2, z2, color="xkcd:dark red", linewidth=2, label="Equator")

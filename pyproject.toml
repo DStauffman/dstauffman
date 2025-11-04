@@ -42,6 +42,8 @@ classifiers = [
 # Note: static excludes numba/datashader for mypy type checking (as they don't play well together)
 numeric = ["h5py>=3.7", "matplotlib>=3.7", "numpy>=2.0", "pandas>=2.0", "pyarrow>=14.0", "PyQt5>=5.15.11", "pyqt5-sip>=12.11", "pyqt5-qt5>=5.15.2", "qtpy>=2.2", "scipy>=1.10", "tblib>=1.7"]
 shader = ["dstauffman[numeric]", "datashader>=0.15", "numba>=0.57"]
+
+[project.dependency-groups]
 spyder = ["spyder-kernels>=2.4"]
 static = ["dstauffman[numeric]", "black>=25.0", "flake8>=6.0", "isort>=5.10", "mypy>=1.5", "pycodestyle>=2.10", "pylint>=2.16", "PyQt5-stubs>=5.15"]
 test = ["pytest>=7.4", "pytest-cov>=4.0"]
@@ -252,3 +254,7 @@ include = ["**/tests/test_*.py"]
 
 [tool.ty.overrides.rules]
 unresolved-import = "ignore"
+
+[tool.uv.sources]
+nubs = { path = "../nubs" }
+slog = { path = "../slog" }
