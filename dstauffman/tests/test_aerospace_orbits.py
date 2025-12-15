@@ -8,6 +8,7 @@ Notes
 """
 
 # %% Imports
+import copy
 import unittest
 
 from slog import read_text_file
@@ -555,10 +556,70 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
 class Test_aerospace_advance_true_anomaly(unittest.TestCase):
     r"""
     Tests the aerospace.advance_true_anomaly function with the following cases:
-        TBD
+        Scalar
+        Vector
+        Broadcast
     """
 
-    pass  # TODO: write this
+    def test_scalar(self) -> None:
+        a = 7e6
+        e = 0.0
+        vo = 0.0
+        mu = 3.9863e14
+        time = 600.0
+        nu = space.advance_true_anomaly(a, e, vo, mu, time)
+        exp = 0.6468285491624978  # TODO: get independent value for this
+        self.assertAlmostEqual(nu, exp, places=12)  # type: ignore[misc]
+
+    def test_vectors(self) -> None:
+        a = np.array([7e6, 7e6])
+        e = np.array([0.0, 0.0])
+        vo = np.array([0.0, 0.0])
+        mu = 3.9863e14
+        time = np.array([600.0, 1200.0])
+        nu = space.advance_true_anomaly(a, e, vo, mu, time)
+        exp = np.array([0.6468285491624978, 1.2936570983249953])  # TODO: get independent value for this
+        np.testing.assert_array_almost_equal(nu, exp, decimal=12)
+
+    def test_broadcast(self) -> None:
+        a = 7e6
+        e = 0.05
+        vo = 0.0
+        mu = 3.9863e14
+        time = np.array([600.0, 1200.0])
+        nu = space.advance_true_anomaly(a, e, vo, mu, time)
+        exp = np.array([0.7102081375602196, 1.391357530431637])  # TODO: get independent value for this
+        np.testing.assert_array_almost_equal(nu, exp, decimal=12)
+
+    def test_parabolic(self) -> None:
+        a = 1.0
+        e = 1.0
+        vo = 0.5
+        mu = 1.0
+        time = np.array([0.5, 1.0])
+        nu = space.advance_true_anomaly(a, e, vo, mu, time)
+        exp = np.array([1.533214210431, 1.888603494568])
+        np.testing.assert_array_almost_equal(nu, exp, decimal=12)
+
+    def test_parabolic2(self) -> None:
+        a = 2.0 * (6378e3 + 300e3)
+        e = 1.0
+        vo = -0.5235987755982988  # (-30.0 deg)
+        mu = 3.986004418e14
+        time = 200.0
+        nu = space.advance_true_anomaly(a, e, vo, mu, time)
+        exp = -0.219717424647
+        np.testing.assert_array_almost_equal(nu, exp, decimal=12)
+
+    def test_hyperbolic(self) -> None:
+        a = -7e6
+        e = 1.5
+        vo = 0.25
+        mu = 3.9863e14
+        time = np.array([600.0, 1200.0])
+        nu = space.advance_true_anomaly(a, e, vo, mu, time)
+        exp = np.array([1.5626931229791183, 1.8419748500022306])  # TODO: get independent value for this
+        np.testing.assert_array_almost_equal(nu, exp, decimal=12)
 
 
 # %% aerospace.advance_elements
@@ -569,7 +630,25 @@ class Test_aerospace_advance_elements(unittest.TestCase):
         TBD
     """
 
-    pass  # TODO: write this
+    def test_scalar(self) -> None:
+        elements = space.Elements(1)
+        elements.a = 7e6
+        elements.e = 0.0
+        elements.i = space.PI / 4
+        elements.W = 0.0
+        elements.w = 0.0
+        elements.vo = 0.0
+        elements.t = np.datetime64("2023-06-01T00:00:00")
+        elements.type = space.OrbitType.elliptic
+        elements.equatorial = True
+        elements.circular = True
+        mu = 3.9863e14
+        time = 600.0
+        exp_elements = copy.copy(elements)
+        exp_elements.vo = 0.6468285491624978
+        exp_elements.t = np.datetime64("2023-06-01T00:10:00")
+        new_elements = space.advance_elements(elements, mu, time)
+        self.assertEqual(new_elements, exp_elements)
 
 
 # %% Unit test execution

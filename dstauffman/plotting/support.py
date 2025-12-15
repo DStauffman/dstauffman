@@ -35,7 +35,7 @@ import unittest
 import warnings
 
 try:
-    from qtpy.QtCore import QSize
+    from qtpy.QtCore import QEvent, QSize
     from qtpy.QtGui import QIcon
     from qtpy.QtWidgets import QApplication, QPushButton
 
@@ -221,11 +221,11 @@ class _HoverButton(QPushButton):
                 self.setIcon(this_arg)
                 self.setIconSize(QSize(24, 24))
 
-    def enterEvent(self, event: Any) -> None:  # pylint: disable=unused-argument  # noqa: N802, ARG002
+    def enterEvent(self, event: QEvent) -> None:  # pylint: disable=unused-argument  # ty: ignore[invalid-method-override]  # noqa: N802, ARG002  # fmt: skip
         r"""Draw border on hover."""
         self.setStyleSheet("border: 1px; border-style: solid;")  # pragma: no cover
 
-    def leaveEvent(self, event: Any) -> None:  # pylint: disable=unused-argument  # noqa: N802, ARG002
+    def leaveEvent(self, event: QEvent) -> None:  # pylint: disable=unused-argument  # ty: ignore[invalid-method-override]  # noqa: N802, ARG002  # fmt: skip
         r"""Delete border after hover."""
         self.setStyleSheet("border: 0px;")  # pragma: no cover
 
@@ -1649,7 +1649,7 @@ def plot_vert_lines(
     for i, this_x in enumerate(x):  # type: ignore[arg-type]
         this_color = cm.get_color(i)
         this_label = labels[i] if show_in_legend else ""
-        ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=10, label=this_label)
+        ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=6, label=this_label)
 
 
 # %% plot_phases
@@ -2158,7 +2158,10 @@ def save_figs_to_pdf(
             plt.figure(fig)
             img_buf = io.BytesIO()
             plt.savefig(img_buf, format="png")
-            img_list.append(Image.open(img_buf))
+            image_png = Image.open(img_buf)
+            image_with_background = Image.new("RGB", image_png.size, (255, 255, 255))
+            image_with_background.paste(image_png, mask=image_png.split()[3])  # 3 is the alpha channel
+            img_list.append(image_with_background)
             img_bufs.append(img_buf)
         # save to PDF
         resolution = max(int(x * d) for x, d in zip(plt.rcParams["figure.figsize"], dpi))  # TODO: why is max necessary?

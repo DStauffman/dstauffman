@@ -158,6 +158,7 @@ def plot_bpe_results(
     bpe_results: BpeResults,
     *,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     plots: dict[str, bool] | None = None,
     **kwargs: Unpack[_BpeKwArgs],
 ) -> _Figs:
@@ -212,13 +213,14 @@ def plot_bpe_results(
             )
             for fig in new_figs:
                 fig.axes[0].set_xlabel("Innovation Number")
-            setup_plots(new_figs, opts=temp_opts)
+            if not skip_setup_plots:
+                setup_plots(new_figs, opts=temp_opts)
             figs += new_figs
         else:
             print("Data isn't available for Innovations plot.")
     if plots["convergence"]:
         if len(bpe_results.costs) != 0:
-            fig = plot_bpe_convergence(bpe_results.costs, opts=opts)
+            fig = plot_bpe_convergence(bpe_results.costs, opts=opts, skip_setup_plots=skip_setup_plots)
             figs.append(fig)
         else:
             print("Data isn't available for convergence plot.")
@@ -230,6 +232,7 @@ def plot_bpe_results(
                 bpe_results.correlation,
                 labels=names,
                 opts=opts,
+                skip_setup_plots=skip_setup_plots,
                 matrix_name="Correlation Matrix",
                 cmin=-1,
                 plot_lower_only=True,
@@ -246,6 +249,7 @@ def plot_bpe_results(
             fig = plot_correlation_matrix(
                 np.abs(bpe_results.info_svd),
                 opts=opts,
+                skip_setup_plots=skip_setup_plots,
                 cmin=0,
                 matrix_name="Information SVD Matrix",
                 label_values=label_values,
@@ -264,6 +268,7 @@ def plot_bpe_results(
                 bpe_results.covariance,
                 labels=names,
                 opts=opts,
+                skip_setup_plots=skip_setup_plots,
                 matrix_name="Covariance Matrix",
                 cmin=-max_mag,
                 cmax=max_mag,

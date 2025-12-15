@@ -719,13 +719,17 @@ def advance_true_anomaly(a: _FN, e: _FN, vo: _FN, mu: _FN, time: _FN) -> _FN:
         # calculate the new true anomaly from the eccentric anomaly
         nu = anomaly_eccentric_2_true(E, e)
     elif np.all(e == 1.0):  # parabolic
-        Ei = np.array(0.0)
-        Mi = anomaly_eccentric_2_mean(Ei, e)  # find new mean anomaly based on delta time
-        M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
-        # solve transcendental function for E
-        E = anomaly_mean_2_eccentric(M, e)
-        # calculate the new true anomaly from the eccentric anomaly
-        nu = anomaly_eccentric_2_true(E, e)
+        D = np.tan(vo / 2)
+        K = D**3 + 3.0 * D + 6.0 * time / np.sqrt(a**3 / mu)
+        # Solve D**3 + 3*D - K = 0 for the only real root
+        # import sympy as sp
+        # D, K = sp.symbols('D K')  # D is the unknown, K is a parameter
+        # eq = sp.Eq(D**3 + 3*D - K, 0)
+        # roots = sp.solve(eq, D)
+        # D_new = -(2 ** (2 / 3)) * (-K + np.sqrt(K**2 + 4)) ** (1 / 3) / 2 + 2 ** (1 / 3) / (-K + np.sqrt(K**2 + 4)) ** (1 / 3)
+        D_new = -((-27 * K / 2 + np.sqrt(729 * K**2 + 2916) / 2) ** (1 / 3)) / 3 + 3 / (-27 * K / 2 + np.sqrt(729 * K**2 + 2916) / 2) ** (1 / 3)  # fmt: skip
+        # convert back to nu, and normalize to -pi to pi range
+        nu = (2.0 * np.atan(D_new) + PI) % TAU - PI
     elif np.all(e > 1.0):  # hyperbolic
         Fi = anomaly_true_2_hyperbolic(vo, e)
         Mi = anomaly_hyperbolic_2_mean(Fi, e)

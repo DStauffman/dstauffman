@@ -35,7 +35,14 @@ from dstauffman.plotting.generic import (
     make_time_plot,
 )
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
-from dstauffman.plotting.support import ColorMap, ExtraPlotter, fig_ax_factory, get_nondeg_colorlists, get_rms_indices, plot_phases  # fmt: skip
+from dstauffman.plotting.support import (
+    ColorMap,
+    ExtraPlotter,
+    fig_ax_factory,
+    get_nondeg_colorlists,
+    get_rms_indices,
+    plot_phases,
+)
 
 if HAVE_MPL:
     from matplotlib.axes import Axes
@@ -128,7 +135,6 @@ if TYPE_CHECKING:
     class _SetsKwargs(TypedDict):
         color_by: NotRequired[str]
         legend_loc: NotRequired[str]
-        skip_setup_plots: NotRequired[bool]
         hide_innovs: NotRequired[bool]
         center_origin: NotRequired[bool]
         units: NotRequired[str]
@@ -410,6 +416,7 @@ def plot_attitude(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[False] = ...,
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfQuatKwargs],
@@ -421,6 +428,7 @@ def plot_attitude(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[True],
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfQuatKwargs],
@@ -431,6 +439,7 @@ def plot_attitude(
     *,
     truth: Kf | None = None,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     return_err: bool = False,
     fields: dict[str, str] | None = None,
     **kwargs: Unpack[_KfQuatKwargs],
@@ -448,6 +457,8 @@ def plot_attitude(
         Third filter output that is considered truth
     opts : class Opts, optional
         Plotting options
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
     fields : dict[str, str], optional
@@ -595,7 +606,8 @@ def plot_attitude(
             figs += out
 
     # Setup plots
-    setup_plots(figs, opts)
+    if not skip_setup_plots:
+        setup_plots(figs, this_opts)
     if printed:
         logger.log(LogLevel.L4, "... done.")
     if return_err:
@@ -611,6 +623,7 @@ def plot_los(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[False] = ...,
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfQuatKwargs],
@@ -622,6 +635,7 @@ def plot_los(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[True],
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfQuatKwargs],
@@ -632,6 +646,7 @@ def plot_los(
     *,
     truth: Kf | None = None,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     return_err: bool = False,
     fields: dict[str, str] | None = None,
     **kwargs: Unpack[_KfQuatKwargs],
@@ -639,7 +654,9 @@ def plot_los(
     r"""Plots the Line of Sight histories."""
     if fields is None:
         fields = {"los": "LOS"}
-    out = plot_attitude(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)  # type: ignore[call-overload]
+    out = plot_attitude(  # type: ignore[call-overload]
+        kf1, kf2, truth=truth, opts=opts, skip_setup_plots=skip_setup_plots, return_err=return_err, fields=fields, **kwargs
+    )
     return out  # type: ignore[no-any-return]
 
 
@@ -651,6 +668,7 @@ def plot_position(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[False] = ...,
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfDiffKwargs],
@@ -662,6 +680,7 @@ def plot_position(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[True],
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfDiffKwargs],
@@ -672,6 +691,7 @@ def plot_position(
     *,
     truth: Kf | None = None,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     return_err: bool = False,
     fields: dict[str, str] | None = None,
     **kwargs: Unpack[_KfDiffKwargs],
@@ -689,6 +709,8 @@ def plot_position(
         Third filter output that is considered truth
     opts : class Opts, optional
         Plotting options
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
     fields : dict[str, str], optional
@@ -835,7 +857,8 @@ def plot_position(
             figs += out
 
     # Setup plots
-    setup_plots(figs, opts)
+    if not skip_setup_plots:
+        setup_plots(figs, this_opts)
     if printed:
         logger.log(LogLevel.L4, "... done.")
     if return_err:
@@ -851,6 +874,7 @@ def plot_velocity(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[False] = ...,
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfDiffKwargs],
@@ -862,6 +886,7 @@ def plot_velocity(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[True],
     fields: dict[str, str] | None,
     **kwargs: Unpack[_KfDiffKwargs],
@@ -872,6 +897,7 @@ def plot_velocity(
     *,
     truth: Kf | None = None,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     return_err: bool = False,
     fields: dict[str, str] | None = None,
     **kwargs: Unpack[_KfDiffKwargs],
@@ -879,7 +905,7 @@ def plot_velocity(
     r"""Plots the Line of Sight histories."""
     if fields is None:
         fields = {"vel": "Velocity"}
-    out = plot_position(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)  # type: ignore[call-overload]
+    out = plot_position(kf1, kf2, truth=truth, opts=opts, skip_setup_plots=skip_setup_plots, return_err=return_err, fields=fields, **kwargs)  # type: ignore[call-overload]
     return out  # type: ignore[no-any-return]
 
 
@@ -891,6 +917,7 @@ def plot_innovations(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[False] = ...,
     fields: dict[str, str] | None,
     plot_by_status: bool,
@@ -910,6 +937,7 @@ def plot_innovations(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[True],
     fields: dict[str, str] | None,
     plot_by_status: bool,
@@ -928,6 +956,7 @@ def plot_innovations(  # noqa: C901
     *,
     truth: Kf | None = None,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     return_err: bool = False,
     fields: dict[str, str] | None = None,
     plot_by_status: bool = False,
@@ -953,6 +982,8 @@ def plot_innovations(  # noqa: C901
         Third filter output that is considered truth
     opts : class Opts, optional
         Plotting options
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
     fields : dict, optional
@@ -1288,7 +1319,8 @@ def plot_innovations(  # noqa: C901
                 )
 
     # Setup plots
-    setup_plots(figs, opts)
+    if not skip_setup_plots:
+        setup_plots(figs, this_opts)
     if printed:
         logger.log(LogLevel.L4, "... done.")
     if return_err:
@@ -1301,6 +1333,7 @@ def plot_innov_fplocs(
     kf1: KfInnov | None,
     *,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     t_bounds: list[_Time] | None = None,
     mask: _B | None = None,
     **kwargs: Unpack[_SetsKwargs],
@@ -1314,6 +1347,8 @@ def plot_innov_fplocs(
         Kalman filter output
     opts : class Opts, optional
         Plotting options
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step
     t_bounds : (2,) ndarray, optional
         Minimum and maximum time bounds to plot
     mask : (N,) ndarray, optional
@@ -1377,7 +1412,6 @@ def plot_innov_fplocs(
 
     # alias opts
     legend_loc = kwargs.pop("legend_loc", opts.leg_spot)
-    skip_setup_plots = kwargs.pop("skip_setup_plots", False)
 
     # pull out time subset
     if t_bounds is None:
@@ -1476,6 +1510,7 @@ def plot_covariance(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[False] = ...,
     groups: list[int | _I] | tuple[int, ...] | None,
     fields: dict[str, str] | None,
@@ -1488,6 +1523,7 @@ def plot_covariance(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[True],
     groups: list[int | _I] | tuple[int, ...] | None,
     fields: dict[str, str] | None,
@@ -1499,6 +1535,7 @@ def plot_covariance(
     *,
     truth: Kf | None = None,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     return_err: bool = False,
     groups: list[int | _I] | tuple[int, ...] | None = None,
     fields: dict[str, str] | None = None,
@@ -1517,6 +1554,8 @@ def plot_covariance(
         Third filter output that is considered truth
     opts : class Opts, optional
         Plotting options
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
     groups : iterable of ints
@@ -1716,7 +1755,8 @@ def plot_covariance(
         logger.log(LogLevel.L4, "... done.")
 
     # Setup plots
-    setup_plots(figs, opts)
+    if not skip_setup_plots:
+        setup_plots(figs, this_opts)
     if not figs:
         msg = f"No {'/'.join(fields.values())} data was provided, so no plots were generated."
         logger.log(LogLevel.L5, msg)
@@ -1733,6 +1773,7 @@ def plot_states(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[False] = ...,
     groups: list[int | _I] | tuple[int, ...] | None,
     fields: dict[str, str] | None,
@@ -1745,6 +1786,7 @@ def plot_states(
     *,
     truth: Kf | None,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[True],
     groups: list[int | _I] | tuple[int, ...] | None,
     fields: dict[str, str] | None,
@@ -1756,6 +1798,7 @@ def plot_states(
     *,
     truth: Kf | None = None,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     return_err: bool = False,
     groups: list[int | _I] | tuple[int, ...] | None = None,
     fields: dict[str, str] | None = None,
@@ -1765,7 +1808,15 @@ def plot_states(
     if fields is None:
         fields = {"state": "State Estimates"}
     out = plot_covariance(  # type: ignore[call-overload, misc]
-        kf1, kf2, truth=truth, opts=opts, return_err=return_err, groups=groups, fields=fields, **kwargs
+        kf1,
+        kf2,
+        truth=truth,
+        opts=opts,
+        skip_setup_plots=skip_setup_plots,
+        return_err=return_err,
+        groups=groups,
+        fields=fields,
+        **kwargs,
     )
     return out  # type: ignore[no-any-return]
 
@@ -1778,6 +1829,7 @@ def plot_tci(
     solar_cycles: _D | None = None,
     solar_labels: list[str] | None = None,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
 ) -> Figure:
     """
     Plots the Thermosphere Climate Index (TCI).
@@ -1794,6 +1846,8 @@ def plot_tci(
         Solar cycle labels
     opts : class Opts, optional
         Plotting options
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step
 
     Returns
     -------
@@ -1852,7 +1906,8 @@ def plot_tci(
     for name, color, value in zip(quintile_names, quintile_colors, quintiles):
         ax.axhline(value, label=name, color=color)
         ax.annotate(name, (time[0], value), color=color, fontsize=16, verticalalignment="top", zorder=10)
-    setup_plots(fig, opts=opts)
+    if not skip_setup_plots:
+        setup_plots(fig, opts=opts)
     return fig
 
 
@@ -1862,6 +1917,7 @@ def plot_kp(
     data: _N,
     *,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
 ) -> Figure:
     """
     Plots the K planetary index 3-hourly data.
@@ -1874,6 +1930,8 @@ def plot_kp(
         Planetary K index
     opts : class Opts, optional
         Plotting options
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step
 
     Returns
     -------
@@ -1937,7 +1995,8 @@ def plot_kp(
     ax.set_ylim(0.0, 9.0)
     ax.set_title(title)
 
-    setup_plots(fig, opts=opts)
+    if not skip_setup_plots:
+        setup_plots(fig, opts=opts)
     return fig
 
 
