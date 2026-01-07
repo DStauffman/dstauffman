@@ -382,7 +382,7 @@ def load_method(
         raise ValueError("No file specified to load.")
     out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
     if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # noqa: SLF001
-        out._save_restore_hdf5(**kwargs)  # noqa: SLF001
+        out._save_restore_hdf5(**kwargs)  # noqa: SLF001  # ty: ignore[call-top-callable]
     return out  # type: ignore[no-any-return]
 
 

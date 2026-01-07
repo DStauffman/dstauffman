@@ -2060,7 +2060,7 @@ def z_from_ci(ci: float) -> float:
     1.96
 
     """
-    return st.norm.ppf(1 - (1 - ci) / 2)  # type: ignore[no-any-return]
+    return st.norm.ppf(1 - (1 - ci) / 2)
 
 
 # %% Functions - ci_from_z
@@ -2091,7 +2091,7 @@ def ci_from_z(z: float) -> float:
     0.9545
 
     """
-    return st.norm.cdf(z) - st.norm.cdf(-z)  # type: ignore[no-any-return]
+    return st.norm.cdf(z) - st.norm.cdf(-z)
 
 
 # %% Functions - save_figs_to_pdf

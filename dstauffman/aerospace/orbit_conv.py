@@ -335,9 +335,11 @@ def anomaly_mean_2_eccentric(M: _FN, e: _FN) -> np.floating | _N:
     l1 = np.size(M)
     l2 = np.size(e)
     if l1 == 1 and l2 == 1:
-        E = root(lambda E: _anomalies(E, M, e), PI).x[0]
+        E = root(lambda E: _anomalies(E, M, e), PI).x[0]  # type: ignore[call-overload]
     else:
-        E = np.array([root(lambda E: _anomalies(E, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)])  # fmt: skip  # pylint: disable=cell-var-from-loop  # noqa: B023
+        E = np.array(
+            [root(lambda E: _anomalies(E, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)]  # type: ignore[call-overload]  # pylint: disable=cell-var-from-loop  # noqa: B023
+        )  # fmt: skip
     # mod with 2*pi in case a different solution was found
     E = np.mod(E, TAU)
     return E  # type: ignore[no-any-return]
@@ -370,9 +372,13 @@ def anomaly_mean_2_hyperbolic(M: _FN, e: _FN) -> np.floating | _N:
     l1 = np.size(M)
     l2 = np.size(e)
     if l1 == 1 and l2 == 1:
-        F = root(lambda F: _anomalies(F, M, e), PI).x[0]
+        F = root(lambda F: _anomalies(F, M, e), PI).x[0]  # type: ignore[call-overload]
     else:
-        F = np.fromiter((root(lambda F: _anomalies(F, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)), float, count=max(l1, l2))  # fmt: skip  # pylint: disable=cell-var-from-loop  # noqa: B023
+        F = np.fromiter(
+            (root(lambda F: _anomalies(F, MM, ee), PI).x[0] for MM, ee in np.broadcast(M, e)),  # type: ignore[call-overload]  # pylint: disable=cell-var-from-loop  # noqa: B023
+            float,
+            count=max(l1, l2)
+        )  # fmt: skip
     # mod with 2*pi in case a different solution was found
     F = np.mod(F, TAU)
     return F  # type: ignore[no-any-return]

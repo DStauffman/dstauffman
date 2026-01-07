@@ -381,7 +381,7 @@ def _draw_lines(
                 zorder=zorder,
                 linestyle="none",
             )
-            datashaders.append({"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": color})
+            datashaders.append({"time": this_time, "data": temp_data.codes, "ax": this_axes, "color": color})  # type: ignore[typeddict-item]
         else:
             line = plot_func(
                 this_axes,

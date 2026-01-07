@@ -1713,8 +1713,8 @@ def linear_interp(
     else:
         bounds_error = True
         fill_value = None
-    func = interp1d(xp, yp, kind="linear", fill_value=fill_value, bounds_error=bounds_error, assume_sorted=False)
-    return func(x).astype(yp.dtype)  # type: ignore[no-any-return]
+    func = interp1d(xp, yp, kind="linear", fill_value=fill_value, bounds_error=bounds_error, assume_sorted=False)  # type: ignore[arg-type]
+    return func(x).astype(yp.dtype)
 
 
 # %% linear_lowpass_interp
@@ -1786,10 +1786,10 @@ def linear_lowpass_interp(
     else:
         bounds_error = True
         fill_value = None
-    func = interp1d(xp, yp, kind="linear", bounds_error=bounds_error, fill_value=fill_value, assume_sorted=assume_sorted)
+    func = interp1d(xp, yp, kind="linear", bounds_error=bounds_error, fill_value=fill_value, assume_sorted=assume_sorted)  # type: ignore[arg-type]
     temp = func(x).astype(yp.dtype)
     sos = butter(filt_order, filt_freq, fs=filt_samp, output="sos", **kwargs)
-    return sosfiltfilt(sos, temp)  # type: ignore[no-any-return]
+    return sosfiltfilt(sos, temp)
 
 
 # %% drop_following_time

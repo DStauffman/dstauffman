@@ -147,11 +147,9 @@ module = [
     "h5py.*",
     "keras.*",
     "numba.*",
-    "pandas.*",
     "PIL.*",
     "pytest.*",
     "qtpy.*",  # Note would be nice to get rid of this, since PyQt5 is actually stubbed
-    "scipy.*",
     "tblib.*",
 ]
 ignore_missing_imports = true
@@ -231,7 +229,7 @@ line-ending = "auto"
 
 [tool.ty.environment]
 python-version = "3.14"
-root = ["./dstauffman"]
+root = [".", "../nubs", "../slog"]
 
 # Strict rules for source code
 [[tool.ty.overrides]]
@@ -248,6 +246,7 @@ possibly-missing-import = "ignore"
 unknown-argument = "ignore"
 unresolved-attribute = "ignore"
 unresolved-import = "ignore"
+unsupported-operator = "ignore"
 
 # Relax rules for test files
 [[tool.ty.overrides]]
