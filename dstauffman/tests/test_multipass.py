@@ -30,7 +30,7 @@ def _model_wrapper(x: _N | None, y: _N | None) -> _N:
         raise ValueError("Bad value for x")
     if y is None:
         raise RuntimeError("Bad value for y")  # pragma: no cover
-    return x + np.sin(x) + np.cos(y * 2)  # type: ignore[no-any-return]
+    return x + np.sin(x) + np.cos(y * 2)
 
 
 # %% MultipassExceptionWrapper

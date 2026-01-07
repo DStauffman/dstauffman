@@ -43,7 +43,7 @@ if __name__ == "__main__":
     oe = space.two_line_elements(line1, line2)
     t = np.datetime64("2024-12-05T00:20:59", dcs.NP_DATETIME_UNITS)
     dt = 15 * dcs.NP_ONE_SECOND
-    time = t + np.arange(0, oe.T * dcs.NP_ONE_SECOND + dt, dt)
+    time = t + np.arange(0 * dcs.NP_ONE_SECOND, oe.T * dcs.NP_ONE_SECOND + dt, dt)  # type: ignore[arg-type]
     mu = 3.9863e14
 
     delta_time_sec = (time - time[0]) / dcs.NP_ONE_SECOND  # TODO: should be oe.t?

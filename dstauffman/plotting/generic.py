@@ -1654,7 +1654,7 @@ def make_bar_plot(
     bottoms = [last]
     for this_data in datum:
         # purposely don't modify last inplace, you want a copy to append to bottoms
-        last = last + np.ma.masked_invalid(this_data)  # type: ignore[no-untyped-call]
+        last = last + np.ma.masked_invalid(this_data)
         bottoms.append(last)
 
     # build labels

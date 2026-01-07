@@ -530,7 +530,7 @@ def get_gps_to_utc_offset(days_since_gps_date_zero: float | _I | _N) -> _N:
     gps_day_bounds = day_bounds + partial_days
     this_bin = np_digitize(days_since_gps_date_zero, gps_day_bounds)
     gps_to_utc_offset = leap_seconds[this_bin]
-    return gps_to_utc_offset
+    return gps_to_utc_offset  # type: ignore[return-value]
 
 
 # %% Functions - gps_to_utc_datetime

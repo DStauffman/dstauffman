@@ -287,7 +287,7 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
         cross_result = np.arcsin(temp) if temp <= 1.0 else dot_result
     else:
         cross_result = np.arcsin(temp, out=dot_result.copy(), where=temp <= 1.0)
-    return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)
+    return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)  # type: ignore[no-any-return]
 
 
 # %% Functions - cart2sph
