@@ -99,7 +99,7 @@ jobs:
       run: |
         uv venv static
         source $VENV_ROOT_DIR/static/bin/activate
-        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy tblib
+        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib
         deactivate
 
     - name: Mypy static analysis
@@ -198,7 +198,7 @@ jobs:
         deactivate
         uv venv static
         source $VENV_ROOT_DIR/static/bin/activate
-        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy tblib
+        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib
         deactivate
         uv venv everything
         source $VENV_ROOT_DIR/everything/bin/activate

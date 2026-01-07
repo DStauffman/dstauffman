@@ -39,7 +39,7 @@ make_envs:
   - deactivate
   - uv venv --allow-existing .cache/static
   - source .cache/static/bin/activate
-  - uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy tblib
+  - uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib
   - deactivate
   - uv venv --allow-existing .cache/everything
   - source .cache/everything/bin/activate
