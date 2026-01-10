@@ -1162,6 +1162,7 @@ def plot_histogram(  # noqa: C901
     xlabel: str = "Data",
     ylabel: str = "Number",
     second_ylabel: str = "Distribution [%]",
+    xlim: tuple[float, float] | None = None,
     units: str = "",
     formatter: str = ".3g",
     normalize_spacing: bool = False,
@@ -1199,6 +1200,8 @@ def plot_histogram(  # noqa: C901
         Name to put on y-axis
     second_ylabel : str, optional
         Name to put on second y-axis
+    xlim : tuple[float, float], optional
+        X-limits to override those calculated automatically
     units : str, optional
         Units to label on the x-axis
     formatter : str, optional
@@ -1260,6 +1263,25 @@ def plot_histogram(  # noqa: C901
     # check optional inputs
     if opts is None:
         opts = Opts()
+    # convert inputs
+    if cdf_x is None:
+        num_cdf_x = 0
+    else:
+        try:
+            num_cdf_x = len(cdf_x)  # type: ignore[arg-type]
+        except TypeError:
+            cdf_x = [cdf_x]  # type: ignore[list-item]
+            num_cdf_x = 1
+    if cdf_y is None:
+        num_cdf_y = 0
+    else:
+        try:
+            num_cdf_y = len(cdf_y)  # type: ignore[arg-type]
+        except TypeError:
+            cdf_y = [cdf_y]  # type: ignore[list-item]
+            num_cdf_y = 1
+    num_cdf = 1 if show_cdf else 0
+    unit_pad = " " if units else ""
     legend_loc = kwargs.pop("legend_loc", opts.leg_spot)
     assert not bool(kwargs), f"Unexpected keyword arguments were passed in: {list(kwargs.keys())}."
     missing: int
@@ -1275,7 +1297,7 @@ def plot_histogram(  # noqa: C901
         missing = int(data_size - np.sum(counts))  # type: ignore[arg-type]
     else:
         assert data is None
-        data_size = 1
+        data_size = int(np.sum(counts))
         missing = 0
     assert counts is not None, "counts should always be set from this point forward."
     num = np.size(bins)
@@ -1315,10 +1337,13 @@ def plot_histogram(  # noqa: C901
     ax.grid(True)
     ax.set_xlabel(f"{xlabel} [{units}]" if units else xlabel)
     ax.set_ylabel(ylabel)
-    if missing > 0:
-        ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins) + 1))  # type: ignore[arg-type]
+    if xlim is None:
+        if missing > 0:
+            ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins) + 1))  # type: ignore[arg-type]
+        else:
+            ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins)))  # type: ignore[arg-type]
     else:
-        ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins)))  # type: ignore[arg-type]
+        ax.set_xlim(xlim)
     if cdf_same_axis:
         ax.set_ylim((0, data_size))
     else:
@@ -1334,18 +1359,19 @@ def plot_histogram(  # noqa: C901
         ax.set_xticklabels(xlab)
     plot_second_yunits(ax, ylab=second_ylabel, multiplier=100 / data_size)
     # Optionally add CDF information
+    color_ix = 0
     if using_cdf:
         # prepare the colormap
         if cdf_colormap is None:
-            cdf_colormap = colors.ListedColormap(("xkcd:grass green", "xkcd:red", "xkcd:hot magenta"))
-        cm = ColorMap(colormap=cdf_colormap, num_colors=3)
+            cdf_colormap = colors.ListedColormap(("xkcd:grass green",) * num_cdf + ("xkcd:red",) * num_cdf_x + ("xkcd:hot magenta",) * num_cdf_y)  # fmt: skip
+        cm = ColorMap(colormap=cdf_colormap, num_colors=num_cdf + num_cdf_x + num_cdf_y)
         # create fake items to add to legend
         p = Rectangle((0, 0), 1, 1, facecolor=color, linewidth=0, edgecolor="none")
         # create a transform with X in data units and Y in axes units
         trans = transforms.blended_transform_factory(ax.transData, ax.transAxes)
         # create the CDF
         if cdf_round_to_bin:
-            cdf = np.hstack([0.0, np.cumsum(counts)]) / data_size if data is not None else np.cumsum(counts)
+            cdf = np.hstack([0.0, np.cumsum(counts)]) / data_size
             cdf_bin = plotting_bins
         else:
             cdf = np.hstack([np.arange(data_size) / data_size, 1.0])
@@ -1356,32 +1382,29 @@ def plot_histogram(  # noqa: C901
             ax3 = ax.twinx()
             ax3.set_ylim(0, 100)
             ax3.spines.right.set_position(("axes", 1.06))
-            ax3.yaxis.label.set_color(cm.get_color(0))
+            ax3.yaxis.label.set_color(cm.get_color(color_ix))
             ax3.set_ylabel("CDF Distribution [%]")
-            ax3.tick_params(axis="y", colors=cm.get_color(0))
+            ax3.tick_params(axis="y", colors=cm.get_color(color_ix))
         # Note: plot on transformed axes instead of ax3 to maintain constant pan/zoom
         if normalize_spacing:
             temp = np_digitize(cdf_bin, bins)
             bins_temp = np.array([bins[t] for t in temp])
             bins_plus = np.array([bins[t + 1] for t in temp])
             cdf_scaled = temp + (cdf_bin - bins_temp) / (bins_plus - bins_temp)
-            ax.step(cdf_scaled, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
+            ax.step(cdf_scaled, cdf, color=cm.get_color(color_ix), label="CDF", zorder=8, transform=trans)
         else:
-            ax.step(cdf_bin, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
+            ax.step(cdf_bin, cdf, color=cm.get_color(color_ix), label="CDF", zorder=8, transform=trans)
+        color_ix += 1
     if cdf_x is not None:
-        try:
-            _ = len(cdf_x)  # type: ignore[arg-type]
-        except TypeError:
-            cdf_x = [cdf_x]  # type: ignore[list-item]
         for this_x in cdf_x:  # type: ignore[union-attr]
             this_ix = np.argmax(cdf_bin >= this_x)
             this_bin = cdf_scaled[this_ix] if normalize_spacing else cdf_bin[this_ix]
             this_cdf = cdf[this_ix]
-            this_label = format(this_x, formatter) + units + "=" + format(100 * this_cdf, formatter) + "%"
+            this_label = format(this_x, formatter) + unit_pad + units + "=" + format(100 * this_cdf, formatter) + "%"
             ax.plot(
                 [0, 1],
                 [this_cdf, this_cdf],
-                color=cm.get_color(1),
+                color=cm.get_color(color_ix),
                 label=this_label,
                 zorder=9,
                 transform=ax.transAxes,
@@ -1390,23 +1413,21 @@ def plot_histogram(  # noqa: C901
                 this_bin,
                 this_cdf,
                 marker="o",
-                markeredgecolor=cm.get_color(1),
+                markeredgecolor=cm.get_color(color_ix),
                 markerfacecolor="none",
                 label="",
                 zorder=10,
                 transform=trans,
             )
+            color_ix += 1
     if cdf_y is not None:
-        try:
-            _ = len(cdf_y)  # type: ignore[arg-type]
-        except TypeError:
-            cdf_y = [cdf_y]  # type: ignore[list-item]
         for this_cdf in cdf_y:  # type: ignore[union-attr]
             this_ix = np.argmax(cdf >= this_cdf)
-            this_label = format(100 * this_cdf, formatter) + "%=" + format(cdf_bin[this_ix], formatter) + units
+            this_label = format(100 * this_cdf, formatter) + "%=" + format(cdf_bin[this_ix], formatter) + unit_pad + units
             this_bin = cdf_scaled[this_ix] if normalize_spacing else cdf_bin[this_ix]
-            ax.axvline(this_bin, label=this_label, color=cm.get_color(2), zorder=9)
-            ax.plot(this_bin, cdf[this_ix], marker="x", color=cm.get_color(2), label="", zorder=10, transform=trans)
+            ax.axvline(this_bin, label=this_label, color=cm.get_color(color_ix), zorder=9)
+            ax.plot(this_bin, cdf[this_ix], marker="x", color=cm.get_color(color_ix), label="", zorder=10, transform=trans)
+            color_ix += 1
     if using_cdf:
         # Add a legend now, since there is something to display
         (handles, labels) = ax.get_legend_handles_labels()

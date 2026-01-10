@@ -545,7 +545,7 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         self.description = "Histogram"
         self.data = np.array([0.5, 3.3, 1.0, 1.5, 1.5, 1.75, 2.5, 2.5])
         self.bins = np.array([0.0, 1.0, 2.0, 3.0, 5.0, 7.0])
-        self.counts = np.array([0.1, 0.2, 0.1, 0.15, 0.15, 0.3])
+        self.counts = np.array([0.1, 0.2, 0.25, 0.15, 0.3])
         self.fig: Figure | None = None
 
     def test_nominal(self) -> None:

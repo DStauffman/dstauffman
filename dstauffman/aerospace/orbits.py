@@ -807,7 +807,7 @@ def advance_elements(elements: Elements, mu: _FN, time: _FN) -> Elements:
             setattr(new_elements, key, np.broadcast_to(value, nu.shape))  # type: ignore[union-attr]
     # store update variables
     new_elements.vo = nu
-    new_elements.t = elements.t + NP_ONE_DAY * (time / JULIAN["day"])
+    new_elements.t = elements.t + NP_ONE_DAY * (time / JULIAN["day"])  # ty: ignore[unsupported-operator]
     return new_elements
 
 

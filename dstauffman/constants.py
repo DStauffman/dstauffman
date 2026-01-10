@@ -8,6 +8,8 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import os
 from typing import Final
 import unittest
@@ -57,7 +59,7 @@ try:
     try:
         import keras
 
-        assert keras
+        keras.backend.set_floatx("float64")  # TODO: this doesn't seem to work!!!
         HAVE_KERAS = True
     except ModuleNotFoundError:
         HAVE_KERAS = False
@@ -117,18 +119,28 @@ NP_TIMEDELTA_FORM: Final = "timedelta64[ns]"
 NP_INT64_PER_SEC: Final = 10**9
 
 # % Numpy constants
+NP_ONE_SECOND: np.timedelta64
+NP_ONE_MINUTE: np.timedelta64
+NP_ONE_HOUR: np.timedelta64
+NP_ONE_DAY: np.timedelta64
+NP_NAT: np.datetime64
+NP_DATETIME_MIN: np.datetime64
+NP_DATETIME_MAX: np.datetime64
 if HAVE_NUMPY:
-    NP_ONE_SECOND: np.timedelta64 = np.timedelta64(1, "s").astype(NP_TIMEDELTA_FORM)
-    NP_ONE_MINUTE: np.timedelta64 = np.timedelta64(1, "m").astype(NP_TIMEDELTA_FORM)
-    NP_ONE_HOUR: np.timedelta64 = np.timedelta64(1, "h").astype(NP_TIMEDELTA_FORM)
-    NP_ONE_DAY: np.timedelta64 = np.timedelta64(1, "D").astype(NP_TIMEDELTA_FORM)
+    NP_ONE_SECOND = np.timedelta64(1, "s").astype(NP_TIMEDELTA_FORM)
+    NP_ONE_MINUTE = np.timedelta64(1, "m").astype(NP_TIMEDELTA_FORM)
+    NP_ONE_HOUR = np.timedelta64(1, "h").astype(NP_TIMEDELTA_FORM)
+    NP_ONE_DAY = np.timedelta64(1, "D").astype(NP_TIMEDELTA_FORM)
+    ZERO_NP_SECONDS = np.timedelta64(0, "s").astype(NP_TIMEDELTA_FORM)
+
     # -2**63   -2**63 + 1 ...... 0 ...... 2**63-1
     #  NP_NAT NP_DATETIME_MIN         NP_DATETIME_MAX
-    NP_NAT: np.datetime64 = np.datetime64("NaT", NP_DATETIME_UNITS)
-    NP_DATETIME_MIN: np.datetime64 = np.datetime64(np.iinfo(np.int64).min + 1, NP_DATETIME_UNITS)
-    NP_DATETIME_MAX: np.datetime64 = np.datetime64(np.iinfo(np.int64).max, NP_DATETIME_UNITS)
+    NP_NAT = np.datetime64("NaT", NP_DATETIME_UNITS)
+    NP_DATETIME_MIN = np.datetime64(np.iinfo(np.int64).min + 1, NP_DATETIME_UNITS)
+    NP_DATETIME_MAX = np.datetime64(np.iinfo(np.int64).max, NP_DATETIME_UNITS)
 else:
-    NP_ONE_SECOND = NP_ONE_MINUTE = NP_ONE_HOUR = NP_ONE_DAY = NP_NAT = NP_DATETIME_MIN = NP_DATETIME_MAX = None  # type: ignore[assignment]
+    NP_ONE_SECOND = NP_ONE_MINUTE = NP_ONE_HOUR = NP_ONE_DAY = ZERO_NP_SECONDS = None  # type: ignore[assignment]
+    NP_NAT = NP_DATETIME_MIN = NP_DATETIME_MAX = None  # type: ignore[assignment]
 
 # %% Functions
 # None

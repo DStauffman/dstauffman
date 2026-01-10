@@ -231,6 +231,10 @@ line-ending = "auto"
 python-version = "3.14"
 root = [".", "../nubs", "../slog"]
 
+[tool.ty.analysis]
+# Disable support for `type: ignore` comments, so that they only apply to mypy
+# respect-type-ignore-comments = false
+
 # Strict rules for source code
 [[tool.ty.overrides]]
 include = ["dstauffman", "scripts"]
@@ -246,7 +250,7 @@ possibly-missing-import = "ignore"
 unknown-argument = "ignore"
 unresolved-attribute = "ignore"
 unresolved-import = "ignore"
-unsupported-operator = "ignore"
+# unused-ignore-comment = "warn"
 
 # Relax rules for test files
 [[tool.ty.overrides]]

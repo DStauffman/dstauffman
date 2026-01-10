@@ -17,7 +17,13 @@ import unittest
 from dstauffman import HAVE_KERAS, HAVE_NUMPY
 
 if HAVE_KERAS:
-    from keras import ops
+    import keras
+
+    if keras.backend.backend() == "jax":
+        # Enforces actual double precision calculations
+        import jax.numpy as ops  # type: ignore[import-not-found]
+    else:
+        from keras import ops
 if HAVE_NUMPY:
     import numpy as np
 
@@ -44,11 +50,11 @@ def qrot_keras(axis: int, angle: float) -> _Q:
     s = ops.sign(c) * ops.sin(angle / 2)
     # TODO: vectorize this (is it possible with tensorflow assign at once?)
     if axis == 1:
-        quat = ops.array([s, 0.0, 0.0, ops.abs(c)])
+        quat = ops.array([s, 0.0, 0.0, ops.abs(c)], dtype="float64")
     elif axis == 2:
-        quat = ops.array([0.0, s, 0.0, ops.abs(c)])
+        quat = ops.array([0.0, s, 0.0, ops.abs(c)], dtype="float64")
     elif axis == 3:
-        quat = ops.array([0.0, 0.0, s, ops.abs(c)])
+        quat = ops.array([0.0, 0.0, s, ops.abs(c)], dtype="float64")
     return quat  # type: ignore[no-any-return]
 
 
@@ -73,7 +79,7 @@ def quat_mult_keras(a: _Q, b: _Q) -> _Q:
         -b[..., 0] * a[..., 2] + b[..., 1] * a[..., 3] + b[..., 2] * a[..., 0] + b[..., 3] * a[..., 1],
          b[..., 0] * a[..., 1] - b[..., 1] * a[..., 0] + b[..., 2] * a[..., 3] + b[..., 3] * a[..., 2],
         -b[..., 0] * a[..., 0] - b[..., 1] * a[..., 1] - b[..., 2] * a[..., 2] + b[..., 3] * a[..., 3],
-    ]))
+    ], dtype=a.dtype))
     # fmt: on
     return quat_norm_keras(enforce_pos_scalar_keras(c))
 
@@ -101,12 +107,12 @@ def quat_times_vector_keras(quat: _Q, v: _V) -> _Q:
          quat[..., 1] * v[..., 2] - quat[..., 2] * v[..., 1],
         -quat[..., 0] * v[..., 2] + quat[..., 2] * v[..., 0],
          quat[..., 0] * v[..., 1] - quat[..., 1] * v[..., 0],
-    ])
+    ], dtype=quat.dtype)
     skew_qv = ops.array([
          quat[..., 1] * ( quat[..., 0] * v[..., 1] - quat[..., 1] * v[..., 0]) - quat[..., 2] * (-quat[..., 0] * v[..., 2] + quat[..., 2] * v[..., 0]),
         -quat[..., 0] * ( quat[..., 0] * v[..., 1] - quat[..., 1] * v[..., 0]) + quat[..., 2] * ( quat[..., 1] * v[..., 2] - quat[..., 2] * v[..., 1]),
          quat[..., 0] * (-quat[..., 0] * v[..., 2] + quat[..., 2] * v[..., 0]) - quat[..., 1] * ( quat[..., 1] * v[..., 2] - quat[..., 2] * v[..., 1]),
-    ])
+    ], dtype=quat.dtype)
     # fmt: on
     return v + ops.transpose(2 * (-quat[..., 3] * qv + skew_qv))  # type: ignore[no-any-return]
 

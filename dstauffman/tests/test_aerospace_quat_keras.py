@@ -36,15 +36,15 @@ class Test_aerospace_enforce_pos_scalar_keras(unittest.TestCase):
 
     def test_nominal(self) -> None:
         q1_out = space.enforce_pos_scalar_keras(self.q1_inp)
-        np.testing.assert_array_almost_equal(q1_out, self.q1_out)
+        np.testing.assert_array_almost_equal(q1_out, self.q1_out, 12)
         q2_out = space.enforce_pos_scalar_keras(self.q2_inp)
-        np.testing.assert_array_almost_equal(q2_out, self.q2_out)
+        np.testing.assert_array_almost_equal(q2_out, self.q2_out, 12)
 
     def test_quat_array(self) -> None:
         quat = ops.stack([self.q1_inp, self.q2_inp])
         qout = space.enforce_pos_scalar_keras(quat)
         exp = ops.stack([self.q1_out, self.q2_out])
-        np.testing.assert_array_almost_equal(qout, exp)
+        np.testing.assert_array_almost_equal(qout, exp, 12)
 
 
 # %% aerospace.qrot_keras
@@ -67,15 +67,16 @@ class Test_aerospace_qrot(unittest.TestCase):
         self.angle2    = ops.array(np.pi / 3, dtype="float64")
         r2o2           = ops.array(np.sqrt(2) / 2, dtype="float64")
         r3o2           = ops.array(np.sqrt(3) / 2, dtype="float64")
-        self.quat      = ops.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
-        self.quat2     = ops.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]])
+        self.quat      = ops.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]], dtype="float64")
+        self.quat2     = ops.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]], dtype="float64")
         # fmt: on
 
     def test_single_inputs(self) -> None:
         for i in range(len(self.axis)):
             quat = space.qrot_keras(self.axis[i], self.angle)
             self.assertEqual(quat.ndim, 1)
-            np.testing.assert_array_almost_equal(quat, self.quat[i, :])
+            self.assertEqual(quat.dtype, np.float64)
+            np.testing.assert_array_almost_equal(quat, self.quat[i, :], 12)
 
     # def test_single_axis(self) -> None:
     #     for i in range(len(self.axis)):
@@ -112,29 +113,32 @@ class Test_aerospace_quat_inv_keras(unittest.TestCase):
 
     def setUp(self) -> None:
         self.q1_inp = space.qrot_keras(1, np.pi / 2)
-        self.q1_out = ops.array([-ops.sqrt(2) / 2, 0, 0, ops.sqrt(2) / 2])
+        self.q1_out = ops.array([-ops.sqrt(2) / 2, 0, 0, ops.sqrt(2) / 2], dtype="float64")
         self.q2_inp = space.qrot_keras(2, np.pi / 3)
-        self.q2_out = ops.array([0, -0.5, 0, ops.sqrt(3) / 2])
+        self.q2_out = ops.array([0, -0.5, 0, ops.sqrt(3) / 2], dtype="float64")
         self.q3_inp = ops.stack([self.q1_inp, self.q2_inp])
         self.q3_out = ops.stack([self.q1_out, self.q2_out])
 
     def test_single_quat1(self) -> None:
         q1_inv = space.quat_inv_keras(self.q1_inp)
-        np.testing.assert_array_almost_equal(q1_inv, self.q1_out)
+        self.assertEqual(q1_inv.dtype, np.float64)
+        np.testing.assert_array_almost_equal(q1_inv, self.q1_out, 12)
         self.assertEqual(q1_inv.ndim, 1)
-        np.testing.assert_array_equal(q1_inv.shape, self.q1_out.shape)
+        np.testing.assert_array_equal(q1_inv.shape, self.q1_out.shape, 12)
 
     def test_single_quat2(self) -> None:
         q2_inv = space.quat_inv_keras(self.q2_inp)
-        np.testing.assert_array_almost_equal(q2_inv, self.q2_out)
+        self.assertEqual(q2_inv.dtype, np.float64)
+        np.testing.assert_array_almost_equal(q2_inv, self.q2_out, 12)
         self.assertEqual(q2_inv.ndim, 1)
-        np.testing.assert_array_equal(q2_inv.shape, self.q2_out.shape)
+        np.testing.assert_array_equal(q2_inv.shape, self.q2_out.shape, 12)
 
     def test_quat_array(self) -> None:
         q3_inv = space.quat_inv_keras(self.q3_inp)
-        np.testing.assert_array_almost_equal(q3_inv, self.q3_out)
+        self.assertEqual(q3_inv.dtype, np.float64)
+        np.testing.assert_array_almost_equal(q3_inv, self.q3_out, 12)
         self.assertEqual(q3_inv.ndim, 2)
-        np.testing.assert_array_equal(q3_inv.shape, self.q3_out.shape)
+        np.testing.assert_array_equal(q3_inv.shape, self.q3_out.shape, 12)
 
 
 # %% aerospace.quat_norm_keras
@@ -148,35 +152,39 @@ class Test_aerospace_quat_norm_keras(unittest.TestCase):
 
     def setUp(self) -> None:
         self.q1_inp = space.qrot_keras(1, np.pi / 2)
-        self.q1_out = ops.array([np.sqrt(2) / 2, 0, 0, np.sqrt(2) / 2])
+        self.q1_out = ops.array([np.sqrt(2) / 2, 0, 0, np.sqrt(2) / 2], dtype="float64")
         self.q2_inp = space.qrot_keras(2, np.pi / 3)
-        self.q2_out = ops.array([0, 0.5, 0, np.sqrt(3) / 2])
-        self.q3_inp = ops.array([0.1, 0, 0, 1])
-        self.q3_out = ops.array([0.09950372, 0, 0, 0.99503719])
+        self.q2_out = ops.array([0, 0.5, 0, np.sqrt(3) / 2], dtype="float64")
+        self.q3_inp = ops.array([0.1, 0, 0, 1], dtype="float64")
+        self.q3_out = ops.array([0.09950371902099893, 0, 0, 0.9950371902099893], dtype="float64")
         self.q4_inp = ops.stack([self.q1_inp, self.q2_inp, self.q3_inp])
         self.q4_out = ops.stack([self.q1_out, self.q2_out, self.q3_out])
 
     def test_nominal1(self) -> None:
         quat_norm = space.quat_norm_keras(self.q1_inp)
-        np.testing.assert_array_almost_equal(quat_norm, self.q1_out)
+        self.assertEqual(quat_norm.dtype, np.float64)
+        np.testing.assert_array_almost_equal(quat_norm, self.q1_out, 12)
         self.assertEqual(quat_norm.ndim, 1)
         np.testing.assert_array_equal(quat_norm.shape, self.q1_out.shape)
 
     def test_nominal2(self) -> None:
         quat_norm = space.quat_norm_keras(self.q2_inp)
-        np.testing.assert_array_almost_equal(quat_norm, self.q2_out)
+        self.assertEqual(quat_norm.dtype, np.float64)
+        np.testing.assert_array_almost_equal(quat_norm, self.q2_out, 12)
         self.assertEqual(quat_norm.ndim, 1)
         np.testing.assert_array_equal(quat_norm.shape, self.q2_out.shape)
 
     def test_nominal3(self) -> None:
         quat_norm = space.quat_norm_keras(self.q3_inp)
-        np.testing.assert_array_almost_equal(quat_norm, self.q3_out)
+        self.assertEqual(quat_norm.dtype, np.float64)
+        np.testing.assert_array_almost_equal(quat_norm, self.q3_out, 12)
         self.assertEqual(quat_norm.ndim, 1)
         np.testing.assert_array_equal(quat_norm.shape, self.q3_out.shape)
 
     def test_array(self) -> None:
         quat_norm = space.quat_norm_keras(self.q4_inp)
-        np.testing.assert_array_almost_equal(quat_norm, self.q4_out)
+        self.assertEqual(quat_norm.dtype, np.float64)
+        np.testing.assert_array_almost_equal(quat_norm, self.q4_out, 12)
         self.assertEqual(quat_norm.ndim, 2)
         np.testing.assert_array_equal(quat_norm.shape, self.q4_out.shape)
 
@@ -195,58 +203,67 @@ class Test_aerospace_quat_mult_keras(unittest.TestCase):
         self.q1 = space.qrot_keras(1, ops.array(np.pi / 2, dtype="float64"))
         self.q2 = space.qrot_keras(2, ops.array(-np.pi, dtype="float64"))
         self.q3 = space.qrot_keras(3, ops.array(np.pi / 3, dtype="float64"))
-        self.q4 = ops.array([0, -np.sqrt(2) / 2, np.sqrt(2) / 2, 0])  # q1*q2
-        self.q5 = ops.array([0.5, -np.sqrt(3) / 2, 0, 0])  # q2*q3
-        self.q6 = ops.array([0.5, 0.5, 0.5, 0.5])  # q6 * q6 = q6**-1, and triggers negative scalar component
+        self.q4 = ops.array([0, -np.sqrt(2) / 2, np.sqrt(2) / 2, 0], dtype="float64")  # q1*q2
+        self.q5 = ops.array([0.5, -np.sqrt(3) / 2, 0, 0], dtype="float64")  # q2*q3
+        self.q6 = ops.array([0.5, 0.5, 0.5, 0.5], dtype="float64")  # q6 * q6 = q6**-1, and triggers negative scalar component
         self.q_array_in1 = ops.stack([self.q1, self.q2])
         self.q_array_in2 = ops.stack([self.q2, self.q3])
         self.q_array_out = ops.stack([self.q4, self.q5])
 
     def test_nominal1(self) -> None:
         quat = space.quat_mult_keras(self.q1, self.q2)
+        self.assertEqual(quat.dtype, np.float64)
         self.assertEqual(quat.ndim, 1)
-        np.testing.assert_array_almost_equal(quat, self.q4)
+        np.testing.assert_array_almost_equal(quat, self.q4, 12)
         np.testing.assert_array_equal(quat.shape, self.q4.shape)
 
     def test_nominal2(self) -> None:
         quat = space.quat_mult_keras(self.q2, self.q3)
+        self.assertEqual(quat.dtype, np.float64)
         self.assertEqual(quat.ndim, 1)
-        np.testing.assert_array_almost_equal(quat, self.q5)
+        np.testing.assert_array_almost_equal(quat, self.q5, 12)
         np.testing.assert_array_equal(quat.shape, self.q5.shape)
 
     def test_nominal3(self) -> None:
         quat = space.quat_mult_keras(self.q6, self.q6)
+        self.assertEqual(quat.dtype, np.float64)
         self.assertEqual(quat.ndim, 1)
-        np.testing.assert_array_almost_equal(quat, space.quat_inv_keras(self.q6))
+        np.testing.assert_array_almost_equal(quat, space.quat_inv_keras(self.q6), 12)
         np.testing.assert_array_equal(quat.shape, self.q6.shape)
 
     def test_reverse(self) -> None:
         quat1 = space.quat_mult_keras(self.q2, self.q1)
+        self.assertEqual(quat1.dtype, np.float64)
         quat2 = space.quat_inv_keras(space.quat_mult_keras(space.quat_inv_keras(self.q1), space.quat_inv_keras(self.q2)))
-        np.testing.assert_array_almost_equal(quat1, quat2)
+        self.assertEqual(quat2.dtype, np.float64)
+        np.testing.assert_array_almost_equal(quat1, quat2, 12)
 
     def test_array_scalar1(self) -> None:
         quat = space.quat_mult_keras(self.q_array_in1, self.q2)
+        self.assertEqual(quat.dtype, np.float64)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_array_almost_equal(quat[0, :], self.q4)
+        np.testing.assert_array_almost_equal(quat[0, :], self.q4, 12)
         np.testing.assert_array_equal(quat.shape, self.q_array_out.shape)
 
     def test_array_scalar2(self) -> None:
         quat = space.quat_mult_keras(self.q1, self.q_array_in2)
+        self.assertEqual(quat.dtype, np.float64)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_array_almost_equal(quat[0, :], self.q4)
+        np.testing.assert_array_almost_equal(quat[0, :], self.q4, 12)
         np.testing.assert_array_equal(quat.shape, self.q_array_out.shape)
 
     def test_array_scalar3(self) -> None:
         quat = space.quat_mult_keras(self.q6, ops.stack([self.q6, self.q6]))
+        self.assertEqual(quat.dtype, np.float64)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_array_almost_equal(quat, ops.stack([space.quat_inv_keras(self.q6), space.quat_inv_keras(self.q6)]))
+        np.testing.assert_array_almost_equal(quat, ops.stack([space.quat_inv_keras(self.q6), space.quat_inv_keras(self.q6)]), 12)  # fmt: skip
         np.testing.assert_array_equal(quat.shape, (2, 4))
 
     def test_array(self) -> None:
         quat = space.quat_mult_keras(self.q_array_in1, self.q_array_in2)
+        self.assertEqual(quat.dtype, np.float64)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_array_almost_equal(quat, self.q_array_out)
+        np.testing.assert_array_almost_equal(quat, self.q_array_out, 12)
         np.testing.assert_array_equal(quat.shape, self.q_array_out.shape)
 
 
@@ -262,23 +279,33 @@ class Test_aerospace_quat_prop_keras(unittest.TestCase):
     def setUp(self) -> None:
         self.quat = ops.array([0.0, 0.0, 0.0, 1.0], dtype="float64")
         self.delta_ang = ops.array([0.01, 0.02, 0.03], dtype="float64")
-        self.new_quat1 = ops.array([0.004999708338, 0.009999416677, 0.014999125015, 0.999825005104], dtype="float64")
-        self.new_quat2 = ops.array([-0.004999708338, -0.009999416677, -0.014999125015, 0.999825005104], dtype="float64")
+        self.new_quat1 = ops.array([0.00499970833843746, 0.00999941667687491, 0.01499912501531237, 0.9998250051041071], dtype="float64")  # fmt: skip
+        self.new_quat2 = ops.array([-0.00499970833843746, -0.00999941667687491, -0.01499912501531237, 0.9998250051041071], dtype="float64")  # fmt: skip
 
     def test_nominal(self) -> None:
         quat = space.quat_prop_keras(self.quat, self.delta_ang)
+        self.assertEqual(quat.dtype, np.float64)
+        self.assertEqual(quat.ndim, 1)
         np.testing.assert_array_almost_equal(quat, self.new_quat1, 12)
         quat = space.quat_prop_keras(self.quat, -self.delta_ang)
+        self.assertEqual(quat.dtype, np.float64)
+        self.assertEqual(quat.ndim, 1)
         np.testing.assert_array_almost_equal(quat, self.new_quat2, 12)
 
     def test_negative_scalar(self) -> None:
-        quat = space.quat_prop_keras(ops.array([1.0, 0.0, 0.0, 0.0]), ops.array([0.01, 0.02, 0.03]))
+        quat = space.quat_prop_keras(ops.array([1.0, 0.0, 0.0, 0.0], dtype="float64"), ops.array([0.01, 0.02, 0.03], dtype="float64"))  # fmt: skip
+        self.assertEqual(quat.dtype, np.float64)
+        self.assertEqual(quat.ndim, 1)
         self.assertGreater(quat[3], 0)
-        quat = space.quat_prop_keras(ops.array([1.0, 0.0, 0.0, 0.0]), ops.array([-0.01, -0.02, -0.03]))
+        quat = space.quat_prop_keras(ops.array([1.0, 0.0, 0.0, 0.0], dtype="float64"), ops.array([-0.01, -0.02, -0.03], dtype="float64"))  # fmt: skip
+        self.assertEqual(quat.dtype, np.float64)
+        self.assertEqual(quat.ndim, 1)
         self.assertGreater(quat[3], 0)
 
     def test_array(self) -> None:
         quat = space.quat_prop_keras(ops.stack([self.quat, self.quat]), ops.stack([self.delta_ang, -self.delta_ang]))
+        self.assertEqual(quat.dtype, np.float64)
+        self.assertEqual(quat.ndim, 2)
         np.testing.assert_array_almost_equal(quat, ops.stack([self.new_quat1, self.new_quat2]), 12)
 
 
@@ -293,37 +320,51 @@ class Test_aerospace_quat_times_vector_keras(unittest.TestCase):
 
     def setUp(self) -> None:
         # TODO: confirm that this is enough to test the correctness of the function
-        self.quat = ops.array([[0, 1, 0, 0], [1, 0, 0, 0]])
-        self.vec = ops.array([[1, 0, 0], [2, 0, 0]])
-        self.out = ops.array([[-1, 0, 0], [2, 0, 0]])
+        self.quat = ops.array([[0, 1, 0, 0], [1, 0, 0, 0]], dtype=int)
+        self.vec = ops.array([[1, 0, 0], [2, 0, 0]], dtype=int)
+        self.out = ops.array([[-1, 0, 0], [2, 0, 0]], dtype=int)
 
     def test_integers(self) -> None:
         for i in range(2):
             vec = space.quat_times_vector_keras(self.quat[i, :], self.vec[i, :])
-            np.testing.assert_array_almost_equal(vec, self.out[i, :])
+            self.assertEqual(vec.dtype, np.int64)
+            self.assertEqual(vec.ndim, 1)
+            np.testing.assert_array_equal(vec, self.out[i, :])
 
     def test_nominal(self) -> None:
         for i in range(2):
             vec = space.quat_times_vector_keras(
                 ops.array(self.quat[i, :], dtype="float64"), ops.array(self.vec[i, :], dtype="float64")
             )
-            np.testing.assert_array_almost_equal(vec, ops.array(self.out[i, :], dtype="float64"))
+            self.assertEqual(vec.dtype, np.float64)
+            self.assertEqual(vec.ndim, 1)
+            np.testing.assert_array_almost_equal(vec, ops.array(self.out[i, :], dtype="float64"), 12)
 
     def test_array(self) -> None:
         vec = space.quat_times_vector_keras(self.quat, self.vec)
-        np.testing.assert_array_almost_equal(vec, self.out)
+        self.assertEqual(vec.dtype, np.int64)
+        self.assertEqual(vec.ndim, 2)
+        np.testing.assert_array_equal(vec, self.out)
 
     def test_vector_array(self) -> None:
         quat = self.quat[0, :]
         vec1 = space.quat_times_vector_keras(quat, self.vec)
+        self.assertEqual(vec1.dtype, np.int64)
+        self.assertEqual(vec1.ndim, 2)
         vec2 = space.quat_times_vector_keras(ops.stack([quat, quat]), self.vec)
-        np.testing.assert_array_almost_equal(vec1, vec2)
+        self.assertEqual(vec2.dtype, np.int64)
+        self.assertEqual(vec2.ndim, 2)
+        np.testing.assert_array_equal(vec1, vec2)
 
     def test_array_vector(self) -> None:
         vec = self.vec[0, :]
         vec1 = space.quat_times_vector_keras(self.quat, vec)
+        self.assertEqual(vec1.dtype, np.int64)
+        self.assertEqual(vec1.ndim, 2)
         vec2 = space.quat_times_vector_keras(self.quat, ops.stack([vec, vec]))
-        np.testing.assert_array_almost_equal(vec1, vec2)
+        self.assertEqual(vec2.dtype, np.int64)
+        self.assertEqual(vec2.ndim, 2)
+        np.testing.assert_array_equal(vec1, vec2)
 
 
 # %% aerospace.quat_angle_diff_keras
@@ -346,44 +387,53 @@ class Test_aerospace_quat_angle_diff_keras(unittest.TestCase):
 
     def test_nominal1(self) -> None:
         comp = space.quat_angle_diff_keras(self.quat1, self.dqq1)
-        np.testing.assert_array_almost_equal(comp, self.comp[0, :])
+        self.assertEqual(comp.dtype, np.float64)
+        np.testing.assert_array_almost_equal(comp, self.comp[0, :], 12)
 
     def test_nominal2(self) -> None:
         comp = space.quat_angle_diff_keras(self.quat1, self.dqq2)
-        np.testing.assert_array_almost_equal(comp, self.comp[1, :])
+        self.assertEqual(comp.dtype, np.float64)
+        np.testing.assert_array_almost_equal(comp, self.comp[1, :], 12)
 
     def test_array1(self) -> None:
         comp = space.quat_angle_diff_keras(ops.stack([self.dqq1, self.dqq2]), self.quat1)
-        np.testing.assert_array_almost_equal(comp, -self.comp)
+        self.assertEqual(comp.dtype, np.float64)
+        np.testing.assert_array_almost_equal(comp, -self.comp, 12)
 
     def test_array2(self) -> None:
         comp = space.quat_angle_diff_keras(self.quat1, ops.stack([self.dqq1, self.dqq2]))
-        np.testing.assert_array_almost_equal(comp, self.comp)
+        self.assertEqual(comp.dtype, np.float64)
+        np.testing.assert_array_almost_equal(comp, self.comp, 12)
 
     def test_array3(self) -> None:
         comp = space.quat_angle_diff_keras(
             ops.stack([self.quat1, self.quat1, self.dqq1, self.dqq2]),
             ops.stack([self.dqq1, self.dqq2, self.quat1, self.quat1]),
         )
+        self.assertEqual(comp.dtype, np.float64)
         exp = ops.tile(self.comp, (2, 1)) * ops.array([[1], [1], [-1], [-1]], dtype="float64")
-        np.testing.assert_array_almost_equal(comp, exp)
+        np.testing.assert_array_almost_equal(comp, exp, 12)
 
     def test_zero_diff1(self) -> None:
         comp = space.quat_angle_diff_keras(self.quat1, self.quat1)
-        np.testing.assert_array_almost_equal(comp, 0)
+        self.assertEqual(comp.dtype, np.float64)
+        np.testing.assert_array_almost_equal(comp, 0, 12)
 
     def test_zero_diff2(self) -> None:
         comp = space.quat_angle_diff_keras(self.quat1, ops.stack([self.quat1, self.quat1]))
-        np.testing.assert_array_almost_equal(comp, 0)
+        self.assertEqual(comp.dtype, np.float64)
+        np.testing.assert_array_almost_equal(comp, 0, 12)
 
     def test_zero_diff3(self) -> None:
         comp = space.quat_angle_diff_keras(ops.stack([self.quat1, self.quat1]), self.quat1)
-        np.testing.assert_array_almost_equal(comp, 0)
+        self.assertEqual(comp.dtype, np.float64)
+        np.testing.assert_array_almost_equal(comp, 0, 12)
 
     def test_zero_diff4(self) -> None:
         temp = ops.stack([self.quat1, self.dq1, self.dq2, self.dqq1, self.dqq2])
         comp = space.quat_angle_diff_keras(temp, temp)
-        np.testing.assert_array_almost_equal(comp, 0)
+        self.assertEqual(comp.dtype, np.float64)
+        np.testing.assert_array_almost_equal(comp, 0, 12)
 
 
 # %% Unit test execution

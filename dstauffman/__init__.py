@@ -14,7 +14,7 @@ from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_DS, HAVE_NUMPY, 
                            HAVE_PANDAS, HAVE_PYTEST, HAVE_SCIPY, INT_TOKEN, IS_WINDOWS, \
                            NP_DATETIME_UNITS, NP_DATETIME_FORM, NP_TIMEDELTA_FORM, \
                            NP_INT64_PER_SEC, NP_ONE_SECOND, NP_ONE_MINUTE, NP_ONE_HOUR, \
-                           NP_ONE_DAY, NP_NAT, NP_DATETIME_MIN, NP_DATETIME_MAX
+                           NP_ONE_DAY, NP_NAT, NP_DATETIME_MIN, NP_DATETIME_MAX, ZERO_NP_SECONDS
 from .matlab    import load_matlab, orth, subspace, ecdf, mat_divide, find_first, find_last, \
                            prepend, postpend
 from .multipass import MultipassExceptionWrapper, parfor_wrapper

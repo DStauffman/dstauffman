@@ -35,7 +35,7 @@ class Test_all_values(unittest.TestCase):
             "HAVE_SCIPY",
             "IS_WINDOWS",
         ]
-        self.xtra: list[str] = ["NP_ONE_DAY", "NP_ONE_HOUR", "NP_ONE_MINUTE", "NP_ONE_SECOND"]
+        self.xtra: list[str] = ["NP_ONE_DAY", "NP_ONE_HOUR", "NP_ONE_MINUTE", "NP_ONE_SECOND", "ZERO_NP_SECONDS"]
         self.nats: list[str] = ["NP_NAT", "NP_DATETIME_MIN", "NP_DATETIME_MAX"]
         self.master = set(self.ints) | set(self.strs) | set(self.bool) | set(self.xtra) | set(self.nats)
 

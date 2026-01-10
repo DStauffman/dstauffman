@@ -21,7 +21,7 @@ def _extra_plotter_factory() -> plot.ExtraPlotter:
         el = np.zeros_like(az)
         rad = np.full(az.shape, space.EARTH["a"])
         x1, y1, z1 = space.sph2cart(az, el, rad)
-        x2, y2, z2 = space.sph2cart(el, az, rad)  # pylint: disable=arguments-out-of-order
+        x2, y2, z2 = space.sph2cart(el, az, rad)
         for this_axes in ax:
             this_axes.plot(x1, y1, z1, color="xkcd:brick red", linewidth=2, label="Prime Meridian")
             this_axes.plot(x2, y2, z2, color="xkcd:dark red", linewidth=2, label="Equator")
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     oe = space.two_line_elements(line1, line2)
     t = np.datetime64("2024-12-05T00:20:59", dcs.NP_DATETIME_UNITS)
     dt = 15 * dcs.NP_ONE_SECOND
-    time = t + np.arange(0 * dcs.NP_ONE_SECOND, oe.T * dcs.NP_ONE_SECOND + dt, dt)  # type: ignore[arg-type]
+    time = t + np.arange(dcs.ZERO_NP_SECONDS, oe.T * dcs.NP_ONE_SECOND + dt, dt)  # type: ignore[arg-type]
     mu = 3.9863e14
 
     delta_time_sec = (time - time[0]) / dcs.NP_ONE_SECOND  # TODO: should be oe.t?
