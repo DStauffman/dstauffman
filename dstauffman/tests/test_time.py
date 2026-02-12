@@ -67,7 +67,7 @@ class Test_get_ymd_from_np(unittest.TestCase):
         self.assertEqual(ymd, self.exp2)
 
     def test_vector(self) -> None:
-        (y, m, d) = dcs.get_ymd_from_np(self.date)
+        y, m, d = dcs.get_ymd_from_np(self.date)
         np.testing.assert_array_equal(y, np.array([self.exp1[0], self.exp2[0]]))
         np.testing.assert_array_equal(m, np.array([self.exp1[1], self.exp2[1]]))
         np.testing.assert_array_equal(d, np.array([self.exp1[2], self.exp2[2]]))

@@ -24,7 +24,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
+from typing import Any, Final, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
 
 try:
     from typing import NotRequired
@@ -139,19 +139,19 @@ if TYPE_CHECKING:
 
 # %% Constants
 # Default colormap to use on certain plots
-DEFAULT_COLORMAP: str = "Dark2"  # "Paired", "Dark2", "tab10", "tab20"
+DEFAULT_COLORMAP: Final = "Dark2"  # "Paired", "Dark2", "tab10", "tab20"
 
 # Whether to include a classification on any generated plots
-DEFAULT_CLASSIFICATION: str = ""
+DEFAULT_CLASSIFICATION: Final = ""
 
 COLOR_LISTS: dict[str, colors.ListedColormap] = {}
 if HAVE_MPL:
     # fmt: off
     # default colormap
     assert isinstance(mpl.colormaps[DEFAULT_COLORMAP], colors.ListedColormap), "Expecting a ListedColormap for the default."
-    COLOR_LISTS["default"]  = mpl.colormaps[DEFAULT_COLORMAP]  # type: ignore[assignment]
+    COLOR_LISTS["default"]  = mpl.colormaps[DEFAULT_COLORMAP]
     # single colors
-    COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(mpl.colormaps[DEFAULT_COLORMAP].colors[0], 8)))  # type: ignore[attr-defined]
+    COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(mpl.colormaps[DEFAULT_COLORMAP].colors[0], 8)))  # type: ignore[arg-type, index]
     COLOR_LISTS["same_old"] = colors.ListedColormap(tuple(repeat("#1f77b4", 8)))
     COLOR_LISTS["single"]   = colors.ListedColormap(("#1f77b4",))  # tab20 first color
     COLOR_LISTS["sing_off"] = colors.ListedColormap(("#aec7e8",))  # tab20 second color
@@ -186,6 +186,8 @@ if HAVE_MPL:
     COLOR_LISTS["quat_comp_r"] = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
     # Matlab
     COLOR_LISTS["matlab"]      = colors.ListedColormap(("#0072bd", "#d95319", "#edb120", "#7e2f8e", "#77ac30", "#4dbeee", "#a2142f"))
+    COLOR_LISTS["matlab_gem"]  = colors.ListedColormap(("#1171be", "#dd5400", "#edb120", "#8516d1", "#3baa32", "#2fbeef", "#d1048b"))
+    COLOR_LISTS["matlab_glow"] = colors.ListedColormap(("#268cdd", "#f57729", "#ffe864", "#c05cfb", "#49db40", "#6cf4ff", "#f267c5"))
     COLOR_LISTS["matlab_old"]  = colors.ListedColormap(("#0000ff", "#008000", "#ff0000", "#00bfbf", "#bf00bf", "#bfbf00", "#404040"))
     # fmt: on
 
@@ -861,7 +863,7 @@ def storefig(
     # loop through the figures
     throw_warning = False
     for this_fig in figs:
-        (raw_title, need_warning) = get_figure_title(this_fig, raise_warning=True)
+        raw_title, need_warning = get_figure_title(this_fig, raise_warning=True)
         throw_warning |= need_warning
         this_title = resolve_name(raw_title)
         # loop through the plot types
@@ -1008,7 +1010,7 @@ def disp_xlimits(
     for this_axis in ax:
         # get xlimits for this axis
         this_axis.autoscale()
-        (old_xmin, old_xmax) = this_axis.get_xlim()
+        old_xmin, old_xmax = this_axis.get_xlim()
         # set the new limits
         if xmin is not None:
             new_xmin = np.maximum(date2num(xmin), old_xmin) if is_datetime(xmin) else np.max([xmin, old_xmin])  # type: ignore[arg-type]
@@ -1143,7 +1145,7 @@ def zoom_ylim(
             this_ymin = (1 - pad) * this_ymin
             this_ymax = (1 + pad) * this_ymax
     # get the current limits
-    (old_ymin, old_ymax) = ax.get_ylim()
+    old_ymin, old_ymax = ax.get_ylim()
     # compare the new bounds to the old ones and update as appropriate based on zoom option
     match zoom:
         case "in":
@@ -1229,7 +1231,7 @@ def rgb_ints_to_hex(int_tuple: tuple[int, int, int]) -> str:
         r"""Clamps a value within the specified minimum and maximum."""
         return max(min_, min(x, max_))
 
-    (r, g, b) = int_tuple
+    r, g, b = int_tuple
     hex_code = f"#{clamp(r):02x}{clamp(g):02x}{clamp(b):02x}"
     return hex_code
 
@@ -1911,7 +1913,7 @@ def plot_classification(
     elif classification == "C":
         color = (0.0, 0.0, 1.0)
         text_str = "CONFIDENTIAL"
-    elif classification in "S":
+    elif classification == "S":
         color = (1.0, 0.0, 0.0)
         text_str = "SECRET"
     elif classification in {"TS", "T"}:
@@ -2018,7 +2020,7 @@ def align_plots(fig: _FigOrListFig, pos: tuple[int, int] | None = None) -> None:
     x_pos: int | None = None
     y_pos: int | None = None
     if pos is not None:
-        (x_pos, y_pos) = pos
+        x_pos, y_pos = pos
     # loop through figures
     for this_fig in figs:
         # get the manager
@@ -2026,7 +2028,7 @@ def align_plots(fig: _FigOrListFig, pos: tuple[int, int] | None = None) -> None:
         assert manager is not None
         # use position from first plot if you don't already have it
         if x_pos is None or y_pos is None:
-            (x_pos, y_pos, _, _) = manager.window.geometry().getRect()  # type: ignore[attr-defined]
+            x_pos, y_pos, _, _ = manager.window.geometry().getRect()  # type: ignore[attr-defined]
         # move the plot
         manager.window.move(x_pos, y_pos)  # type: ignore[attr-defined]
 
@@ -2415,7 +2417,7 @@ def fig_ax_factory(
     figs: list[Figure] = []
     axes: list[Axes] | list[list[Axes]] | list[list[list[Axes]]] = []
     for i in range(num_figs):
-        (fig, ax) = plt.subplots(num_row, num_col, sharex=sharex)
+        fig, ax = plt.subplots(num_row, num_col, sharex=sharex)
         if bool(suptitle):
             this_title = suptitle[i] if isinstance(suptitle, list) else suptitle
             fig.suptitle(this_title)

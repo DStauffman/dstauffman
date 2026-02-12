@@ -408,7 +408,7 @@ def rv2dcm(vec: _V) -> _DCM:
     -----
     #.  Written by Jason Hull in July 2008.
     #.  Translated from Matlab into Python by David C. Stauffer in January 2021.
-    #.  The rotation vector `vec` defines the Euler rotation axis, and its magnitude defines then
+    #.  The rotation vector `vec` defines the Euler rotation axis, and its magnitude defines the
         Euler rotation angle.
 
     Examples
@@ -446,7 +446,7 @@ def interp_vector(
     **kwargs: Unpack[_InterpKwArgs],
 ) -> _V:
     r"""
-    Interpolates each component of a vector, with options for convert numpy datetimes to int64.
+    Interpolates each component of a vector, with options for converting numpy datetimes to int64.
 
     Parameters
     ----------

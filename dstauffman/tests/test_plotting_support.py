@@ -23,7 +23,17 @@ except ImportError:
 
 import unittest
 
-from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS, NP_DATETIME_UNITS, NP_NAT
+from dstauffman import (
+    get_tests_dir,
+    HAVE_DS,
+    HAVE_MPL,
+    HAVE_NUMPY,
+    HAVE_SCIPY,
+    IS_WINDOWS,
+    NP_DATETIME_UNITS,
+    NP_NAT,
+    NP_ONE_SECOND,
+)
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -103,7 +113,7 @@ class Test_plotting_COLOR_LISTS(unittest.TestCase):
             "double", "vec", "quat", "dbl_off", "vec_off", "quat_off",
             "sing_diff", "dbl_diff", "vec_diff", "quat_diff", "sing_diff_r", "dbl_diff_r", "vec_diff_r", "quat_diff_r",
             "sing_comp", "dbl_comp", "vec_comp", "quat_comp", "sing_comp_r", "dbl_comp_r", "vec_comp_r", "quat_comp_r",
-            "matlab", "matlab_old",
+            "matlab", "matlab_gem", "matlab_glow", "matlab_old",
         }  # fmt: skip
 
     def test_nominal(self) -> None:
@@ -749,31 +759,31 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
 
     def test_nominal(self) -> None:
         plot.disp_xlimits(self.fig, self.t_start, self.t_final)
-        (old_ymin, old_ymax) = self.ax.get_ylim()
+        old_ymin, old_ymax = self.ax.get_ylim()
         plot.zoom_ylim(self.ax, self.time, self.data, t_start=self.t_start, t_final=self.t_final)
-        (new_ymin, new_ymax) = self.ax.get_ylim()
+        new_ymin, new_ymax = self.ax.get_ylim()
         self.assertGreater(old_ymax, new_ymax)
         self.assertLess(old_ymin, new_ymin)
 
     def test_no_zoom_out(self) -> None:
-        (old_ymin, old_ymax) = self.ax.get_ylim()
+        old_ymin, old_ymax = self.ax.get_ylim()
         plot.zoom_ylim(self.ax, self.time, self.data, pad=2.0, zoom="in")
-        (new_ymin, new_ymax) = self.ax.get_ylim()
+        new_ymin, new_ymax = self.ax.get_ylim()
         self.assertEqual(old_ymax, new_ymax)
         self.assertEqual(old_ymin, new_ymin)
         plot.zoom_ylim(self.ax, self.time, self.data, pad=2.0)
-        (new_ymin, new_ymax) = self.ax.get_ylim()
+        new_ymin, new_ymax = self.ax.get_ylim()
         self.assertLess(old_ymax, new_ymax)
         self.assertGreater(old_ymin, new_ymin)
 
     def test_no_zoom_in(self) -> None:
-        (old_ymin, old_ymax) = self.ax.get_ylim()
+        old_ymin, old_ymax = self.ax.get_ylim()
         plot.zoom_ylim(self.ax, self.time, self.data, t_start=self.t_start, t_final=self.t_final, zoom="out")
-        (new_ymin, new_ymax) = self.ax.get_ylim()
+        new_ymin, new_ymax = self.ax.get_ylim()
         self.assertEqual(old_ymax, new_ymax)
         self.assertEqual(old_ymin, new_ymin)
         plot.zoom_ylim(self.ax, self.time, self.data, t_start=self.t_start, t_final=self.t_final, zoom="in")
-        (new_ymin, new_ymax) = self.ax.get_ylim()
+        new_ymin, new_ymax = self.ax.get_ylim()
         self.assertGreater(old_ymax, new_ymax)
         self.assertLess(old_ymin, new_ymin)
 
@@ -783,9 +793,9 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
 
     def test_no_pad(self) -> None:
         plot.disp_xlimits(self.fig, self.t_start, self.t_final)
-        (old_ymin, old_ymax) = self.ax.get_ylim()
+        old_ymin, old_ymax = self.ax.get_ylim()
         plot.zoom_ylim(self.ax, self.time, self.data, t_start=self.t_start, t_final=self.t_final, pad=0)
-        (new_ymin, new_ymax) = self.ax.get_ylim()
+        new_ymin, new_ymax = self.ax.get_ylim()
         self.assertGreater(old_ymax, new_ymax)
         self.assertLess(old_ymin, new_ymin)
         self.assertAlmostEqual(new_ymin, self.t_start**2)
@@ -850,7 +860,7 @@ class Test_plotting_get_screen_resolution(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        (screen_width, screen_height) = plot.get_screen_resolution()
+        screen_width, screen_height = plot.get_screen_resolution()
         self.assertGreater(screen_width, 0)
         self.assertGreater(screen_height, 0)
 
@@ -1036,10 +1046,29 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
             np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_datetime64(self) -> None:
-        pass  # TODO: write this
+        date_zero = np.datetime64("2026-01-15T08:00:00", NP_DATETIME_UNITS)
+        time_one = date_zero + self.time_one * NP_ONE_SECOND
+        time_two = date_zero + self.time_two * NP_ONE_SECOND
+        time_overlap = date_zero + self.time_overlap * NP_ONE_SECOND
+        xmin = date_zero + self.xmin * NP_ONE_SECOND
+        xmax = date_zero + self.xmax * NP_ONE_SECOND
+        ix = plot.get_rms_indices(time_one, time_two, time_overlap, xmin=xmin, xmax=xmax)
+        self.exp["pts"] = [date_zero + x * NP_ONE_SECOND for x in self.exp["pts"]]  # type: ignore[misc]
+        for key in ix:
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_datetime(self) -> None:
-        pass  # TODO: write this
+        date_zero = datetime.datetime(2026, 1, 15, 9, 0, 0)
+        ONE_SECOND = datetime.timedelta(seconds=1)
+        time_one = date_zero + self.time_one * ONE_SECOND  # type: ignore[operator]
+        time_two = date_zero + self.time_two * ONE_SECOND  # type: ignore[operator]
+        time_overlap = date_zero + self.time_overlap * ONE_SECOND  # type: ignore[operator]
+        xmin = date_zero + self.xmin * ONE_SECOND
+        xmax = date_zero + self.xmax * ONE_SECOND
+        ix = plot.get_rms_indices(time_one, time_two, time_overlap, xmin=xmin, xmax=xmax)
+        self.exp["pts"] = [date_zero + x * ONE_SECOND for x in self.exp["pts"]]  # type: ignore[misc]
+        for key in ix:
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
 
 # %% plotting.plot_vert_lines

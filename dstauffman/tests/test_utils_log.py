@@ -194,7 +194,7 @@ class Test_remove_outliers(unittest.TestCase):
         self.assertIs(y, self.x)
 
     def test_stats(self, mock_logger: Mock) -> None:
-        (y, num_replaced, rms_initial, rms_removed) = dcs.remove_outliers(self.x, return_stats=True)  # type: ignore[call-overload]
+        y, num_replaced, rms_initial, rms_removed = dcs.remove_outliers(self.x, return_stats=True)  # type: ignore[call-overload]
         self.assertEqual(self.x[0], y[0])
         self.assertEqual(self.x[5], 1e5)
         self.assertTrue(np.isnan(y[5]))

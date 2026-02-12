@@ -226,7 +226,7 @@ def get_unit_conversion(
         return (conversion[0], float(conversion[1]))
     if conversion == "percentage":
         return ("%", 100)
-    (unit_mult, label) = get_factors(conversion, inverse=True)
+    unit_mult, label = get_factors(conversion, inverse=True)
     if units in {"", "rad", "rad^2"} and "arc" in conversion:
         new_units = label
     elif units == "rad^2":

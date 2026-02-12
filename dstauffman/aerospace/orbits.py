@@ -150,7 +150,7 @@ class Elements(Frozen):
             if key in {"type", "equatorial", "circular"}:
                 if not np.all(x == y):
                     return False
-            elif key in {"t"}:
+            elif key == "t":
                 if not np.all((np.isnat(x) & np.isnat(y)) | (x == y)):
                     return False
             elif not np.allclose(x, y, rtol=1e-6, atol=1e-8, equal_nan=True):

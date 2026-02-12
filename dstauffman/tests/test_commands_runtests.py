@@ -105,7 +105,7 @@ class Test_commands_execute_tests(unittest.TestCase):
     def test_docstrings(self, mocker: Mock) -> None:
         self.args.docstrings = True
         commands.execute_tests(self.args)
-        (pos_args, kwargs) = mocker.call_args
+        pos_args, kwargs = mocker.call_args
         self.assertFalse(kwargs["verbose"])
         self.assertTrue(len(pos_args) > 0)
 
@@ -114,7 +114,7 @@ class Test_commands_execute_tests(unittest.TestCase):
         self.args.docstrings = True
         self.args.verbose = True
         commands.execute_tests(self.args)
-        (pos_args, kwargs) = mocker.call_args
+        pos_args, kwargs = mocker.call_args
         self.assertTrue(kwargs["verbose"])
         self.assertTrue(len(pos_args) > 0)
 
@@ -122,7 +122,7 @@ class Test_commands_execute_tests(unittest.TestCase):
     def test_library(self, mocker: Mock) -> None:
         self.args.library = "other_folder"
         commands.execute_tests(self.args)
-        (pos_args, kwargs) = mocker.call_args
+        pos_args, kwargs = mocker.call_args
         self.assertEqual(len(pos_args), 1)
         self.assertTrue(str(pos_args[0]).endswith("other_folder"))
         self.assertEqual(kwargs, {})

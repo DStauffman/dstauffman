@@ -470,7 +470,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         # fmt: on
 
     def test_nominal(self) -> None:
-        (r, v) = space.oe_2_rv(self.oe)
+        r, v = space.oe_2_rv(self.oe)
         np.testing.assert_array_almost_equal(r, self.r, 14)
         np.testing.assert_array_almost_equal(v, self.v, 14)
 
@@ -516,10 +516,10 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         oe2.circular   = False
         oe2.t          = NP_NAT
         # fmt: on
-        (r, v) = space.oe_2_rv(oe1)
+        r, v = space.oe_2_rv(oe1)
         np.testing.assert_array_equal(r, r0)
         np.testing.assert_array_equal(v, v0)
-        (r, v) = space.oe_2_rv(oe2)
+        r, v = space.oe_2_rv(oe2)
         np.testing.assert_array_equal(r, r1)
         np.testing.assert_array_equal(v, v1)
 
@@ -541,7 +541,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
                                 oe.type = space.OrbitType.elliptic  # if E < 0 else space.OrbitType.parabolic if E == 0 else
                                 oe.equatorial = i == 0
                                 oe.circular = e == 0
-                                (r, v) = space.oe_2_rv(oe)
+                                r, v = space.oe_2_rv(oe)
                                 oe2 = space.rv_2_oe(r, v)
                                 np.testing.assert_array_almost_equal(oe.a, oe2.a, err_msg="a is different")
                                 np.testing.assert_array_almost_equal(oe.e, oe2.e, err_msg="e is different")

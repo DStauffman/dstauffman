@@ -62,7 +62,7 @@ class Test_aerospace_geod2ecf(unittest.TestCase):
         np.testing.assert_array_almost_equal(xyz, self.xyz, decimal=self.decimal)
 
     def test_output_vectors(self) -> None:
-        (x, y, z) = space.geod2ecf(self.lla, output="split")
+        x, y, z = space.geod2ecf(self.lla, output="split")
         np.testing.assert_array_almost_equal(x, self.xyz[0, :], decimal=self.decimal)
         np.testing.assert_array_almost_equal(y, self.xyz[1, :], decimal=self.decimal)
         np.testing.assert_array_almost_equal(z, self.xyz[2, :], decimal=self.decimal)
@@ -72,7 +72,7 @@ class Test_aerospace_geod2ecf(unittest.TestCase):
         np.testing.assert_array_almost_equal(xyz, self.xyz, decimal=self.decimal)
 
     def test_all_vectors(self) -> None:
-        (x, y, z) = space.geod2ecf(self.lla[0, :], self.lla[1, :], self.lla[2, :], output="split")
+        x, y, z = space.geod2ecf(self.lla[0, :], self.lla[1, :], self.lla[2, :], output="split")
         np.testing.assert_array_almost_equal(x, self.xyz[0, :], decimal=self.decimal)
         np.testing.assert_array_almost_equal(y, self.xyz[1, :], decimal=self.decimal)
         np.testing.assert_array_almost_equal(z, self.xyz[2, :], decimal=self.decimal)
@@ -83,9 +83,9 @@ class Test_aerospace_geod2ecf(unittest.TestCase):
             np.testing.assert_array_almost_equal(xyz, self.xyz[:, ix], decimal=self.decimal)
             xyz = space.geod2ecf(self.lla[0, ix], self.lla[1, ix], self.lla[2, ix])
             np.testing.assert_array_almost_equal(xyz, self.xyz[:, ix], decimal=self.decimal)
-            (x, y, z) = space.geod2ecf(self.lla[:, ix], output="split")
+            x, y, z = space.geod2ecf(self.lla[:, ix], output="split")
             np.testing.assert_array_almost_equal(xyz, self.xyz[:, ix], decimal=self.decimal)
-            (x, y, z) = space.geod2ecf(self.lla[:, ix], output="split")
+            x, y, z = space.geod2ecf(self.lla[:, ix], output="split")
             np.testing.assert_array_almost_equal(xyz, self.xyz[:, ix], decimal=self.decimal)
 
     def test_english_units(self) -> None:
@@ -169,7 +169,7 @@ class Test_aerospace_ecf2geod(unittest.TestCase):
         np.testing.assert_array_almost_equal(lla, self.lla, decimal=self.decimal)
 
     def test_output_vectors(self) -> None:
-        (lat, lon, alt) = space.ecf2geod(self.xyz, output="split")
+        lat, lon, alt = space.ecf2geod(self.xyz, output="split")
         np.testing.assert_array_almost_equal(lat, self.lla[0, :], decimal=self.decimal)
         np.testing.assert_array_almost_equal(lon, self.lla[1, :], decimal=self.decimal)
         np.testing.assert_array_almost_equal(alt, self.lla[2, :], decimal=self.decimal)
@@ -179,7 +179,7 @@ class Test_aerospace_ecf2geod(unittest.TestCase):
         np.testing.assert_array_almost_equal(lla, self.lla, decimal=self.decimal)
 
     def test_all_vectors(self) -> None:
-        (lat, lon, alt) = space.ecf2geod(self.xyz[0, :], self.xyz[1, :], self.xyz[2, :], output="split")
+        lat, lon, alt = space.ecf2geod(self.xyz[0, :], self.xyz[1, :], self.xyz[2, :], output="split")
         np.testing.assert_array_almost_equal(lat, self.lla[0, :], decimal=self.decimal)
         np.testing.assert_array_almost_equal(lon, self.lla[1, :], decimal=self.decimal)
         np.testing.assert_array_almost_equal(alt, self.lla[2, :], decimal=self.decimal)
@@ -190,9 +190,9 @@ class Test_aerospace_ecf2geod(unittest.TestCase):
             np.testing.assert_array_almost_equal(lla, self.lla[:, ix], decimal=self.decimal)
             lla = space.ecf2geod(self.xyz[0, ix], self.xyz[1, ix], self.xyz[2, ix])
             np.testing.assert_array_almost_equal(lla, self.lla[:, ix], decimal=self.decimal)
-            (lat, lon, alt) = space.ecf2geod(self.xyz[:, ix], output="split")
+            lat, lon, alt = space.ecf2geod(self.xyz[:, ix], output="split")
             np.testing.assert_array_almost_equal(lla, self.lla[:, ix], decimal=self.decimal)
-            (lat, lon, alt) = space.ecf2geod(self.xyz[:, ix], output="split")
+            lat, lon, alt = space.ecf2geod(self.xyz[:, ix], output="split")
             np.testing.assert_array_almost_equal(lla, self.lla[:, ix], decimal=self.decimal)
 
     def test_english_units(self) -> None:

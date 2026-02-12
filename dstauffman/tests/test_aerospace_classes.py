@@ -248,7 +248,7 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         innov.innov[:] = np.random.default_rng().random((2, 60))
         innov.norm[:] = 10 * innov.innov
         innov.status[:] = np.ones(60, dtype=int)
-        (innov3, innov2, innov4) = innov.chop(ti=10, tf=20, return_ends=True)
+        innov3, innov2, innov4 = innov.chop(ti=10, tf=20, return_ends=True)
         assert innov2.time is not None
         assert innov2.innov is not None
         assert innov2.norm is not None
@@ -502,7 +502,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         kf.time[:] = np.arange(60.0)  # type: ignore[index]
         kf.innov.time[:] = np.arange(5.0, 60.0, 0.5)
         kf.innov.innov[:] = self.prng.random((2, 110))
-        (kf3, kf2, kf4) = kf.chop(ti=10, tf=20, return_ends=True)
+        kf3, kf2, kf4 = kf.chop(ti=10, tf=20, return_ends=True)
         self.assertIsNot(kf, kf2)
         for this in [kf, kf2, kf3, kf4]:
             self.assertEqual(this.name, "Gnd")
@@ -691,7 +691,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
 
     def test_chop_return_ends(self) -> None:
         kf_record = space.KfRecord(num_points=60, num_states=6, num_active=3, num_axes=2, time_dtype=float)
-        (kf_record3, kf_record2, kf_record4) = kf_record.chop(ti=10, tf=20, return_ends=True)
+        kf_record3, kf_record2, kf_record4 = kf_record.chop(ti=10, tf=20, return_ends=True)
         self.assertIsNot(kf_record, kf_record2)
         np.testing.assert_array_equal(kf_record2.time, np.arange(10.0, 21.0))
         self.assertEqual(kf_record2.P.shape, (3, 3, 11), "P shape mismatch.")  # type: ignore[union-attr]

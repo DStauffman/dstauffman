@@ -61,7 +61,7 @@ def read_tci_data(filename: Path) -> pd.DataFrame:
 
     def _convert_m_d_y(text: str) -> datetime.datetime:
         """Convert a m-d-y string when each are floats (yet still whole integers)."""
-        (m, d, y) = text.split("-")
+        m, d, y = text.split("-")
         return datetime.datetime(int(float(y)), int(float(m)), int(float(d)))
 
     names = ["Date", "TCI"]
@@ -104,11 +104,11 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:
     def _get_duration(text: str) -> int | float:
         if not text:
             return np.nan
-        (y, m) = text.split("-")
+        y, m = text.split("-")
         return 12 * int(y) + int(m)
 
     def _get_solar_cycle(text: str) -> int:
-        return int(text.split("Solar cycle ")[-1])
+        return int(text.rsplit("Solar cycle ", maxsplit=1)[-1])
 
     def _get_date(text: str) -> datetime.datetime | np.datetime64:
         if not text:
@@ -133,7 +133,7 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:
             pass
         if text.startswith("Progr: "):
             return int(text.split(" ")[1].replace("*", ""))
-        return int(text.split(" ")[0])
+        return int(text.split(" ", maxsplit=1)[0])
 
     names = [
         "Solar_Cycle",

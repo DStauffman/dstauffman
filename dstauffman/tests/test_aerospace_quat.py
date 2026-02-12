@@ -438,27 +438,27 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         # fmt: on
 
     def test_nominal1(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.quat1, self.dqq1)
+        theta, comp = space.quat_angle_diff(self.quat1, self.dqq1)
         np.testing.assert_array_almost_equal(theta, self.theta[0], 14)
         np.testing.assert_array_almost_equal(comp, self.comp[:, 0], 14)
 
     def test_nominal2(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.quat1, self.dqq2)
+        theta, comp = space.quat_angle_diff(self.quat1, self.dqq2)
         np.testing.assert_array_almost_equal(theta, self.theta[1], 14)
         np.testing.assert_array_almost_equal(comp, self.comp[:, 1], 14)
 
     def test_array1(self) -> None:
-        (theta, comp) = space.quat_angle_diff(np.column_stack((self.dqq1, self.dqq2)), self.quat1)
+        theta, comp = space.quat_angle_diff(np.column_stack((self.dqq1, self.dqq2)), self.quat1)
         np.testing.assert_array_almost_equal(theta, self.theta, 14)
         np.testing.assert_array_almost_equal(comp, -self.comp, 14)
 
     def test_array2(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.quat1, np.column_stack((self.dqq1, self.dqq2)))
+        theta, comp = space.quat_angle_diff(self.quat1, np.column_stack((self.dqq1, self.dqq2)))
         np.testing.assert_array_almost_equal(theta, self.theta, 14)
         np.testing.assert_array_almost_equal(comp, self.comp, 14)
 
     def test_array3(self) -> None:
-        (theta, comp) = space.quat_angle_diff(
+        theta, comp = space.quat_angle_diff(
             np.column_stack((self.quat1, self.quat1, self.dqq1, self.dqq2)),
             np.column_stack((self.dqq1, self.dqq2, self.quat1, self.quat1)),
         )
@@ -466,49 +466,49 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         np.testing.assert_array_almost_equal(comp, self.comp[:, [0, 1, 0, 1]] * np.array([1, 1, -1, -1]), 14)
 
     def test_zero_diff1(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.quat1, self.quat1)
+        theta, comp = space.quat_angle_diff(self.quat1, self.quat1)
         np.testing.assert_array_almost_equal(theta, 0, 14)
         np.testing.assert_array_almost_equal(comp, 0, 14)
 
     def test_zero_diff2(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.quat1, np.column_stack((self.quat1, self.quat1)))
+        theta, comp = space.quat_angle_diff(self.quat1, np.column_stack((self.quat1, self.quat1)))
         np.testing.assert_array_almost_equal(theta, 0, 14)
         np.testing.assert_array_almost_equal(comp, 0, 14)
 
     def test_zero_diff3(self) -> None:
-        (theta, comp) = space.quat_angle_diff(np.column_stack((self.quat1, self.quat1)), self.quat1)
+        theta, comp = space.quat_angle_diff(np.column_stack((self.quat1, self.quat1)), self.quat1)
         np.testing.assert_array_almost_equal(theta, 0, 14)
         np.testing.assert_array_almost_equal(comp, 0, 14)
 
     def test_zero_diff4(self) -> None:
         temp = np.column_stack((self.quat1, self.dq1, self.dq2, self.dqq1, self.dqq2))
-        (theta, comp) = space.quat_angle_diff(temp, temp)
+        theta, comp = space.quat_angle_diff(temp, temp)
         np.testing.assert_array_almost_equal(theta, 0, 14)
         np.testing.assert_array_almost_equal(comp, 0, 14)
 
     def test_null1(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.quat1, self.null)
+        theta, comp = space.quat_angle_diff(self.quat1, self.null)
         self.assertEqual(theta.size, 0)
         self.assertEqual(theta.shape, (0,))
         self.assertEqual(comp.size, 0)
         self.assertEqual(comp.shape, (3, 0))
 
     def test_null2(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.quat1, self.null_quat)
+        theta, comp = space.quat_angle_diff(self.quat1, self.null_quat)
         self.assertEqual(theta.size, 0)
         self.assertEqual(theta.shape, (0,))
         self.assertEqual(comp.size, 0)
         self.assertEqual(comp.shape, (3, 0))
 
     def test_null3(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.null, self.quat1)
+        theta, comp = space.quat_angle_diff(self.null, self.quat1)
         self.assertEqual(theta.size, 0)
         self.assertEqual(theta.shape, (0,))
         self.assertEqual(comp.size, 0)
         self.assertEqual(comp.shape, (3, 0))
 
     def test_null4(self) -> None:
-        (theta, comp) = space.quat_angle_diff(self.null_quat, self.quat1)
+        theta, comp = space.quat_angle_diff(self.null_quat, self.quat1)
         self.assertEqual(theta.size, 0)
         self.assertEqual(theta.shape, (0,))
         self.assertEqual(comp.size, 0)

@@ -84,7 +84,7 @@ def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: floa
 def cost_wrapper(results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams) -> _N:  # noqa: ARG001  # fmt: skip
     r"""Example Cost wrapper for the model."""
     # Pull out overlapping time points and indices
-    (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
+    ix_truth, ix_results = _get_truth_index(results_time, truth_time)
     sub_truth = truth_data[ix_truth]
     sub_result = results_data[ix_results]
 
@@ -505,7 +505,7 @@ class Test_estimation_batch__function_wrapper(unittest.TestCase):
         self.cost_func = lambda *args, **kwargs: np.array([1, 2, np.nan])
 
     def test_nominal(self) -> None:
-        (innovs, results) = estm.batch._function_wrapper(
+        innovs, results = estm.batch._function_wrapper(
             model_func=self.model_func,
             model_args=self.model_args,
             cost_func=self.cost_func,
@@ -516,7 +516,7 @@ class Test_estimation_batch__function_wrapper(unittest.TestCase):
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_model_args(self) -> None:
-        (innovs, results) = estm.batch._function_wrapper(
+        innovs, results = estm.batch._function_wrapper(
             model_func=self.model_func,
             model_args={"a": 5},
             cost_func=self.cost_func,
@@ -527,7 +527,7 @@ class Test_estimation_batch__function_wrapper(unittest.TestCase):
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_cost_args(self) -> None:
-        (innovs, results) = estm.batch._function_wrapper(
+        innovs, results = estm.batch._function_wrapper(
             model_func=self.model_func,
             model_args=self.model_args,
             cost_func=self.cost_func,
@@ -618,7 +618,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.normalized = False
 
     def test_nominal(self, mock_logger: Mock) -> None:
-        (jacobian, gradient, hessian) = estm.batch._finite_differences(
+        jacobian, gradient, hessian = estm.batch._finite_differences(
             self.opti_opts,
             self.model_args,
             self.bpe_results,
@@ -632,7 +632,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
 
     def test_normalized(self, mock_logger: Mock) -> None:
         self.normalized = True
-        (jacobian, gradient, hessian) = estm.batch._finite_differences(
+        jacobian, gradient, hessian = estm.batch._finite_differences(
             self.opti_opts,
             self.model_args,
             self.bpe_results,
@@ -646,7 +646,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
 
     def test_two_sided(self, mock_logger: Mock) -> None:
         self.two_sided = True
-        (jacobian, gradient, hessian) = estm.batch._finite_differences(
+        jacobian, gradient, hessian = estm.batch._finite_differences(
             self.opti_opts,
             self.model_args,
             self.bpe_results,
@@ -661,7 +661,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
     def test_norm_and_two_sided(self, mock_logger: Mock) -> None:
         self.normalized = True
         self.two_sided = True
-        (jacobian, gradient, hessian) = estm.batch._finite_differences(
+        jacobian, gradient, hessian = estm.batch._finite_differences(
             self.opti_opts,
             self.model_args,
             self.bpe_results,
@@ -803,21 +803,21 @@ class Test_estimation_batch__double_dogleg(unittest.TestCase):
     def test_large_trust_radius(self) -> None:
         # Newton step in trust radius
         self.trust_radius = 10000.0
-        (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(
+        new_delta_param, step_len, step_scale, step_type = estm.batch._double_dogleg(
             self.delta_param, self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius
         )
 
     def test_small_bias(self) -> None:
         # Newton step outside trust_radius
         self.x_bias = 0.01
-        (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(
+        new_delta_param, step_len, step_scale, step_type = estm.batch._double_dogleg(
             self.delta_param, self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius
         )
 
     def test_gradient_step(self) -> None:
         # Newton step outside trust_radius
         self.x_bias = 0.001
-        (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(
+        new_delta_param, step_len, step_scale, step_type = estm.batch._double_dogleg(
             self.delta_param, self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius
         )
 
@@ -825,7 +825,7 @@ class Test_estimation_batch__double_dogleg(unittest.TestCase):
         # Dogleg step 1
         self.x_bias = 0.001
         self.grad_hessian_grad = 75.0
-        (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(
+        new_delta_param, step_len, step_scale, step_type = estm.batch._double_dogleg(
             self.delta_param, self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius
         )
 
@@ -834,7 +834,7 @@ class Test_estimation_batch__double_dogleg(unittest.TestCase):
         self.x_bias = 0.001
         self.grad_hessian_grad = 75.0
         self.delta_param = 0.001 * np.array([1, 2])
-        (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(
+        new_delta_param, step_len, step_scale, step_type = estm.batch._double_dogleg(
             self.delta_param, self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius
         )
 
@@ -1145,7 +1145,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
 
     def test_nominal(self, mock_logger: Mock) -> None:
         mock_logger.level = LogLevel.L5
-        (bpe_results, results) = estm.run_bpe(self.opti_opts)
+        bpe_results, results = estm.run_bpe(self.opti_opts)
         # TODO: check logging results?
         self.assertTrue(isinstance(bpe_results, estm.BpeResults))
         self.assertTrue(isinstance(results, np.ndarray))

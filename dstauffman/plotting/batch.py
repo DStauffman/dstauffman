@@ -130,7 +130,7 @@ def plot_bpe_convergence(
         fig = plt.figure()
         ax = fig.add_subplot(111)
     else:
-        (fig, ax) = fig_ax
+        fig, ax = fig_ax
     assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
         fig.canvas.manager.set_window_title(this_title)

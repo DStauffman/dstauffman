@@ -250,9 +250,9 @@ def _calc_rms(datum: list[_N], ix: list[_B], *, use_mean: bool) -> tuple[list[np
 # %% Functions - _get_units
 def _get_units(units: str, second_units: _SecUnits, leg_scale: _SecUnits) -> tuple[str, float, str, float]:
     """Get all the unit conversions."""
-    (new_units, unit_conv) = get_unit_conversion(second_units, units)
+    new_units, unit_conv = get_unit_conversion(second_units, units)
     if leg_scale is not None:
-        (leg_units, leg_conv) = get_unit_conversion(leg_scale, units)
+        leg_units, leg_conv = get_unit_conversion(leg_scale, units)
     else:
         leg_units = new_units
         leg_conv = unit_conv
@@ -366,7 +366,7 @@ def _draw_lines(
     if use_datashader and this_time.size > datashader_pts:
         ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)
         if not np.issubdtype(this_data.dtype, np.number):
-            (categories, ix_extras) = np.unique(this_data, return_index=True)
+            categories, ix_extras = np.unique(this_data, return_index=True)
             temp_data = pd.Categorical(this_data, categories=categories[np.argsort(ix_extras)], ordered=True)
             ix_spot = np.union1d(ix_spot, ix_extras)
             line = plot_func(
@@ -514,7 +514,7 @@ def make_time_plot(
     cm = ColorMap(colormap=colormap, num_colors=num_channels)
 
     # unit conversion value
-    (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
+    new_units, unit_conv, leg_units, leg_conv = _get_units(units, second_units, leg_scale)
 
     # plotting options
     plot_func = _plot_zoh if use_zoh else _plot_linear
@@ -890,7 +890,7 @@ def make_difference_plot(  # noqa: C901
             err = {"one": np.hstack(data_func), "two": np.hstack(data2_func), "diff": np.hstack(nondeg_func)}
 
     # unit conversion value
-    (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
+    new_units, unit_conv, leg_units, leg_conv = _get_units(units, second_units, leg_scale)
 
     # plotting options
     plot_func = _plot_zoh if use_zoh else _plot_linear
@@ -1429,7 +1429,7 @@ def make_error_bar_plot(
         data_func, func_name = _calc_rms(datum, ix["one"], use_mean=use_mean)
 
     # unit conversion value
-    (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
+    new_units, unit_conv, leg_units, leg_conv = _get_units(units, second_units, leg_scale)
 
     # plotting options
     plot_func = _plot_zoh if use_zoh else _plot_linear
@@ -1647,7 +1647,7 @@ def make_bar_plot(
         data_func, func_name = _calc_rms(datum, ix["one"], use_mean=use_mean)
 
     # unit conversion value
-    (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
+    new_units, unit_conv, leg_units, leg_conv = _get_units(units, second_units, leg_scale)
 
     # extra bar calculations
     last = np.zeros_like(datum[0])
@@ -1663,7 +1663,7 @@ def make_bar_plot(
     if fig_ax is None:
         fig_ax = _create_figure(1, 1, 1, description=description)[0]
     assert fig_ax is not None
-    (fig, ax) = fig_ax
+    fig, ax = fig_ax
 
     for i in reversed(range(num_channels)):
         this_ylabel = ylabels[i]
@@ -1864,7 +1864,7 @@ def make_categories_plot(  # noqa: C901
             data_func[cat], func_name = _calc_rms(this_datum, temp_ix_one, use_mean=use_mean)
 
     # unit conversion value
-    (new_units, unit_conv, leg_units, leg_conv) = _get_units(units, second_units, leg_scale)
+    new_units, unit_conv, leg_units, leg_conv = _get_units(units, second_units, leg_scale)
 
     # plotting options
     plot_func = _plot_zoh if use_zoh else _plot_linear
@@ -2142,7 +2142,7 @@ def make_connected_sets(
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
     else:
-        (fig, ax) = fig_ax
+        fig, ax = fig_ax
     assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
         fig.canvas.manager.set_window_title(description + extra_text)

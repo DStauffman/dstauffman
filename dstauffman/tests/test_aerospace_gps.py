@@ -133,14 +133,14 @@ class Test_aerospace_get_prn_bits(unittest.TestCase):
     """
 
     def test_spot_check(self) -> None:
-        (b1, b2) = space.get_prn_bits(19)
+        b1, b2 = space.get_prn_bits(19)
         self.assertEqual(b1, 3)
         self.assertEqual(b2, 6)
 
     def test_no_errors(self) -> None:
         valid_bits = frozenset(range(1, 11))
         for i in range(1, 38):
-            (b1, b2) = space.get_prn_bits(i)
+            b1, b2 = space.get_prn_bits(i)
             self.assertIn(b1, valid_bits)
             self.assertIn(b2, valid_bits)
 

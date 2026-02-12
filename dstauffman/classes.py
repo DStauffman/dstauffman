@@ -450,6 +450,7 @@ def pprint_dict(
     disp: bool = True,
     offset: int = 0,
     max_elements: int | None = None,
+    exclude: set[str] | None = None,
 ) -> str:
     r"""
     Print all the fields and their values.
@@ -470,6 +471,8 @@ def pprint_dict(
         Additional offset for recursive calls
     max_elements : int, optional, default is None meaning don't change
         Maximum number of elements to show in array, if zero, then only show shape of array
+    exclude : set[str], optional
+        Names to exclude when printing
 
     Notes
     -----
@@ -498,6 +501,8 @@ def pprint_dict(
     pad_len = max(len(x) for x in dct)
     # loop through fields
     for this_key, this_value in dct.items():
+        if exclude is not None and this_key in exclude:
+            continue
         if hasattr(this_value, "pprint"):
             this_name = f"{this_key} (class {this_value.__class__.__name__})"
             try:

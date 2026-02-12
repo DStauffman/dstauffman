@@ -394,10 +394,10 @@ def ijk_2_sez(ijk: _N, geo_loc: _N, time_jd: _N) -> _N:
     # calculate SEZ vector in IJK frame by subtracting position on Earth in IJK
     sez_in_ijk = ijk - R
     # find the size of the input array
-    (m, n) = ijk.shape
+    m, n = ijk.shape
     if m != 3:
         raise ValueError("ijk_2_sez expects an array of 3 dimensional vectors for sez")
-    (m, length) = geo_loc.shape
+    m, length = geo_loc.shape
     if m != 3:
         raise ValueError("ijk_2_sez expects an array of 3 dimensional vectors for geo_loc")
     # pull out data from geo_loc
@@ -532,10 +532,10 @@ def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:
         # fmt: on
 
     # find the size of the input array
-    (m, n) = sez.shape
+    m, n = sez.shape
     if m != 3:
         raise ValueError("ijk_2_sez expects an array of 3 dimensional vectors for sez")
-    (m, length) = geo_loc.shape
+    m, length = geo_loc.shape
     if m != 3:
         raise ValueError("ijk_2_sez expects an array of 3 dimensional vectors for geo_loc")
     # pull out data from geo_loc
@@ -575,9 +575,9 @@ def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:
 def rv_aer_2_ijk(r_aer: _N, v_aer: _N, geo_loc: _N, time_jd: _N) -> tuple[_N, _N]:
     r"""Converts position and velocity from Az/El/range to IJK cartesion."""
     # transform to SEZ frame
-    (r_sez, v_sez) = rv_aer_2_sez(r_aer, v_aer)
+    r_sez, v_sez = rv_aer_2_sez(r_aer, v_aer)
     # transform to IJK frame
-    (r_ijk, v_ijk) = rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd)
+    r_ijk, v_ijk = rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd)
     return (r_ijk, v_ijk)
 
 
@@ -610,9 +610,9 @@ def rv_aer_2_sez(r_aer: _N, v_aer: _N) -> tuple[_N, _N]:
 def rv_ijk_2_aer(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> tuple[_N, _N]:
     r"""Converts position and velocity IJK cartesion to Az/El/range."""
     # transform from IJK frame to SEZ frame
-    (r_sez, v_sez) = rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd)
+    r_sez, v_sez = rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd)
     # transform from SEZ frame to AER frame
-    (r_aer, v_aer) = rv_sez_2_aer(r_sez, v_sez)
+    r_aer, v_aer = rv_sez_2_aer(r_sez, v_sez)
     return (r_aer, v_aer)
 
 
@@ -776,7 +776,7 @@ def get_sun_radec(time_jd: _FN, return_early: bool = False) -> tuple[np.floating
 
     """
     # time in julian centuries
-    (_, T) = jd_2_century(time_jd)
+    _, T = jd_2_century(time_jd)
     T2 = T * T
     T3 = T2 * T
     T4 = T3 * T
@@ -909,7 +909,7 @@ def get_moon_radec_approx(time_jd: _FN) -> tuple[np.floating, np.floating] | tup
 
     """
     # time in julian centuries
-    (_, T) = jd_2_century(time_jd)
+    _, T = jd_2_century(time_jd)
 
     L = (
         218.32
@@ -979,7 +979,7 @@ def get_moon_distance(time_jd: _FN) -> np.floating | _N:
 
     """
     # time in julian centuries
-    (_, T) = jd_2_century(time_jd)
+    _, T = jd_2_century(time_jd)
 
     P = (
         0.9508
@@ -1034,7 +1034,7 @@ def beta_from_oe(raan: _FN, inclination: _FN, time_jd: _FN) -> np.floating | _N:
     -0.8068
 
     """
-    (Ls, ob) = get_sun_radec(time_jd, return_early=True)
+    Ls, ob = get_sun_radec(time_jd, return_early=True)
     sin_beta = (
         np.cos(Ls) * np.sin(raan) * np.sin(inclination)
         - np.sin(Ls) * np.cos(ob) * np.cos(raan) * np.sin(inclination)

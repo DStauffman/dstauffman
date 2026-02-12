@@ -373,9 +373,9 @@ class Kf(Frozen):
                     for subkey in vars(sub):
                         value = getattr(sub, subkey)
                         if value is not None:
-                            if subkey in {"chan"}:
+                            if subkey == "chan":
                                 value = [x.encode("utf-8") for x in value]
-                            elif subkey in {"time"} and is_datetime(value):
+                            elif subkey == "time" and is_datetime(value):
                                 value = value.copy().astype(np.int64)
                             inner_grp.create_dataset(subkey, data=value)
                 else:
@@ -383,9 +383,9 @@ class Kf(Frozen):
                     value = getattr(self, key)
                     if value is not None:
                         # special case to handle lists of strings
-                        if key in {"chan"}:
+                        if key == "chan":
                             value = [x.encode("utf-8") for x in value]
-                        elif key in {"time"} and is_datetime(value):
+                        elif key == "time" and is_datetime(value):
                             value = value.copy().astype(np.int64)
                         grp.create_dataset(key, data=value)
 
@@ -403,9 +403,9 @@ class Kf(Frozen):
                         inner_grp = grp[field]
                         for subfield in inner_grp:
                             value = inner_grp[subfield][()]
-                            if subfield in {"chan"}:
+                            if subfield == "chan":
                                 value = [x.decode("utf-8") for x in value]
-                            elif subfield in {"time"}:
+                            elif subfield == "time":
                                 if value.dtype == np.int64:
                                     value.dtype = NP_DATETIME_FORM
                             elif isinstance(value, bytes):
@@ -413,9 +413,9 @@ class Kf(Frozen):
                             setattr(getattr(out, field), subfield, value)
                     else:
                         value = grp[field][()]
-                        if field in {"chan"}:
+                        if field == "chan":
                             value = [x.decode("utf-8") for x in value]
-                        elif field in {"time"}:
+                        elif field == "time":
                             if value.dtype == np.int64:
                                 value.dtype = NP_DATETIME_FORM
                         elif isinstance(value, bytes):

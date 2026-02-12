@@ -189,6 +189,13 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         angle = space.vec_angle(tuple1, tuple2, use_cross=False)
         np.testing.assert_almost_equal(angle, exp2, 12)
 
+    def test_bad_sizes(self) -> None:
+        prng = np.random.default_rng()
+        with self.assertRaises(ValueError):
+            space.vec_angle(prng.random((3, 4)), prng.random((2, 4)))
+        with self.assertRaises(ValueError):
+            space.vec_angle(prng.random((3, 3)), prng.random((3, 5)))
+
     def test_not_normalized(self) -> None:
         angle = space.vec_angle(np.array([0, 2.0, 0]), np.array([0.0, -5.0, 5.0]), normalized=False, use_cross=True)
         self.assertAlmostEqual(angle, 3 * np.pi / 4, 14)  # type: ignore[misc]
@@ -229,11 +236,11 @@ class Test_aerospace_cart2sph(unittest.TestCase):
         self.aer2 = (-np.pi / 2, 0, 1)
 
     def test_single(self) -> None:
-        (az, el, rad) = space.cart2sph(*self.xyz1)
+        az, el, rad = space.cart2sph(*self.xyz1)
         self.assertAlmostEqual(az, self.aer1[0], 14)
         self.assertAlmostEqual(el, self.aer1[1], 14)
         self.assertAlmostEqual(rad, self.aer1[2], 14)
-        (az, el, rad) = space.cart2sph(*self.xyz2)
+        az, el, rad = space.cart2sph(*self.xyz2)
         self.assertAlmostEqual(az, self.aer2[0], 14)
         self.assertAlmostEqual(el, self.aer2[1], 14)
         self.assertAlmostEqual(rad, self.aer2[2], 14)
@@ -245,7 +252,7 @@ class Test_aerospace_cart2sph(unittest.TestCase):
         exp_az = np.array([self.aer1[0], self.aer2[0]])
         exp_el = np.array([self.aer1[1], self.aer2[1]])
         exp_rad = np.array([self.aer1[2], self.aer2[2]])
-        (az, el, rad) = space.cart2sph(x, y, z)
+        az, el, rad = space.cart2sph(x, y, z)
         np.testing.assert_array_almost_equal(az, exp_az, 14)
         np.testing.assert_array_almost_equal(el, exp_el, 14)
         np.testing.assert_array_almost_equal(rad, exp_rad, 14)
@@ -256,8 +263,8 @@ class Test_aerospace_cart2sph(unittest.TestCase):
         x = 3 * prng.random(num)
         y = -4 * prng.random(num)
         z = 10 * prng.random(num)
-        (az, el, rad) = space.cart2sph(x, y, z)
-        (x2, y2, z2) = space.sph2cart(az, el, rad)
+        az, el, rad = space.cart2sph(x, y, z)
+        x2, y2, z2 = space.sph2cart(az, el, rad)
         np.testing.assert_array_almost_equal(x, x2, 14)
         np.testing.assert_array_almost_equal(y, y2, 14)
         np.testing.assert_array_almost_equal(z, z2, 14)
@@ -280,11 +287,11 @@ class Test_aerospace_sph2cart(unittest.TestCase):
         self.aer2 = (-np.pi / 2, 0, 1)
 
     def test_single(self) -> None:
-        (x, y, z) = space.sph2cart(*self.aer1)
+        x, y, z = space.sph2cart(*self.aer1)
         self.assertAlmostEqual(x, self.xyz1[0], 14)
         self.assertAlmostEqual(y, self.xyz1[1], 14)
         self.assertAlmostEqual(z, self.xyz1[2], 14)
-        (x, y, z) = space.sph2cart(*self.aer2)
+        x, y, z = space.sph2cart(*self.aer2)
         self.assertAlmostEqual(x, self.xyz2[0], 14)
         self.assertAlmostEqual(y, self.xyz2[1], 14)
         self.assertAlmostEqual(z, self.xyz2[2], 14)
@@ -296,7 +303,7 @@ class Test_aerospace_sph2cart(unittest.TestCase):
         exp_x = np.array([self.xyz1[0], self.xyz2[0]])
         exp_y = np.array([self.xyz1[1], self.xyz2[1]])
         exp_z = np.array([self.xyz1[2], self.xyz2[2]])
-        (x, y, z) = space.sph2cart(az, el, rad)
+        x, y, z = space.sph2cart(az, el, rad)
         np.testing.assert_array_almost_equal(x, exp_x, 14)
         np.testing.assert_array_almost_equal(y, exp_y, 14)
         np.testing.assert_array_almost_equal(z, exp_z, 14)
@@ -307,8 +314,8 @@ class Test_aerospace_sph2cart(unittest.TestCase):
         az = 2 * np.pi * prng.random(num) - np.pi
         el = np.pi / 2 * prng.random(num)
         rad = 10 * prng.random(num)
-        (x, y, z) = space.sph2cart(az, el, rad)
-        (az2, el2, rad2) = space.cart2sph(x, y, z)
+        x, y, z = space.sph2cart(az, el, rad)
+        az2, el2, rad2 = space.cart2sph(x, y, z)
         np.testing.assert_array_almost_equal(az, az2, 14)
         np.testing.assert_array_almost_equal(el, el2, 14)
         np.testing.assert_array_almost_equal(rad, rad2, 14)
@@ -371,7 +378,7 @@ class Test_aerospace_linear_interp(unittest.TestCase):
         self.xp = np.array([1.0, 5.0, 9.0, 14.0])
         self.yp: _N
         self.ix: _I
-        (self.yp, self.ix, _) = intersect(self.x, self.xp, return_indices=True, tolerance=1e-10)  # type: ignore[call-overload]
+        self.yp, self.ix, _ = intersect(self.x, self.xp, return_indices=True, tolerance=1e-10)  # type: ignore[call-overload]
         self.yp = self.y[self.ix]
 
     def test_nominal(self) -> None:

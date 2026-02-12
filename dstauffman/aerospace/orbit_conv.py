@@ -756,7 +756,7 @@ def raan_2_mltan(raan: _FN, time_jd: _FN, return_descending: bool = False) -> np
 
     """
     # right ascension of the sun
-    (ra_sun, _) = get_sun_radec(time_jd)
+    ra_sun, _ = get_sun_radec(time_jd)
     # mean local time of the ascending node (hours)
     offset = 0.0 if return_descending else PI
     mltan = np.mod(raan - ra_sun + offset, TAU)
@@ -783,7 +783,7 @@ def jd_2_sidereal(time_jd: _FN) -> np.floating | _N:
 
     """
     # days since J2000 and time in julian centuries
-    (Du, T) = jd_2_century(time_jd)
+    Du, T = jd_2_century(time_jd)
     T2 = T * T
     T3 = T2 * T
     T4 = T3 * T
@@ -835,7 +835,7 @@ def quat_eci_2_ecf(time_jd: _FN, ignore_nutation: bool = False) -> _Q:
 
     """
     # days since J2000 and time in julian centuries
-    (Du, T) = jd_2_century(time_jd)
+    Du, T = jd_2_century(time_jd)
     T2 = T * T
     T3 = T2 * T
     T4 = T3 * T

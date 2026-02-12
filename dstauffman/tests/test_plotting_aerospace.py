@@ -219,7 +219,7 @@ class Test_plotting_plot_states(unittest.TestCase):
 
     def test_errs(self) -> None:
         with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
-            (figs, err) = plot.plot_states(self.gnd1, self.gnd2, opts=self.opts, return_err=True)  # type: ignore[call-overload]
+            figs, err = plot.plot_states(self.gnd1, self.gnd2, opts=self.opts, return_err=True)  # type: ignore[call-overload]
         mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
         self.figs += figs
@@ -227,6 +227,15 @@ class Test_plotting_plot_states(unittest.TestCase):
 
     def test_groups(self) -> None:
         groups: list[tuple[int, ...]] = [(0, 1, 2), (3, 4, 5), (6, 7, 8)]
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="Mean of empty slice")
+            with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
+                self.figs += plot.plot_states(self.gnd1, self.gnd2, groups=groups, opts=self.opts)  # type: ignore[call-overload]
+        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
+        mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
+
+    def test_groups2(self) -> None:
+        groups: list[tuple[int, ...]] = [(0, 1, 2), (4, 8, 12, 16, 20, 24, 28, 32)]
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="Mean of empty slice")
             with patch("dstauffman.plotting.aerospace.logger") as mock_logger:

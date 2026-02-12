@@ -42,7 +42,7 @@ def _print_bad_command(command: str) -> None:
 def main() -> int:
     r"""Main function called when executed using the command line api."""
     try:
-        (command, args) = parse_wrapper(sys.argv[1:])
+        command, args = parse_wrapper(sys.argv[1:])
     except ValueError:
         _print_bad_command(" ".join(sys.argv[1:]))
         return ReturnCodes.bad_command

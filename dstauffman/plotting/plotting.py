@@ -14,7 +14,7 @@ import datetime
 import doctest
 import logging
 from pathlib import Path
-from typing import Literal, overload, TYPE_CHECKING, TypedDict
+from typing import Any, Literal, overload, TYPE_CHECKING, TypedDict
 
 try:
     from typing import NotRequired, Unpack
@@ -24,7 +24,7 @@ except ImportError:
 import unittest
 import warnings
 
-from slog import LogLevel
+from slog import is_dunder, LogLevel
 
 from dstauffman import (
     convert_date,
@@ -410,6 +410,24 @@ class Opts(Frozen):
             self.rms_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
         return self
+
+    def pprint_non_defaults(self, return_text: bool = False, **kwargs: Any) -> str | None:
+        r"""Displays only the non-default values within the structure."""
+        # create default for comparison
+        nom = self.__class__()
+        # initialize a structure to hold the non-defaults
+        exclude: set[str] = kwargs.pop("exclude", set())
+        # loop through the fields
+        for key, value in vars(nom).items():
+            if key in exclude:
+                continue
+            if is_dunder(key):
+                continue
+            # compare field values
+            if hasattr(self, key) and getattr(self, key) == value:
+                exclude.add(key)
+        # display the resulting structure using built-in matlab options
+        return self.pprint(exclude=exclude, return_text=return_text, **kwargs)  # type: ignore[call-overload, no-any-return]
 
 
 # %% Functions - suppress_plots
@@ -863,7 +881,7 @@ def plot_correlation_matrix(
     >>> label_values = True
     >>> x_lab_rot = 90
     >>> colormap = None
-    >>> plot_border=None
+    >>> plot_border = None
     >>> leg_scale = "centi"
     >>> fig_ax = None
     >>> skip_setup_plots = False
@@ -881,14 +899,14 @@ def plot_correlation_matrix(
         opts = Opts()
     if colormap is None:
         colormap = "cool" if opts.colormap is None else opts.colormap
-    (new_units, scale) = get_unit_conversion(leg_scale, units)
+    new_units, scale = get_unit_conversion(leg_scale, units)
 
     # Hard-coded values
     box_size = 1
     precision = 1e-12
 
     # get sizes
-    (n, m) = data.shape
+    n, m = data.shape
 
     # check labels
     if labels is None:
@@ -936,7 +954,7 @@ def plot_correlation_matrix(
         # get handle to axes for use later
         ax = fig.add_subplot(1, 1, 1)
     else:
-        (fig, ax) = fig_ax
+        fig, ax = fig_ax
     # set figure title
     assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
@@ -1299,6 +1317,9 @@ def plot_histogram(  # noqa: C901
         assert data is None
         data_size = int(np.sum(counts))
         missing = 0
+    if data_size == 0:
+        # Handle empty data case for scaling and to avoid divide by zero
+        data_size = 1
     assert counts is not None, "counts should always be set from this point forward."
     num = np.size(bins)
     plotting_bins: _I | _N
@@ -1326,7 +1347,7 @@ def plot_histogram(  # noqa: C901
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
     else:
-        (fig, ax) = fig_ax
+        fig, ax = fig_ax
     assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access  # noqa: SLF001
         fig.canvas.manager.set_window_title(description)
@@ -1430,7 +1451,7 @@ def plot_histogram(  # noqa: C901
             color_ix += 1
     if using_cdf:
         # Add a legend now, since there is something to display
-        (handles, labels) = ax.get_legend_handles_labels()
+        handles, labels = ax.get_legend_handles_labels()
         handles.insert(0, p)
         labels.insert(0, "PDF")
         ax.legend(handles, labels, loc=legend_loc)
@@ -1491,7 +1512,7 @@ def setup_plots(figs: Figure | _Figs, opts: Opts, *, skip_tight: bool = False) -
         titleprefix(figs, opts.case_name)
 
     # label plot classification
-    (classification, caveat) = get_classification(opts.classify)
+    classification, caveat = get_classification(opts.classify)
     if classification:
         for fig in figs:
             ax = fig.gca()

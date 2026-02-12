@@ -86,7 +86,7 @@ class Test_plotting_Opts(unittest.TestCase):
         opts.rms_xmax = None
         opts.time_base = "sec"
         opts.time_unit = "min"
-        (d1, d2, r1, r2) = opts.get_time_limits()
+        d1, d2, r1, r2 = opts.get_time_limits()
         self.assertEqual(d1, 1)
         self.assertEqual(d2, inf)
         self.assertEqual(r1, -inf)
@@ -96,7 +96,7 @@ class Test_plotting_Opts(unittest.TestCase):
         opts = plot.Opts().convert_dates("datetime")
         opts.disp_xmin = datetime.datetime(2020, 6, 1, 0, 0, 0)
         opts.disp_xmax = datetime.datetime(2020, 6, 1, 12, 0, 0)
-        (d1, d2, r1, r2) = opts.get_time_limits()
+        d1, d2, r1, r2 = opts.get_time_limits()
         self.assertEqual(d1, datetime.datetime(2020, 6, 1, 0, 0, 0))
         self.assertEqual(d2, datetime.datetime(2020, 6, 1, 12, 0, 0))
         self.assertIsNone(r1)
@@ -112,6 +112,21 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertEqual(lines[1], "  case_name = ")
         self.assertEqual(lines[3], "  save_plot = False")
         self.assertEqual(lines[-1], "  names     = []")
+
+    def test_pprint_non_defaults(self) -> None:
+        opts = plot.Opts()
+        opts.case_name = "New"
+        opts.save_plot = True
+        opts.use_mean = True
+        opts.time_base = "sec"
+        with capture_output() as ctx:
+            opts.pprint_non_defaults()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
+        self.assertEqual(lines[0], "Opts")
+        self.assertEqual(lines[1], " case_name = New")
+        self.assertEqual(lines[2], " save_plot = True")
+        self.assertEqual(lines[3], " use_mean  = True")
 
     @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_convert_dates(self) -> None:
@@ -371,6 +386,9 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
             label_values=True,
             x_lab_rot=180,
             colormap="Paired",
+            plot_border="xkcd:black",
+            leg_scale="micro",
+            skip_setup_plots=False,
         )
 
     def test_symmetric(self) -> None:
@@ -411,6 +429,15 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
 
     def test_x_label_rotation(self) -> None:
         self.fig = plot.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0)
+
+    def test_colormap(self) -> None:
+        self.fig = plot.plot_correlation_matrix(self.data, self.labels, colormap="autumn_r")
+
+    def test_matrix_name(self) -> None:
+        self.fig = plot.plot_correlation_matrix(self.data, matrix_name="Not a Correlation Matrix")
+
+    def test_plot_border(self) -> None:
+        self.fig = plot.plot_correlation_matrix(self.data, plot_border="xkcd:white")
 
     def test_nans(self) -> None:
         self.data[0, 0] = np.nan
@@ -660,7 +687,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
 
     def test_multiple_figs(self) -> None:
         fig_list = [self.fig]
-        (new_fig, ax) = plt.subplots()
+        new_fig, ax = plt.subplots()
         ax.plot(0, 0)
         fig_list.append(new_fig)
         plot.setup_plots(fig_list, self.opts)

@@ -1074,7 +1074,7 @@ def plot_innovations(  # noqa: C901
         num_chan = max(num_chan, temp)
     # fmt: off
     elements: list[str] | tuple[str, ...] | None
-    elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f"Channel {i+1}" for i in range(num_chan)]
+    elements     = kf1.chan or (kf2.chan or [f"Channel {i+1}" for i in range(num_chan)])
     elements     = kwargs.pop("elements", elements)
     units        = kwargs.pop("units", kf1.units)
     second_units = kwargs.pop("second_units", "micro")
@@ -1117,7 +1117,7 @@ def plot_innovations(  # noqa: C901
     colormap     = kwargs.pop("colormap", this_opts.colormap)
     tolerance    = kwargs.pop("tolerance", 0)
     name_one, name_two = this_opts.get_name_one_and_two(kwargs, kf1=kf1, kf2=kf2)
-    description = name_one if name_one else name_two if name_two else ""
+    description  = name_one or (name_two or "")
     # fmt: on
 
     # Initialize outputs
@@ -1460,7 +1460,7 @@ def plot_innov_hist(
     if fields is None:
         fields = {"innov": "Innovations", "norm": "Normalized Innovations"}
 
-    description = kf1.name if kf1.name else ""
+    description = kf1.name or ""
     logger.log(LogLevel.L4, "Plotting %s plots ...", description)
 
     # check for data
@@ -1631,7 +1631,7 @@ def plot_covariance(
         num_chan = max(num_chan, temp)
     # fmt: off
     elements: list[str] | tuple[str, ...] | None
-    elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f"Channel {i+1}" for i in range(num_chan)]
+    elements     = kf1.chan or (kf2.chan or [f"Channel {i+1}" for i in range(num_chan)])
     elements     = kwargs.pop("elements", elements)
     units        = kwargs.pop("units", "mixed")
     second_units = kwargs.pop("second_units", "micro")
@@ -1690,11 +1690,11 @@ def plot_covariance(
             this_ylabel = description + f" [{this_units}]"
             states_array = np.atleast_1d(states)
             if hasattr(kf1, "active") and kf1.active is not None:
-                (this_state_nums1, this_state_rows1, found_rows1) = intersect(kf1.active, states_array, return_indices=True)  # type: ignore[call-overload]
+                this_state_nums1, this_state_rows1, found_rows1 = intersect(kf1.active, states_array, return_indices=True)  # type: ignore[call-overload]
             else:
                 this_state_nums1 = np.array([], dtype=int)
             if hasattr(kf2, "active") and kf2.active is not None:
-                (this_state_nums2, this_state_rows2, found_rows2) = intersect(kf2.active, states_array, return_indices=True)  # type: ignore[call-overload]
+                this_state_nums2, this_state_rows2, found_rows2 = intersect(kf2.active, states_array, return_indices=True)  # type: ignore[call-overload]
             else:
                 this_state_nums2 = np.array([], dtype=int)
             this_state_nums = np.union1d(this_state_nums1, this_state_nums2)
@@ -1748,10 +1748,10 @@ def plot_covariance(
                     **kwargs,
                 )
                 if return_err:
-                    figs += out[0]  # ty: ignore[unsupported-operator]
+                    figs += out[0]
                     err[field][f"Group {ix + 1}"] = out[1]
                 else:
-                    figs += out  # ty: ignore[unsupported-operator]
+                    figs += out
         logger.log(LogLevel.L4, "... done.")
 
     # Setup plots
@@ -1871,7 +1871,7 @@ def plot_tci(
     >>> solar_file = folder / "Solar_Cycles.txt"
     >>> solar_data = read_solar_cycles(solar_file)
     >>> time = tci_data.Date.to_numpy()
-    >>> data = tci_data.TCI.to_numpy()
+    >>> data = tci_data.TCI.to_numpy().copy()
     >>> data[data < 0.0] = np.nan
     >>> solar_cycles = date2num(solar_data.Start[16:].to_numpy())
     >>> solar_labels = [f"SC {name}" for name in solar_data.Solar_Cycle[16:]]
@@ -1952,7 +1952,7 @@ def plot_kp(
     >>> kp_file = folder / "Kp_ap_nowcast.txt"
     >>> kp_data = read_kp_ap_nowcast(kp_file)
     >>> time = kp_data.GMT.to_numpy()
-    >>> data = kp_data.Kp.to_numpy()
+    >>> data = kp_data.Kp.to_numpy().copy()
     >>> data[data < 0.0] = np.nan
     >>> fig = plot_kp(time, data)
 

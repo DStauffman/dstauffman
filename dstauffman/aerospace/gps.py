@@ -352,7 +352,7 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
         return np.mod(np.sum(x), 2)  # type: ignore[no-any-return]
 
     # find which bits to mod based on the satellite number
-    (bit1, bit2) = get_prn_bits(sat)
+    bit1, bit2 = get_prn_bits(sat)
 
     # initialize generators
     g1 = np.ones(10, dtype=int)

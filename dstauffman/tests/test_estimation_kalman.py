@@ -42,12 +42,12 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
         self.assertAlmostEqual(K[0, 0], self.exp, 12)
 
     def test_innov_cov(self) -> None:
-        (K, Pz) = estm.calculate_kalman_gain(self.P, self.H, self.R, return_innov_cov=True)  # type: ignore[call-overload]
+        K, Pz = estm.calculate_kalman_gain(self.P, self.H, self.R, return_innov_cov=True)  # type: ignore[call-overload]
         self.assertAlmostEqual(K[0, 0], self.exp, 14)
         self.assertAlmostEqual(Pz[0, 0], self.exp_pz, 14)
 
     def test_numba(self) -> None:
-        (K, Pz) = estm.calculate_kalman_gain_opt(self.P, self.H, self.R)
+        K, Pz = estm.calculate_kalman_gain_opt(self.P, self.H, self.R)
         self.assertAlmostEqual(K[0, 0], self.exp, 14)
 
 

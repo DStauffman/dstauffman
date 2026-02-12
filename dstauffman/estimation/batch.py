@@ -1082,7 +1082,7 @@ def _dogleg_search(  # pylint: disable=too-many-positional-arguments
 
         # compute restrained trial parameter step
         if search_method == "trust_region":
-            (new_delta_param, step_len, step_scale, step_type) = _double_dogleg(
+            new_delta_param, step_len, step_scale, step_type = _double_dogleg(
                 delta_param, gradient, grad_hessian_grad, opti_opts.x_bias, trust_radius
             )
 
@@ -1254,7 +1254,7 @@ def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M,
     # Make information, covariance matrix, compute Singular Value Decomposition (SVD).
     try:
         # note, python has x = U*S*Vh instead of U*S*V', when V = Vh'
-        (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian @ normalize_matrix, full_matrices=False)
+        _, S_jacobian, Vh_jacobian = np.linalg.svd(jacobian @ normalize_matrix, full_matrices=False)
         V_jacobian = Vh_jacobian.T
         temp = np.power(S_jacobian, -2, out=np.zeros(S_jacobian.shape), where=S_jacobian > min_eig)
         covariance = V_jacobian @ np.diag(temp) @ Vh_jacobian
@@ -1271,7 +1271,7 @@ def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M,
     # Update SVD and covariance for the normalized parameters (but correlation remains as calculated above)
     if normalized:
         try:
-            (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian, full_matrices=False)
+            _, S_jacobian, Vh_jacobian = np.linalg.svd(jacobian, full_matrices=False)
             V_jacobian = Vh_jacobian.T
             covariance = V_jacobian @ np.diag(S_jacobian**-2) @ Vh_jacobian
         except MemoryError:  # pragma: no cover
@@ -1465,9 +1465,7 @@ def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:
         logger.log(LogLevel.L3, "Running iteration %s.", iter_count)
 
         # run finite differences code to numerically approximate the Jacobian, gradient and Hessian
-        (jacobian, gradient, hessian) = _finite_differences(
-            opti_opts, model_args, bpe_results, cur_results, two_sided=two_sided
-        )
+        jacobian, gradient, hessian = _finite_differences(opti_opts, model_args, bpe_results, cur_results, two_sided=two_sided)
 
         # Check direction of the last step and the gradient. If the old step and the negative new
         # gradient are in the same general direction, then increase the trust radius.
@@ -1521,7 +1519,7 @@ def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:
     _print_divider(level=LogLevel.L3)
     logger.log(LogLevel.L3, "Running final simulation.")
     opti_opts.set_param_func(names=names, values=cur_results.params, **model_args)
-    (cur_results.innovs, results) = _function_wrapper(
+    cur_results.innovs, results = _function_wrapper(
         model_func=opti_opts.model_func,
         cost_func=opti_opts.cost_func,
         model_args=model_args,

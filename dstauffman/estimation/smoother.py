@@ -201,7 +201,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: _N | None = None, LAMBDA_bar: _
     z  = kf_record.z[:, -1]
     # fmt: on
     # Update information
-    (lambda_hat, LAMBDA_hat) = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
+    lambda_hat, LAMBDA_hat = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
 
     # % Backwards time loop
     for i in range(n_time - 2, 0, -1):
@@ -221,7 +221,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: _N | None = None, LAMBDA_bar: _
         # propagated information vector
         x_delta[:, i] = -P @ lambda_bar
         # Update information
-        (lambda_hat, LAMBDA_hat) = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
+        lambda_hat, LAMBDA_hat = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
 
     return (x_delta, lambda_bar, LAMBDA_bar)
 

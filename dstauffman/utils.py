@@ -1087,7 +1087,7 @@ def combine_per_year(data: _Array | None, func: Callable[..., Any] | None = None
     if is_1d:
         data = data[:, np.newaxis]
     assert isinstance(data, np.ndarray)
-    (num_time, num_chan) = data.shape
+    num_time, num_chan = data.shape
     num_year = num_time // MONTHS_PER_YEAR
     # check for case with all NaNs
     if np.all(np.isnan(data)):
@@ -1518,11 +1518,11 @@ def intersect(  # type: ignore[misc]
     b3 = np.floor_divide(b + hi_tol, tolerance)
 
     # do a normal intersect on the quantized data for different comparisons
-    (_, ia1, ib1) = np.intersect1d(a1, b1, assume_unique=assume_unique, return_indices=True)
-    (_, ia2, ib2) = np.intersect1d(a1, b2, assume_unique=assume_unique, return_indices=True)
-    (_, ia3, ib3) = np.intersect1d(a1, b3, assume_unique=assume_unique, return_indices=True)
-    (_, ia4, ib4) = np.intersect1d(a2, b1, assume_unique=assume_unique, return_indices=True)
-    (_, ia5, ib5) = np.intersect1d(a3, b1, assume_unique=assume_unique, return_indices=True)
+    _, ia1, ib1 = np.intersect1d(a1, b1, assume_unique=assume_unique, return_indices=True)
+    _, ia2, ib2 = np.intersect1d(a1, b2, assume_unique=assume_unique, return_indices=True)
+    _, ia3, ib3 = np.intersect1d(a1, b3, assume_unique=assume_unique, return_indices=True)
+    _, ia4, ib4 = np.intersect1d(a2, b1, assume_unique=assume_unique, return_indices=True)
+    _, ia5, ib5 = np.intersect1d(a3, b1, assume_unique=assume_unique, return_indices=True)
 
     # combine the results
     ia = reduce(np.union1d, [ia1, ia2, ia3, ia4, ia5])

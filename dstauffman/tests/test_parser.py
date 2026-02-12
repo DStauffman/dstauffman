@@ -73,7 +73,7 @@ class Test_parse_wrapper(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        (command, parsed_args) = dcs.parse_wrapper(["tests", "-dv"])
+        command, parsed_args = dcs.parse_wrapper(["tests", "-dv"])
         self.assertEqual(command, "tests")
         self.assertEqual(
             parsed_args,
@@ -81,11 +81,11 @@ class Test_parse_wrapper(unittest.TestCase):
         )
 
     def test_help1(self) -> None:
-        (command, parsed_args) = dcs.parse_wrapper([])
+        command, parsed_args = dcs.parse_wrapper([])
         self.assertEqual(command, "help")
 
     def test_help2(self) -> None:
-        (command, parsed_args) = dcs.parse_wrapper(["-h"])
+        command, parsed_args = dcs.parse_wrapper(["-h"])
         self.assertEqual(command, "help")
 
 

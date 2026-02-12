@@ -54,6 +54,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         self.show_rms         = True
         self.legend_loc       = "best"
         self.second_units     = None
+        self.leg_scale        = None
         self.ylabel           = None
         self.data_as_rows     = True
         self.extra_plotter    = None
@@ -87,6 +88,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             show_rms=self.show_rms,
             legend_loc=self.legend_loc,
             second_units=self.second_units,
+            leg_scale=self.leg_scale,
             ylabel=self.ylabel,
             data_as_rows=self.data_as_rows,
             extra_plotter=self.extra_plotter,
@@ -275,7 +277,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_no_subplots(self) -> None:
         self.make_subplots = False
-        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -312,7 +314,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_no_start_date(self) -> None:
         self.start_date = ""
-        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -350,7 +352,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_only_data_one(self) -> None:
         self.data_two.fill(np.nan)
         self.name_two = ""
-        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -389,7 +391,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_only_data_two(self) -> None:
         self.data_one = None  # type: ignore[assignment]
         self.name_one = ""
-        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -428,7 +430,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_rms_bounds(self) -> None:
         self.rms_xmin = 5
         self.rms_xmax = 7
-        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -465,7 +467,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_use_mean(self) -> None:
         self.use_mean = True
-        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -502,7 +504,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_no_rms_in_legend(self) -> None:
         self.show_rms = False
-        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -539,7 +541,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_plot_zero(self) -> None:
         self.plot_zero = True
-        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -697,7 +699,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
 
     def test_nominal(self) -> None:
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -731,7 +733,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_no_subplots(self) -> None:
         self.make_subplots = False
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -765,7 +767,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_no_components(self) -> None:
         self.plot_components = False
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -800,7 +802,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_no_start_date(self) -> None:
         self.start_date = ""
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -835,7 +837,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.quat_two.fill(np.nan)
         self.name_two = ""
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -868,7 +870,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_only_quat_two(self) -> None:
         self.name_one = ""
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -902,7 +904,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.rms_xmin = 5
         self.rms_xmax = 7
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
+        self.figs, err = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,

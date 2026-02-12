@@ -222,6 +222,16 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines3[2], " bb  = <class 'int'>")
         self.assertEqual(lines3[3], " ccc = <class 'int'>")
 
+    def test_exclusions(self) -> None:
+        exclude = {"bb", "dd", "ee"}
+        with capture_output() as ctx:
+            dcs.pprint_dict(self.dct, name=self.name, exclude=exclude)
+        lines = ctx.get_output().split("\n")
+        ctx.close()
+        self.assertEqual(lines[0], "Example")
+        self.assertEqual(lines[1], " a   = 1")
+        self.assertEqual(lines[2], " ccc = 3")
+
 
 # %% chop_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
@@ -401,7 +411,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.results.save(self.save_path, meta=meta, compression=None, shuffle=False)  # type: ignore[call-arg]
         results = self.results_cls.load(self.save_path)
         self.assertTrue(dcs.compare_two_classes(results, self.results, suppress_output=True, compare_recursively=True))
-        (results2, meta2) = self.results_cls.load(self.save_path, return_meta=True)  # type: ignore[misc]
+        results2, meta2 = self.results_cls.load(self.save_path, return_meta=True)  # type: ignore[misc]
         self.assertTrue(dcs.compare_two_classes(results2, self.results, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
         self.assertEqual(meta2, meta)  # type: ignore[has-type]
 
@@ -410,7 +420,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.results.save(self.save_path, compression=6, shuffle=True)  # type: ignore[call-arg]
         results = self.results_cls.load(self.save_path)
         self.assertTrue(dcs.compare_two_classes(results, self.results, suppress_output=True, compare_recursively=True))
-        (results2, meta2) = self.results_cls.load(self.save_path, return_meta=True)  # type: ignore[misc]
+        results2, meta2 = self.results_cls.load(self.save_path, return_meta=True)  # type: ignore[misc]
         self.assertTrue(dcs.compare_two_classes(results2, self.results, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
         self.assertEqual(meta2, {})  # type: ignore[has-type]
 

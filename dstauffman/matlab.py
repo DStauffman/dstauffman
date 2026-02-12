@@ -193,7 +193,7 @@ def orth(A: _M) -> _M:
 
     """
     # compute the SVD
-    (Q, S, _) = np.linalg.svd(A, full_matrices=False)
+    Q, S, _ = np.linalg.svd(A, full_matrices=False)
     # calculate a tolerance based on the first eigenvalue (instead of just using a small number)
     tol = np.max(A.shape) * S[0] * _EPS
     # sum the number of eigenvalues that are greater than the calculated tolerance
@@ -249,7 +249,7 @@ def subspace(A: _M, B: _M) -> float:
     B = orth(B)
     # check rank and swap
     if A.shape[1] > B.shape[1]:
-        (B, A) = (A, B)
+        B, A = (A, B)
     # compute the projection according to Ref 1
     B = B - A @ (A.T @ B)
     # make sure it's magnitude is less than 1 and compute arcsin
