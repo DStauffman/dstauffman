@@ -1596,8 +1596,23 @@ def plot_covariance(
     >>> opts = Opts()
     >>> opts.case_name = "test_plot"
     >>> opts.sub_plots = True
+    >>> groups = [np.array([1, 2, 3]), np.arange(4, 36, 4)]
 
-    >>> figs = plot_covariance(kf1, kf2, opts=opts)
+    >>> elements = {
+    ...     1: "Attitude X",
+    ...     2: "Attitude Y",
+    ...     3: "Attitude Z",
+    ...     4: "Gyro Bias 1A",
+    ...     8: "Gyro Bias 1B",
+    ...     12: "Gyro Bias 1C",
+    ...     16: "Gyro Bias 1D",
+    ...     20: "Gyro Bias 2A",
+    ...     24: "Gyro Bias 2B",
+    ...     28: "Gyro Bias 2C",
+    ...     32: "Gyro Bias 2D",
+    ... }
+
+    >>> figs = plot_covariance(kf1, kf2, opts=opts, groups=groups, elements=elements)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1622,16 +1637,22 @@ def plot_covariance(
     # aliases and defaults
     num_chan = 0
     for key in fields:
-        if getattr(kf1, key) is not None:
-            temp = getattr(kf1, key).shape[0]
-        elif getattr(kf2, key) is not None:
-            temp = getattr(kf2, key).shape[0]
+        if hasattr(kf1, "active") and kf1.active is not None:
+            temp1 = max(kf1.active) + 1
+        elif getattr(kf1, key) is not None:
+            temp1 = getattr(kf1, key).shape[0]
         else:
-            temp = 0
-        num_chan = max(num_chan, temp)
+            temp1 = 0
+        if hasattr(kf2, "active") and kf2.active is not None:
+            temp2 = max(kf2.active) + 1
+        elif getattr(kf2, key) is not None:
+            temp2 = getattr(kf2, key).shape[0]
+        else:
+            temp2 = 0
+        num_chan = max(num_chan, temp1, temp2)
     # fmt: off
     elements: list[str] | tuple[str, ...] | None
-    elements     = kf1.chan or (kf2.chan or [f"Channel {i+1}" for i in range(num_chan)])
+    elements     = kf1.chan or (kf2.chan or [f"Channel {i}" for i in range(num_chan)])
     elements     = kwargs.pop("elements", elements)
     units        = kwargs.pop("units", "mixed")
     second_units = kwargs.pop("second_units", "micro")
