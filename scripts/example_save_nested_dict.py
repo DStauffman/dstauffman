@@ -65,7 +65,7 @@ if __name__ == "__main__":
     }
     dcs.save_hdf5(data1, filename1, meta=meta, exclusions=exclusions)
 
-    (out1, meta1) = dcs.load_hdf5(None, filename1, return_meta=True)
+    out1, meta1 = dcs.load_hdf5(None, filename1, return_meta=True)
     out_dict1 = {k: v for k, v in vars(out1).items() if not lg.is_dunder(k)}
 
     dcs.compare_two_dicts(meta, meta1, names=["meta", "meta1"])
@@ -78,7 +78,7 @@ if __name__ == "__main__":
     filename2 = folder / "test_file2.hdf5"
     dcs.save_hdf5(data2, filename2, meta=meta, exclusions=exclusions)
 
-    (out2, meta2) = dcs.load_hdf5(None, filename2, return_meta=True)
+    out2, meta2 = dcs.load_hdf5(None, filename2, return_meta=True)
     out_dict2 = {k: v for k, v in vars(out2).items() if not lg.is_dunder(k)}
     for key, value in out_dict2.items():
         out_dict2[key] = {k: v for k, v in vars(value).items() if not lg.is_dunder(k)}
@@ -93,7 +93,7 @@ if __name__ == "__main__":
     filename3 = folder / "test_file3.hdf5"
     data3.save(filename3, meta=meta, exclusions=exclusions)
 
-    (out3, meta3) = dcs.load_hdf5(None, filename3, return_meta=True)
+    out3, meta3 = dcs.load_hdf5(None, filename3, return_meta=True)
 
     dcs.compare_two_classes(
         data3, out3, exclude={"ver", "load", "save", "pprint"}, names=["data3", "out3"], ignore_callables=True

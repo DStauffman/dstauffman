@@ -10,7 +10,7 @@ line2 = "2 25544  51.6383  12.2586 0009556 188.7367 320.5459 15.75215761427503"
 
 oe = space.two_line_elements(line1, line2)
 
-(r, v) = space.oe_2_rv(oe, mu=space.MU_EARTH)
+r, v = space.oe_2_rv(oe, mu=space.MU_EARTH)
 oe2 = space.rv_2_oe(r, v, mu=space.MU_EARTH)
 
 print(r, v)

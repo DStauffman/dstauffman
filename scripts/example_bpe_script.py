@@ -83,7 +83,7 @@ def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: floa
 def cost_wrapper(results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams) -> _N:  # pylint: disable=unused-argument  # noqa: ARG001  # fmt: skip
     r"""Calculate innovations (cost) for the model."""
     # Pull out overlapping time points and indices
-    (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
+    ix_truth, ix_results = _get_truth_index(results_time, truth_time)
     sub_truth = truth_data[ix_truth]
     sub_result = results_data[ix_results]
 
@@ -171,7 +171,7 @@ if __name__ == "__main__":
 
     # Run code
     if rerun:
-        (bpe_results, results) = estm.run_bpe(opti_opts)
+        bpe_results, results = estm.run_bpe(opti_opts)
     else:
         bpe_results = estm.BpeResults.load(opti_opts.output_folder / opti_opts.output_results)
         results = sim_model(sim_params)  # just re-run, nothing is actually saved by this model
