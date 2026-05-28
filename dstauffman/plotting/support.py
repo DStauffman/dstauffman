@@ -7,6 +7,8 @@ Notes
 
 """  # pylint: disable=too-many-lines
 
+# mypy: disable-error-code="call-overload"
+
 # %% Imports
 from __future__ import annotations
 
@@ -189,6 +191,7 @@ if HAVE_MPL:
     COLOR_LISTS["matlab_gem"]  = colors.ListedColormap(("#1171be", "#dd5400", "#edb120", "#8516d1", "#3baa32", "#2fbeef", "#d1048b"))
     COLOR_LISTS["matlab_glow"] = colors.ListedColormap(("#268cdd", "#f57729", "#ffe864", "#c05cfb", "#49db40", "#6cf4ff", "#f267c5"))
     COLOR_LISTS["matlab_old"]  = colors.ListedColormap(("#0000ff", "#008000", "#ff0000", "#00bfbf", "#bf00bf", "#bfbf00", "#404040"))
+    COLOR_LISTS["ltt_minmax"]  = colors.ListedColormap(("xkcd:emerald green", "xkcd:royal purple", "xkcd:bluegreen"))
     # fmt: on
 
 # %% Set Matplotlib global settings
@@ -381,7 +384,10 @@ class ColorMap(Frozen):
         high: float = 1,
         num_colors: int | None = None,
     ) -> None:
-        self.num_colors = num_colors
+        if isinstance(colormap, ColorMap) and colormap.num_colors is not None:  # type: ignore[has-type]
+            self.num_colors = colormap.num_colors  # type: ignore[has-type]
+        else:
+            self.num_colors = num_colors
         # check for optional inputs
         if self.num_colors is not None:
             low = 0
@@ -392,6 +398,9 @@ class ColorMap(Frozen):
         # get colormap based on high and low limits
         if colormap is None:
             cmap = plt.get_cmap(DEFAULT_COLORMAP)
+            if isinstance(cmap, colors.ListedColormap):
+                low = 0
+                high = cmap.N - 1
         elif isinstance(colormap, colors.Colormap):
             cmap = colormap
         elif isinstance(colormap, type(self)):
@@ -402,6 +411,12 @@ class ColorMap(Frozen):
                 # special case to always use in the given order
                 cmap = plt.get_cmap(colormap)
                 assert isinstance(cmap, colors.ListedColormap), "Qualitative colormaps are assumed to be listed."
+                low = 0
+                high = cmap.N - 1
+            elif colormap in COLOR_LISTS:
+                # special case to use defined qualitative color lists
+                cmap = COLOR_LISTS[colormap]
+                assert isinstance(cmap, colors.ListedColormap), "COLOR_LISTS are assumed to be listed."
                 low = 0
                 high = cmap.N - 1
             else:
@@ -419,6 +434,8 @@ class ColorMap(Frozen):
 
     def get_color(self, value: float | np.floating | np.int_) -> tuple[float, float, float, float]:
         r"""Get the color based on the scalar value."""
+        if self.num_colors is not None:
+            return self.smap.to_rgba(value % self.num_colors)  # type: ignore[return-value]
         return self.smap.to_rgba(value)  # type: ignore[arg-type, return-value]
 
     def get_smap(self) -> cmx.ScalarMappable:
@@ -628,7 +645,7 @@ def ignore_plot_data(data: _Data | None, ignore_empties: bool, col: int | None =
     if not ignore_empties:
         return False
     # otherwise determine if ignoring by seeing if data is all zeros or nans
-    return np.all((data == 0) | np.isnan(data)) if col is None else np.all((data[:, col] == 0) | np.isnan(data[:, col]))  # type: ignore[call-overload, index, return-value]  # fmt: skip
+    return np.all((data == 0) | np.isnan(data)) if col is None else np.all((data[:, col] == 0) | np.isnan(data[:, col]))  # type: ignore[index, return-value]  # fmt: skip
 
 
 # %% Functions - whitten
@@ -1121,11 +1138,11 @@ def zoom_ylim(
             this_ymin = np.min(data[ix_time])  # type: ignore[index]
             this_ymax = np.max(data[ix_time])  # type: ignore[index]
         else:
-            this_ymin = np.min(data[ix_time, :])  # type: ignore[call-overload, index]
-            this_ymax = np.max(data[ix_time, :])  # type: ignore[call-overload, index]
+            this_ymin = np.min(data[ix_time, :])  # type: ignore[index]
+            this_ymax = np.max(data[ix_time, :])  # type: ignore[index]
     else:
-        this_ymin = np.min(data[ix_time, channel])  # type: ignore[call-overload, index]
-        this_ymax = np.max(data[ix_time, channel])  # type: ignore[call-overload, index]
+        this_ymin = np.min(data[ix_time, channel])  # type: ignore[index]
+        this_ymax = np.max(data[ix_time, channel])  # type: ignore[index]
     # optionally pad the bounds
     if pad < 0.0:
         raise ValueError("The pad cannot be negative.")
@@ -2433,9 +2450,9 @@ def fig_ax_factory(
         else:
             fig_ax = tuple((figs[f], axes[f][i]) for f in range(num_figs) for i in range(num_axes))  # type: ignore[index, misc]
     elif layout == "rowwise":
-        fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for i in range(num_row) for j in range(num_col))  # type: ignore[call-overload, index]
+        fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for i in range(num_row) for j in range(num_col))  # type: ignore[index]
     elif layout == "colwise":
-        fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[call-overload, index]
+        fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[index]
     return fig_ax
 
 

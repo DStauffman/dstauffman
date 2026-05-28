@@ -159,14 +159,14 @@ def save_hdf5(
         grp = file.create_group(base_group)
         # write meta data
         if meta is not None:
-            for key, value in meta.items():
-                grp.attrs[key] = value
+            for meta_key, value in meta.items():
+                grp.attrs[meta_key] = value
         # figure out how to loop over self
         types = (dict, DataFrame) if HAVE_PANDAS else (dict,)
         temp = vars(self) if not isinstance(self, types) else self
         # loop and write data by name and type criteria
         for key in temp:
-            if is_dunder(key):
+            if is_dunder(key):  # type: ignore[arg-type]
                 continue
             if exclusions is not None and key in exclusions:
                 continue

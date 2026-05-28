@@ -1549,7 +1549,6 @@ def save_zoomed_version(
     ylims: tuple[float, float] | None,
     *,
     ax2: Axes | None = None,
-    use_display: bool = True,
     title_post: str = " (Zoomed)",
     opts: Opts | None = None,
 ) -> None:
@@ -1566,8 +1565,6 @@ def save_zoomed_version(
         New y limits
     ax2 : class matplotlib.axes.Axes, optional
         Secondary axes to also scale
-    use_display : bool, optional, default if True
-        Whether there is a display to use when modifying the plot
     title_post : str, optional, default is " (Zoomed)"
         String to post-pend to the end of the title
     opts : class Opts, optional
@@ -1608,11 +1605,8 @@ def save_zoomed_version(
     if ax2 is not None:
         ax2.set_ylim(fact * ylims[0], fact * ylims[1])
 
-    if use_display:
-        if (manager := fig.canvas.manager) is not None:
-            manager.set_window_title(manager.get_window_title() + title_post)
-        else:
-            ax.set_title(ax.get_title() + title_post)
+    if (manager := fig.canvas.manager) is not None:
+        manager.set_window_title(manager.get_window_title() + title_post)
     else:
         ax.set_title(ax.get_title() + title_post)
     # resave zoomed plot

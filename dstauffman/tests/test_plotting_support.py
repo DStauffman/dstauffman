@@ -113,7 +113,7 @@ class Test_plotting_COLOR_LISTS(unittest.TestCase):
             "double", "vec", "quat", "dbl_off", "vec_off", "quat_off",
             "sing_diff", "dbl_diff", "vec_diff", "quat_diff", "sing_diff_r", "dbl_diff_r", "vec_diff_r", "quat_diff_r",
             "sing_comp", "dbl_comp", "vec_comp", "quat_comp", "sing_comp_r", "dbl_comp_r", "vec_comp_r", "quat_comp_r",
-            "matlab", "matlab_gem", "matlab_glow", "matlab_old",
+            "matlab", "matlab_gem", "matlab_glow", "matlab_old", "ltt_minmax",
         }  # fmt: skip
 
     def test_nominal(self) -> None:
@@ -277,13 +277,16 @@ class Test_plotting_ColorMap(unittest.TestCase):
     def test_colormap_rollovers(self) -> None:
         colormap = colors.ListedColormap(["r", "g", "b"])
         cm = plot.ColorMap(colormap, num_colors=12)
-        self.assertEqual(cm.get_color(0), (1.0, 0.0, 0.0, 1.0))
-        self.assertEqual(cm.get_color(1), (1.0, 0.0, 0.0, 1.0))
-        self.assertEqual(cm.get_color(4), (0.0, 0.5, 0.0, 1.0))
-        self.assertEqual(cm.get_color(10), (0.0, 0.0, 1.0, 1.0))
-        self.assertEqual(cm.get_color(11), (0.0, 0.0, 1.0, 1.0))
-        self.assertEqual(cm.get_color(12), (0.0, 0.0, 1.0, 1.0))
-        self.assertEqual(cm.get_color(20), (0.0, 0.0, 1.0, 1.0))
+        r = (1.0, 0.0, 0.0, 1.0)  # colors 0-3
+        g = (0.0, 0.5, 0.0, 1.0)  # colors 4-7
+        b = (0.0, 0.0, 1.0, 1.0)  # colors 8-11, then repeats at 12 (mod by 12)
+        self.assertEqual(cm.get_color(0), r)
+        self.assertEqual(cm.get_color(1), r)
+        self.assertEqual(cm.get_color(4), g)
+        self.assertEqual(cm.get_color(10), b)
+        self.assertEqual(cm.get_color(11), b)
+        self.assertEqual(cm.get_color(12), r)
+        self.assertEqual(cm.get_color(20), b)
 
     def test_specific_cmaps(self) -> None:
         cm_viridis = plot.ColorMap("viridis", num_colors=4)

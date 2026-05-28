@@ -549,7 +549,7 @@ def rv_2_oe(r: _N, v: _N, mu: _FN = 1.0, unit: bool = False, precision: float = 
     elements.P          = P
     elements.lo         = lo
     elements.equatorial = equatorial
-    elements.type       = orbit_type if num > 1 else orbit_type[0]
+    elements.type       = orbit_type if num > 1 or num == 0 else orbit_type[0]
     elements.T          = T
     elements.circular   = circular
     # fmt: on

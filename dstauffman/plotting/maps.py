@@ -483,6 +483,7 @@ def plot_map_3d(
     ax.set_title(title)
     ax.grid(True)
     ax.set_box_aspect([1, 1, 1])
+    ax.set_aspect("equal")
     ax.set_xlabel(f"X [{earth_units}]")
     ax.set_ylabel(f"Y [{earth_units}]")
     ax.set_zlabel(f"Z [{earth_units}]")
