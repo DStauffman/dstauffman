@@ -10,86 +10,27 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+import importlib.util
 import os
 from typing import Final
 import unittest
 import warnings
 
-HAVE_H5PY: bool
-HAVE_NUMPY: bool
-
 # %% Set flags for optional dependencies
-try:
-    import coverage
-
-    assert coverage  # not really used, but it silences the warnings
-    HAVE_COVERAGE = True
-except ModuleNotFoundError:
-    HAVE_COVERAGE = False
-try:
-    import h5py
-
-    assert h5py  # not really used, but it silences the warnings
-    HAVE_H5PY = True
-except ModuleNotFoundError:
-    HAVE_H5PY = False
-try:
-    import matplotlib  # noqa: ICN001
-
-    assert matplotlib  # not really used, but it silences the warnings
-    HAVE_MPL = True
-except ModuleNotFoundError:
-    HAVE_MPL = False
-if HAVE_MPL:
-    try:
-        import datashader
-
-        assert datashader
-        HAVE_DS = True
-    except ModuleNotFoundError:
-        HAVE_DS = False
-    except OSError:
-        HAVE_DS = False
-else:
-    HAVE_DS = False
-try:
-    import numpy as np
-
-    HAVE_NUMPY = True
-    try:
-        import keras
-
-        keras.backend.set_floatx("float64")  # TODO: this doesn't seem to work!!!
-        HAVE_KERAS = True
-    except ModuleNotFoundError:
-        HAVE_KERAS = False
-except ModuleNotFoundError:
-    HAVE_NUMPY = False
-    HAVE_KERAS = False
-try:
-    import pandas as pd
-
-    assert pd
-    HAVE_PANDAS = True
-except ModuleNotFoundError:
-    HAVE_PANDAS = False
-try:
-    import pytest
-
-    assert pytest
-    HAVE_PYTEST = True
-except ModuleNotFoundError:
-    HAVE_PYTEST = False
-try:
-    import scipy
-
-    assert scipy
-    HAVE_SCIPY = True
-except ModuleNotFoundError:
-    HAVE_SCIPY = False
+HAVE_COVERAGE = importlib.util.find_spec("coverage") is not None
+HAVE_H5PY = importlib.util.find_spec("h5py") is not None
+HAVE_MPL = importlib.util.find_spec("matplotlib") is not None
+HAVE_DS = importlib.util.find_spec("datashader") is not None if HAVE_MPL else False
+HAVE_NUMPY = importlib.util.find_spec("numpy") is not None
+HAVE_KERAS = importlib.util.find_spec("keras") is not None
+HAVE_PANDAS = importlib.util.find_spec("pandas") is not None
+HAVE_PYTEST = importlib.util.find_spec("pytest") is not None
+HAVE_SCIPY = importlib.util.find_spec("scipy") is not None
 
 # %% Optional settings
 if HAVE_NUMPY:
+    import numpy as np
+
     # Set NumPy error state for module
     np.seterr(invalid="raise", divide="raise")
     # Set NumPy printing options

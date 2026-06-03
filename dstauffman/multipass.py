@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable
 import doctest
+import importlib.util
 import logging
 import multiprocessing
 import sys
@@ -23,14 +24,14 @@ import warnings
 from slog import LogLevel
 
 if TYPE_CHECKING:
-    from types import TracebackType
+    from types import TracebackType  # make lazy in v3.15+
 
 # %% Activate exception support for parallel code
-try:
-    import tblib.pickling_support
-except ModuleNotFoundError:
+if importlib.util.find_spec("tblib") is None:
     warnings.warn("tblib not found, so parallelized tracebacks will not work.")
 else:
+    import tblib.pickling_support
+
     # TODO: is there a downside to always doing this?  Should I rely on the scripts that call it instead?
     tblib.pickling_support.install()
 

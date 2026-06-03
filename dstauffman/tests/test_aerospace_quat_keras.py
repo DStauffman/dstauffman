@@ -8,6 +8,7 @@ Notes
 """
 
 # %% Imports
+import importlib.util
 import unittest
 
 from dstauffman import HAVE_KERAS, HAVE_NUMPY
@@ -15,12 +16,20 @@ import dstauffman.aerospace as space
 
 if HAVE_KERAS:
     from keras import ops
+
+    _HAVE_OPS = True
+elif importlib.util.find_spec("jax") is not None:
+    import jax.numpy as ops
+
+    _HAVE_OPS = True
+else:
+    _HAVE_OPS = False
 if HAVE_NUMPY:
     import numpy as np
 
 
 # %% aerospace.enforce_pos_scalar_keras
-@unittest.skipIf(not HAVE_KERAS, "Skipping due to missing keras dependency.")
+@unittest.skipIf(not _HAVE_OPS, "Skipping due to missing keras and/or jax dependency.")
 class Test_aerospace_enforce_pos_scalar_keras(unittest.TestCase):
     r"""
     Tests the aerospace.enforce_pos_scalar_keras function with the following cases:
@@ -48,7 +57,7 @@ class Test_aerospace_enforce_pos_scalar_keras(unittest.TestCase):
 
 
 # %% aerospace.qrot_keras
-@unittest.skipIf(not HAVE_KERAS, "Skipping due to missing keras dependency.")
+@unittest.skipIf(not _HAVE_OPS, "Skipping due to missing keras and/or jax dependency.")
 class Test_aerospace_qrot(unittest.TestCase):
     r"""
     Tests the aerospace.qrot_keras function with the following cases:
@@ -103,7 +112,7 @@ class Test_aerospace_qrot(unittest.TestCase):
 
 
 # %% aerospace.quat_inv_keras
-@unittest.skipIf(not HAVE_KERAS, "Skipping due to missing keras dependency.")
+@unittest.skipIf(not _HAVE_OPS, "Skipping due to missing keras and/or jax dependency.")
 class Test_aerospace_quat_inv_keras(unittest.TestCase):
     r"""
     Tests the aerospace.quat_inv_keras function with the following cases:
@@ -142,7 +151,7 @@ class Test_aerospace_quat_inv_keras(unittest.TestCase):
 
 
 # %% aerospace.quat_norm_keras
-@unittest.skipIf(not HAVE_KERAS, "Skipping due to missing keras dependency.")
+@unittest.skipIf(not _HAVE_OPS, "Skipping due to missing keras and/or jax dependency.")
 class Test_aerospace_quat_norm_keras(unittest.TestCase):
     r"""
     Tests the aerospace.quat_norm_keras function with the following cases:
@@ -190,7 +199,7 @@ class Test_aerospace_quat_norm_keras(unittest.TestCase):
 
 
 # %% aerospace.quat_mult_keras
-@unittest.skipIf(not HAVE_KERAS, "Skipping due to missing keras dependency.")
+@unittest.skipIf(not _HAVE_OPS, "Skipping due to missing keras and/or jax dependency.")
 class Test_aerospace_quat_mult_keras(unittest.TestCase):
     r"""
     Tests the aerospace.quat_mult_keras function with the following cases:
@@ -268,7 +277,7 @@ class Test_aerospace_quat_mult_keras(unittest.TestCase):
 
 
 # %% aerospace.quat_prop_keras
-@unittest.skipIf(not HAVE_KERAS, "Skipping due to missing keras dependency.")
+@unittest.skipIf(not _HAVE_OPS, "Skipping due to missing keras and/or jax dependency.")
 class Test_aerospace_quat_prop_keras(unittest.TestCase):
     r"""
     Tests the aerospace.quat_prop_keras function with the following cases:
@@ -310,7 +319,7 @@ class Test_aerospace_quat_prop_keras(unittest.TestCase):
 
 
 # %% aerospace.quat_times_vector_keras
-@unittest.skipIf(not HAVE_KERAS, "Skipping due to missing keras dependency.")
+@unittest.skipIf(not _HAVE_OPS, "Skipping due to missing keras and/or jax dependency.")
 class Test_aerospace_quat_times_vector_keras(unittest.TestCase):
     r"""
     Tests the aerospace.quat_times_vector_keras function with the following cases:
@@ -368,7 +377,7 @@ class Test_aerospace_quat_times_vector_keras(unittest.TestCase):
 
 
 # %% aerospace.quat_angle_diff_keras
-@unittest.skipIf(not HAVE_KERAS, "Skipping due to missing keras dependency.")
+@unittest.skipIf(not _HAVE_OPS, "Skipping due to missing keras and/or jax dependency.")
 class Test_aerospace_quat_angle_diff_keras(unittest.TestCase):
     r"""
     Tests the aerospace.quat_angle_diff_keras function with the following cases:

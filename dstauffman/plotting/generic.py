@@ -14,13 +14,7 @@ from collections.abc import Callable, Iterable
 import datetime
 import doctest
 import logging
-from typing import Any, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
-
-try:
-    from typing import NotRequired
-except ImportError:
-    from typing_extensions import NotRequired  # for Python v3.10
-
+from typing import Any, Literal, NotRequired, overload, Protocol, TYPE_CHECKING, TypedDict
 import unittest
 
 from slog import LogLevel

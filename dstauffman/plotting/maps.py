@@ -14,12 +14,7 @@ from __future__ import annotations
 import doctest
 import json
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict
-
-try:
-    from typing import NotRequired, Unpack
-except ImportError:
-    from typing_extensions import NotRequired, Unpack  # for Python v3.10
+from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from dstauffman import DEG2RAD, get_data_dir, HAVE_MPL, HAVE_NUMPY, M2FT, RAD2DEG, unit

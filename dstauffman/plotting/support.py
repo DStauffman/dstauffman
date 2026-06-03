@@ -18,6 +18,7 @@ import datetime
 import doctest
 from functools import partial
 import gc
+import importlib.util
 import io
 from itertools import repeat
 import operator
@@ -26,13 +27,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Final, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
-
-try:
-    from typing import NotRequired
-except ImportError:
-    from typing_extensions import NotRequired  # for Python v3.10
-
+from typing import Any, Final, Literal, NotRequired, overload, Protocol, TYPE_CHECKING, TypedDict
 import unittest
 import warnings
 
@@ -99,11 +94,9 @@ if HAVE_PANDAS:
     import pandas as pd
 if HAVE_SCIPY:
     import scipy.stats as st
-try:
+if importlib.util.find_spec("PIL") is not None:
     from PIL import Image
     from PIL.PngImagePlugin import PngInfo
-except ModuleNotFoundError:
-    pass
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray

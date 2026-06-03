@@ -14,13 +14,7 @@ import datetime
 import os
 import pathlib
 import platform
-from typing import TYPE_CHECKING, TypedDict
-
-try:
-    from typing import NotRequired
-except ImportError:
-    from typing_extensions import NotRequired  # for Python v3.10
-
+from typing import NotRequired, TYPE_CHECKING, TypedDict
 import unittest
 
 from dstauffman import (

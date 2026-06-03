@@ -15,13 +15,7 @@ from collections.abc import Sequence
 import datetime
 import doctest
 from pathlib import Path
-from typing import TYPE_CHECKING, TypedDict
-
-try:
-    from typing import NotRequired, Unpack
-except ImportError:
-    from typing_extensions import NotRequired, Unpack  # for Python v3.10
-
+from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY

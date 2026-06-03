@@ -23,13 +23,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import Any, Literal, overload, TYPE_CHECKING, TypedDict
-
-try:
-    from typing import NotRequired, Unpack
-except ImportError:
-    from typing_extensions import NotRequired, Unpack  # for Python v3.10
-
+from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 import warnings
 

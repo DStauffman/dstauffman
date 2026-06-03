@@ -16,13 +16,7 @@ from collections.abc import Callable
 import doctest
 from pathlib import Path
 import sys
-from typing import Any, Literal, overload, TYPE_CHECKING, TypedDict, TypeVar
-
-try:
-    from typing import NotRequired, Unpack
-except ImportError:
-    from typing_extensions import NotRequired, Unpack  # for Python v3.10
-
+from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, TypeVar, Unpack
 import unittest
 import warnings
 

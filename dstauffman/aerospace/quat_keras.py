@@ -11,6 +11,7 @@ Notes
 from __future__ import annotations
 
 import doctest
+import importlib.util
 from typing import TYPE_CHECKING
 import unittest
 
@@ -24,6 +25,9 @@ if HAVE_KERAS:
         import jax.numpy as ops  # type: ignore[import-not-found]
     else:
         from keras import ops
+elif importlib.util.find_spec("jax") is not None:
+    import jax.numpy as ops
+
 if HAVE_NUMPY:
     import numpy as np
 
