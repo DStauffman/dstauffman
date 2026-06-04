@@ -19,7 +19,7 @@ if HAVE_KERAS:
 
     _HAVE_OPS = True
 elif importlib.util.find_spec("jax") is not None:
-    import jax.numpy as ops
+    import jax.numpy as ops  # type: ignore[import-not-found]
 
     _HAVE_OPS = True
 else:

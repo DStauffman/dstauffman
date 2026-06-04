@@ -908,7 +908,7 @@ def plot_correlation_matrix(
         ylab = [str(i) for i in range(n)]
     elif isinstance(labels[0], list):
         xlab = labels[0]
-        ylab = labels[1]  # type: ignore[assignment]
+        ylab = labels[1]
     else:
         xlab = labels  # type: ignore[assignment]
         ylab = labels  # type: ignore[assignment]

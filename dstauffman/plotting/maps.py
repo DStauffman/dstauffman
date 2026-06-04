@@ -459,7 +459,7 @@ def plot_map_3d(
     else:
         raise ValueError(f"Unexpected value for land_colors: {land_colors}")
     # Plot globe
-    az, el = np.mgrid[0.0 : 2 * np.pi : 24j, -np.pi : np.pi : 12j]  # type: ignore[misc]
+    az, el = np.mgrid[0.0 : 2 * np.pi : 24j, -np.pi : np.pi : 12j]
     x, y, z = sph2cart(az, el, 0.9999 * earth_radius)
     for i in range(x.shape[0] - 1):  # type: ignore[attr-defined]
         for j in range(x.shape[1] - 1):  # type: ignore[attr-defined]
