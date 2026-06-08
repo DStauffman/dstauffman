@@ -191,8 +191,8 @@ class Test_convert_date(unittest.TestCase):
 
     def setUp(self) -> None:
         self.seconds = 3725.5
-        self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
-        self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.timezone.utc)
+        self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.UTC)
+        self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.UTC)
         # When Python v3.11 and newer
         # self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.UTC)
         # self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.UTC)
@@ -249,7 +249,7 @@ class Test_convert_date(unittest.TestCase):
     @unittest.skipIf(not dcs.HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_matplotlibs(self) -> None:
         out = dcs.convert_date(self.matplotlib, "datetime", old_form="matplotlib")
-        exp = self.datetime.replace(tzinfo=datetime.timezone.utc)
+        exp = self.datetime.replace(tzinfo=datetime.UTC)
         self.assertEqual(out, exp)
         out = dcs.convert_date(self.matplotlib, "numpy", old_form="matplotlib")
         self.assertEqual(out, self.numpy)

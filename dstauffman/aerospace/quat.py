@@ -7,6 +7,8 @@ Notes
 
 """  # pylint: disable=too-many-lines
 
+# mypy: disable-error-code="operator"
+
 # %% Imports
 from __future__ import annotations
 
@@ -286,21 +288,21 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
     quat: _Q | _Qs
     if np.isscalar(angle) and np.isscalar(axis):
         # optimized scalar case
-        quat = np.array([0, 0, 0, np.cos(angle / 2)])  # type: ignore[operator]
-        quat[axis - 1] = np.sin(angle / 2)  # type: ignore[index, operator]
+        quat = np.array([0, 0, 0, np.cos(angle / 2)])  # ty: ignore[unsupported-operator]
+        quat[axis - 1] = np.sin(angle / 2)  # type: ignore[index]  # ty: ignore[unsupported-operator]
     elif np.isscalar(axis):
         # single axis, multiple angle case
-        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # type: ignore[operator]
-        quat[axis - 1, :] = np.sin(angle / 2)  # type: ignore[index, operator]
+        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # fmt: skip  # ty: ignore[unsupported-operator]
+        quat[axis - 1, :] = np.sin(angle / 2)  # type: ignore[index]  # ty: ignore[unsupported-operator]
     elif np.isscalar(angle):
         # single angle, multiple axis case
-        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle / 2)]]), (1, np.size(axis)))  # type: ignore[operator]
-        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[index, operator]
+        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle / 2)]]), (1, np.size(axis)))  # ty: ignore[unsupported-operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[index]  # ty: ignore[unsupported-operator]
     else:
         # multiple axis, multiple angle case
         assert np.size(axis) == np.size(angle)
-        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # type: ignore[operator]
-        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[index, operator]
+        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # fmt: skip  # ty: ignore[unsupported-operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[index]  # ty: ignore[unsupported-operator]
     enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
@@ -347,8 +349,8 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_Qu
 
     """
     # ailas the cosine and sine terms
-    c = np.cos(angle / 2)  # type: ignore[operator]
-    s = np.sin(angle / 2)  # type: ignore[operator]
+    c = np.cos(angle / 2)  # ty: ignore[unsupported-operator]
+    s = np.sin(angle / 2)  # ty: ignore[unsupported-operator]
     # scale the unit vector by the sine and concatenate the cosine term
     if axis.ndim == 1 and c.size == 1:  # type: ignore[union-attr]
         quat = np.hstack([axis * s, c])

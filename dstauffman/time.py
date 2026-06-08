@@ -22,6 +22,7 @@ from dstauffman.constants import HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT
 from dstauffman.units import get_time_factor, ONE_DAY
 from dstauffman.utils import is_datetime
 
+__lazy_modules__ = ["matplotlib"]
 if HAVE_MPL:
     from matplotlib import dates
 if HAVE_NUMPY:
@@ -440,7 +441,7 @@ def convert_date(  # noqa: C901
     if old_form in time_forms:
         is_num = isfinite(date) if is_actual_date else False
         if form == "datetime":
-            out = date_zero + datetime.timedelta(seconds=date) if is_num else None  # type: ignore[assignment, operator]
+            out = date_zero + datetime.timedelta(seconds=date) if is_num else None  # type: ignore[assignment, operator]  # ty: ignore[unsupported-operator]
         elif form == "numpy":
             out = np.full(date.shape, NP_NAT, dtype=numpy_form)
             if np.any(is_num):
@@ -479,7 +480,7 @@ def convert_date(  # noqa: C901
     elif old_form == "numpy":
         is_num = ~np.isnat(date)
         if form == "datetime":
-            out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.timezone.utc) if is_num else None  # fmt: skip
+            out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.UTC) if is_num else None  # fmt: skip
             # When Python v3.11 and newer:
             # out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.UTC) if is_num else None
         elif form == "matplotlib":

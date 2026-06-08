@@ -594,10 +594,10 @@ def plot_attitude(
             **kwargs,
         )
         if return_err:
-            figs += out[0]  # ty: ignore[unsupported-operator]
+            figs += out[0]
             err[field] = out[1]
         else:
-            figs += out  # ty: ignore[unsupported-operator]
+            figs += out
 
     # Setup plots
     if not skip_setup_plots:
@@ -845,10 +845,10 @@ def plot_position(
             **kwargs,
         )
         if return_err:
-            figs += out[0]  # ty: ignore[unsupported-operator]
+            figs += out[0]
             err[field] = out[1]
         else:
-            figs += out  # ty: ignore[unsupported-operator]
+            figs += out
 
     # Setup plots
     if not skip_setup_plots:
@@ -1177,10 +1177,10 @@ def plot_innovations(  # noqa: C901
             **kwargs,
         )
         if return_err:
-            figs += out[0]  # ty: ignore[unsupported-operator]
+            figs += out[0]
             err[field] = out[1]
         else:
-            figs += out  # ty: ignore[unsupported-operator]
+            figs += out
         this_ylabel = [e + " Innovation [" + units + "]" for e in elements] if elements is not None else None
         if plot_by_status and field_one is not None and kf1.status is not None:
             figs += make_categories_plot(  # type: ignore[misc]

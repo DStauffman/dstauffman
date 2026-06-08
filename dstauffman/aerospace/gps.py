@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import datetime
 import doctest
-from typing import Literal, NoReturn, overload, TYPE_CHECKING
+from typing import Literal, Never, overload, TYPE_CHECKING
 import unittest
 
 from dstauffman import HAVE_NUMPY, NP_DATETIME_UNITS, np_digitize, NP_ONE_DAY, NP_ONE_SECOND
@@ -36,7 +36,7 @@ NP_GPS_DATE_ZERO = np.datetime64(GPS_DATE_ZERO, NP_DATETIME_UNITS) if HAVE_NUMPY
 
 
 # %% Mypy support - _assert_never
-def _assert_never(value: NoReturn) -> NoReturn:
+def _assert_never(value: Never) -> Never:
     r"""Static and Runtime checker for possible options."""
     raise ValueError(f"This code should never be reached, got: {value}")
 

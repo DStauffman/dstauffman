@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dstauffman"
-version = "3.10.0"
+version = "3.10.1"
 description = "Generic python utilities for Aerospace applications"
 readme = "README.rst"
 dependencies = ["nubs", "slog"]
-requires-python = ">=3.10,<4.0"
+requires-python = ">=3.11,<4.0"
 authors = [
   {name = "David C. Stauffer", email = "dstauffman@yahoo.com"},
 ]
@@ -23,11 +23,11 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Langauge :: Python :: 3.10",
     "Programming Langauge :: Python :: 3.11",
     "Programming Langauge :: Python :: 3.12",
     "Programming Langauge :: Python :: 3.13",
     "Programming Langauge :: Python :: 3.14",
+    "Programming Langauge :: Python :: 3.15",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Astronomy",
     "Topic :: Scientific/Engineering :: Information Analysis",
@@ -42,10 +42,11 @@ classifiers = [
 # Note: static excludes numba/datashader for mypy type checking (as they don't play well together)
 numeric = ["h5py>=3.7", "matplotlib>=3.7", "numpy>=2.0", "pandas>=2.0", "pyarrow>=14.0", "PyQt5>=5.15.11", "pyqt5-sip>=12.11", "pyqt5-qt5>=5.15.2", "qtpy>=2.2", "scipy>=1.10", "tblib>=1.7"]
 shader = ["dstauffman[numeric]", "datashader>=0.15", "numba>=0.57"]
+aiml = ["jax>=0.10.0"]
 
 [project.dependency-groups]
 spyder = ["spyder-kernels>=2.4"]
-static = ["dstauffman[numeric]", "black>=25.0", "flake8>=6.0", "isort>=5.10", "mypy>=1.5", "pycodestyle>=2.10", "pylint>=2.16", "PyQt5-stubs>=5.15"]
+static = ["dstauffman[numeric]", "black>=25.0", "isort>=5.10", "mypy>=1.5", "pylint>=2.16", "PyQt5-stubs>=5.15"]
 test = ["pytest>=7.4", "pytest-cov>=4.0"]
 
 [project.urls]
@@ -105,7 +106,7 @@ directory = "coverage_html_report"
 output = "coverage_html_report/coverage.xml"
 
 [tool.isort]
-py_version = 313
+py_version = 314
 profile = "black"
 line_length = 128
 combine_as_imports = true
@@ -160,16 +161,11 @@ disable = ["C0103", "C0301", "C0411", "C0414", "E0401", "E0601", "E0606", "E0611
 enable = ["I0021"]
 ignore-paths = "^(.*[/\\\\]|)tests[/\\\\]test_.*$"
 
-[tool.pydocstyle]
-inherit = false
-convention = "numpy"
-add-ignore = ["D102", "D105", "D204"]
-
 [tool.ruff]
 include = ["pyproject.toml", "dstauffman/**/*.py", "scripts/**/*.py"]
 line-length = 128
 indent-width = 4
-target-version = "py310"
+target-version = "py311"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -233,7 +229,7 @@ root = [".", "../nubs", "../slog"]
 
 [tool.ty.analysis]
 # Disable support for `type: ignore` comments, so that they only apply to mypy
-# respect-type-ignore-comments = false
+respect-type-ignore-comments = false
 
 # Strict rules for source code
 [[tool.ty.overrides]]
@@ -242,15 +238,18 @@ include = ["dstauffman", "scripts"]
 [tool.ty.overrides.rules]
 invalid-argument-type = "ignore"
 invalid-assignment = "ignore"
+invalid-key = "ignore"
 invalid-return-type = "ignore"
 invalid-type-form = "ignore"
 missing-argument = "ignore"
+missing-typed-dict-key = "ignore"
 no-matching-overload = "ignore"
-possibly-missing-import = "ignore"
+not-iterable = "ignore"
+not-subscriptable = "ignore"
+parameter-already-assigned = "ignore"
 unknown-argument = "ignore"
 unresolved-attribute = "ignore"
 unresolved-import = "ignore"
-# unused-ignore-comment = "warn"
 
 # Relax rules for test files
 [[tool.ty.overrides]]

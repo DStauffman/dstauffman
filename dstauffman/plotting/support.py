@@ -7,7 +7,7 @@ Notes
 
 """  # pylint: disable=too-many-lines
 
-# mypy: disable-error-code="call-overload"
+# mypy: disable-error-code="call-overload, operator"
 
 # %% Imports
 from __future__ import annotations
@@ -160,25 +160,25 @@ if HAVE_MPL:
     COLOR_LISTS["quat"]     = colors.ListedColormap(("xkcd:red", "xkcd:green", "xkcd:blue", "xkcd:chocolate"))
     COLOR_LISTS["quat_off"] = colors.ListedColormap(("xkcd:fuchsia", "xkcd:lightgreen", "xkcd:cyan", "xkcd:brown"))
     # single combinations
-    COLOR_LISTS["sing_diff"]   = colors.ListedColormap(COLOR_LISTS["sing_off"].colors + COLOR_LISTS["single"].colors)  # type: ignore[operator]
-    COLOR_LISTS["sing_diff_r"] = colors.ListedColormap(COLOR_LISTS["single"].colors + COLOR_LISTS["sing_off"].colors)  # type: ignore[operator]
+    COLOR_LISTS["sing_diff"]   = colors.ListedColormap(COLOR_LISTS["sing_off"].colors + COLOR_LISTS["single"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["sing_diff_r"] = colors.ListedColormap(COLOR_LISTS["single"].colors + COLOR_LISTS["sing_off"].colors)  # ty: ignore[unsupported-operator]
     COLOR_LISTS["sing_comp"]   = colors.ListedColormap(("xkcd:red", "xkcd:green", "xkcd:blue"))  # Note: this intentionally breaks the pattern
     COLOR_LISTS["sing_comp_r"] = colors.ListedColormap(("xkcd:blue", "xkcd:green", "xkcd:red"))  # Note: this intentionally breaks the pattern
     # double combinations
-    COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
-    COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)  # type: ignore[operator]
-    COLOR_LISTS["dbl_comp"]    = colors.ListedColormap(COLOR_LISTS["dbl_diff"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
-    COLOR_LISTS["dbl_comp_r"]  = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
+    COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["dbl_comp"]    = colors.ListedColormap(COLOR_LISTS["dbl_diff"].colors + COLOR_LISTS["double"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["dbl_comp_r"]  = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)  # ty: ignore[unsupported-operator]
     # triple combinations
-    COLOR_LISTS["vec_diff"]    = colors.ListedColormap(COLOR_LISTS["vec_off"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
-    COLOR_LISTS["vec_diff_r"]  = colors.ListedColormap(COLOR_LISTS["vec"].colors + COLOR_LISTS["vec_off"].colors)  # type: ignore[operator]
-    COLOR_LISTS["vec_comp"]    = colors.ListedColormap(COLOR_LISTS["vec_diff"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
-    COLOR_LISTS["vec_comp_r"]  = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
+    COLOR_LISTS["vec_diff"]    = colors.ListedColormap(COLOR_LISTS["vec_off"].colors + COLOR_LISTS["vec"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["vec_diff_r"]  = colors.ListedColormap(COLOR_LISTS["vec"].colors + COLOR_LISTS["vec_off"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["vec_comp"]    = colors.ListedColormap(COLOR_LISTS["vec_diff"].colors + COLOR_LISTS["vec"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["vec_comp_r"]  = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)  # ty: ignore[unsupported-operator]
     # quad combinations
-    COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
-    COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)  # type: ignore[operator]
-    COLOR_LISTS["quat_comp"]   = colors.ListedColormap(COLOR_LISTS["quat_diff"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
-    COLOR_LISTS["quat_comp_r"] = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
+    COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["quat_comp"]   = colors.ListedColormap(COLOR_LISTS["quat_diff"].colors + COLOR_LISTS["quat"].colors)  # ty: ignore[unsupported-operator]
+    COLOR_LISTS["quat_comp_r"] = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # ty: ignore[unsupported-operator]
     # Matlab
     COLOR_LISTS["matlab"]      = colors.ListedColormap(("#0072bd", "#d95319", "#edb120", "#7e2f8e", "#77ac30", "#4dbeee", "#a2142f"))
     COLOR_LISTS["matlab_gem"]  = colors.ListedColormap(("#1171be", "#dd5400", "#edb120", "#8516d1", "#3baa32", "#2fbeef", "#d1048b"))
@@ -384,7 +384,7 @@ class ColorMap(Frozen):
         # check for optional inputs
         if self.num_colors is not None:
             low = 0
-            high = num_colors - 1  # type: ignore[operator]
+            high = num_colors - 1  # ty: ignore[unsupported-operator]
         elif isinstance(colormap, colors.ListedColormap):
             low = 0
             high = colormap.N - 1
@@ -495,7 +495,7 @@ def is_notebook() -> bool:
 
     """
     try:
-        shell = get_ipython().__class__.__name__  # type: ignore[name-defined]
+        shell = get_ipython().__class__.__name__  # type: ignore[name-defined]  # ty: ignore[unresolved-reference]
         if shell == "ZMQInteractiveShell":
             return True  # Jupyter notebook or qtconsole
         if shell == "TerminalInteractiveShell":
@@ -1120,7 +1120,7 @@ def zoom_ylim(
     if is_datetime(time):
         time = date2num(time)
     # find the relevant time indices
-    ix_time = (time >= t_start) & (time <= t_final)  # type: ignore[operator]
+    ix_time = (time >= t_start) & (time <= t_final)  # ty: ignore[unsupported-operator]
     # exit if no data is in this time window
     if ~np.any(ix_time):
         warnings.warn("No data matched the given time interval.")
@@ -1558,11 +1558,11 @@ def get_rms_indices(
     p3_max: _B
     if _process(xmin, t_max, operator.lt):  # type: ignore[arg-type]
         if have1:
-            p1_min = time_one >= xmin  # type: ignore[assignment, operator]
+            p1_min = time_one >= xmin  # type: ignore[assignment]  # ty: ignore[unsupported-operator]
         if have2:
-            p2_min = time_two >= xmin  # type: ignore[assignment, operator]
+            p2_min = time_two >= xmin  # type: ignore[assignment]  # ty: ignore[unsupported-operator]
         if have3:
-            p3_min = time_overlap >= xmin  # type: ignore[assignment, operator]
+            p3_min = time_overlap >= xmin  # type: ignore[assignment]  # ty: ignore[unsupported-operator]
         ix["pts"].append(np.maximum(xmin, t_min))  # type: ignore[arg-type]
     else:
         if have1:
@@ -1574,11 +1574,11 @@ def get_rms_indices(
         ix["pts"].append(t_min)
     if _process(xmax, t_min, operator.gt):  # type: ignore[arg-type]
         if have1:
-            p1_max = time_one <= xmax  # type: ignore[assignment, operator]
+            p1_max = time_one <= xmax  # type: ignore[assignment]  # ty: ignore[unsupported-operator]
         if have2:
-            p2_max = time_two <= xmax  # type: ignore[assignment, operator]
+            p2_max = time_two <= xmax  # type: ignore[assignment]  # ty: ignore[unsupported-operator]
         if have3:
-            p3_max = time_overlap <= xmax  # type: ignore[assignment, operator]
+            p3_max = time_overlap <= xmax  # type: ignore[assignment]  # ty: ignore[unsupported-operator]
         ix["pts"].append(np.minimum(xmax, t_max))  # type: ignore[arg-type]
     else:
         if have1:

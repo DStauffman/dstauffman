@@ -1057,9 +1057,9 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
     def test_datetime(self) -> None:
         date_zero = datetime.datetime(2026, 1, 15, 9, 0, 0)
         ONE_SECOND = datetime.timedelta(seconds=1)
-        time_one = date_zero + self.time_one * ONE_SECOND  # type: ignore[operator]
-        time_two = date_zero + self.time_two * ONE_SECOND  # type: ignore[operator]
-        time_overlap = date_zero + self.time_overlap * ONE_SECOND  # type: ignore[operator]
+        time_one = date_zero + self.time_one * ONE_SECOND  # type: ignore[operator]  # ty: ignore[unsupported-operator]
+        time_two = date_zero + self.time_two * ONE_SECOND  # type: ignore[operator]  # ty: ignore[unsupported-operator]
+        time_overlap = date_zero + self.time_overlap * ONE_SECOND  # type: ignore[operator]  # ty: ignore[unsupported-operator]
         xmin = date_zero + self.xmin * ONE_SECOND
         xmax = date_zero + self.xmax * ONE_SECOND
         ix = plot.get_rms_indices(time_one, time_two, time_overlap, xmin=xmin, xmax=xmax)

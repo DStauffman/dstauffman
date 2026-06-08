@@ -90,7 +90,7 @@ jobs:
       uses: astral-sh/setup-uv@v5
       id: setup_uv
       with:
-        python-version: "3.14"
+        python-version: ${{ matrix.python-version }}
 
     - name: Set up Python
       run: uv python install
@@ -99,7 +99,7 @@ jobs:
       run: |
         uv venv static
         source $VENV_ROOT_DIR/static/bin/activate
-        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib
+        uv pip install black h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib
         deactivate
 
     - name: Mypy static analysis
@@ -119,15 +119,6 @@ jobs:
         python --version
         ruff --version
         ruff check
-
-    - name: Flake8 static analysis
-      working-directory: ${{ env.DCS_ROOT_DIR }}
-      if: always()
-      run: |
-        source $VENV_ROOT_DIR/static/bin/activate
-        python --version
-        flake8 --version
-        flake8 .
 
     - name: Pylint static analysis
       working-directory: ${{ env.DCS_ROOT_DIR }}
@@ -198,7 +189,7 @@ jobs:
         deactivate
         uv venv static
         source $VENV_ROOT_DIR/static/bin/activate
-        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib
+        uv pip install black h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib
         deactivate
         uv venv everything
         source $VENV_ROOT_DIR/everything/bin/activate

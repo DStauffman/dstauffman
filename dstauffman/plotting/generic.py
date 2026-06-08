@@ -2113,7 +2113,7 @@ def make_connected_sets(
         ds_color = "hsv" if not isinstance(colormap, str) else colormap
     elif color_by == "magnitude":
         (new_units, unit_conv) = get_unit_conversion(leg_scale, units)
-        innov_mags = unit_conv * np.sqrt(np.sum(innovs**2, axis=0))  # type: ignore[operator]
+        innov_mags = unit_conv * np.sqrt(np.sum(innovs**2, axis=0))  # type: ignore[operator]  # ty: ignore[unsupported-operator]
         if mag_ratio is None:
             max_innov = np.max(innov_mags)
         else:

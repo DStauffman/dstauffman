@@ -26,7 +26,7 @@ if HAVE_KERAS:
     else:
         from keras import ops
 elif importlib.util.find_spec("jax") is not None:
-    import jax.numpy as ops
+    import jax.numpy as ops  # pylint: disable=ungrouped-imports
 
 if HAVE_NUMPY:
     import numpy as np

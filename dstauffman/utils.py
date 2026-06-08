@@ -9,6 +9,8 @@ Notes
 
 """  # pylint: disable=too-many-lines
 
+# mypy: disable-error-code="operator"
+
 # %% Imports
 from __future__ import annotations
 
@@ -32,6 +34,7 @@ from slog import ReturnCodes, write_text_file
 from dstauffman.constants import HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
 from dstauffman.units import MONTHS_PER_YEAR
 
+__lazy_modules__ = ["scipy"]
 if HAVE_NUMPY:
     import numpy as np
     from numpy import inf, isnan, logical_not, nan
@@ -219,7 +222,7 @@ def find_in_range(
     # find those greater than the minimum bound
     if np.isfinite(min_):
         func = np.greater_equal if inclusive or left else np.greater
-        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
+        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # fmt: skip  # ty: ignore[unsupported-operator]
     else:
         if np.isnan(min_) or np.sign(min_) > 0:
             raise AssertionError("The minimum should be -np.inf if not finite.")
@@ -227,7 +230,7 @@ def find_in_range(
     # combine with those less than the maximum bound
     if np.isfinite(max_):
         func = np.less_equal if inclusive or right else np.less  # type: ignore[assignment]
-        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
+        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # fmt: skip  # ty: ignore[unsupported-operator]
     elif np.isnan(max_) or np.sign(max_) < 0:
         raise AssertionError("The maximum should be np.inf if not finite.")
     return valid  # type: ignore[no-any-return]
@@ -895,18 +898,18 @@ def np_digitize(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
 
     # check the bounds
     tolerance: int | float | None = None  # TODO: do I need a tolerance here?
-    bmin = bins[0] if tolerance is None else bins[0] - tolerance  # type: ignore[index, operator]
-    bmax = bins[-1] if tolerance is None else bins[-1] + tolerance  # type: ignore[index, operator]
+    bmin = bins[0] if tolerance is None else bins[0] - tolerance  # type: ignore[index]
+    bmax = bins[-1] if tolerance is None else bins[-1] + tolerance  # type: ignore[index]
     bad_bounds = False
     if right:
-        if np.any(x <= bmin) or np.any(x > bmax):  # type: ignore[operator]
+        if np.any(x <= bmin) or np.any(x > bmax):  # ty: ignore[unsupported-operator]
             bad_bounds = True
-            bad_left = np.flatnonzero(x <= bmin)  # type: ignore[operator]
-            bad_right = np.flatnonzero(x > bmax)  # type: ignore[operator]
-    elif np.any(x < bmin) or np.any(x >= bmax):  # type: ignore[operator]
+            bad_left = np.flatnonzero(x <= bmin)  # ty: ignore[unsupported-operator]
+            bad_right = np.flatnonzero(x > bmax)  # ty: ignore[unsupported-operator]
+    elif np.any(x < bmin) or np.any(x >= bmax):  # ty: ignore[unsupported-operator]
         bad_bounds = True
-        bad_left = np.flatnonzero(x < bmin)  # type: ignore[operator]
-        bad_right = np.flatnonzero(x >= bmax)  # type: ignore[operator]
+        bad_left = np.flatnonzero(x < bmin)  # ty: ignore[unsupported-operator]
+        bad_right = np.flatnonzero(x >= bmax)  # ty: ignore[unsupported-operator]
     if bad_bounds:
         message = f"Some values ({len(bad_left)} left, {len(bad_right)} right) of x are outside the given bins ([{bmin}, {bmax}])."  # type: ignore[str-bytes-safe]
         if bad_left.size > 0:
@@ -1374,11 +1377,15 @@ def is_datetime(time: datetime.datetime | ArrayLike | None) -> bool:
 
 # %% Functions - intersect
 @overload
-def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[False] = ...) -> _I | _N | _D: ...
+def intersect(  # ty: ignore[invalid-overload]
+    a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[False] = ...
+) -> _I | _N | _D: ...
 @overload
-def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[True]) -> tuple[_I | _N | _D, _I, _I]: ...
+def intersect(  # ty: ignore[invalid-overload]
+    a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[True]
+) -> tuple[_I | _N | _D, _I, _I]: ...
 @overload
-def intersect(
+def intersect(  # ty: ignore[invalid-overload]
     a: ArrayLike,
     b: ArrayLike,
     /,
@@ -1388,7 +1395,7 @@ def intersect(
     return_index: Literal[False] = ...,
 ) -> _I | _N | _D: ...
 @overload
-def intersect(
+def intersect(  # ty: ignore[invalid-overload]
     a: ArrayLike,
     b: ArrayLike,
     /,

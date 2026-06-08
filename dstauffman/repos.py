@@ -21,6 +21,7 @@ from slog import ReturnCodes
 from dstauffman.constants import HAVE_COVERAGE, HAVE_PYTEST
 from dstauffman.paths import get_root_dir, get_tests_dir
 
+__lazy_modules__ = ["coverage", "pytest", "qtpy"]
 if HAVE_COVERAGE:
     from coverage import Coverage
 if HAVE_PYTEST:

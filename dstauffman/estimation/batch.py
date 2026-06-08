@@ -331,7 +331,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         text = pprint_dict(dct, name=name, indent=2, align=True, disp=False)
         return text
 
-    def pprint(self) -> None:  # type: ignore[override]  # pylint: disable=arguments-differ
+    def pprint(self) -> None:  # type: ignore[override]  # pylint: disable=arguments-differ  # ty: ignore[invalid-method-override]
         r"""
         Print summary results.
 

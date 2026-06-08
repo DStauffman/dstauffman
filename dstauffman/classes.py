@@ -26,6 +26,7 @@ from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY, HAVE_PANDAS, NP_DATETIME
 from dstauffman.time import is_datetime
 from dstauffman.utils import find_in_range
 
+__lazy_modules__ = ["h5py", "pandas"]
 if HAVE_H5PY:
     import h5py
 if HAVE_NUMPY:

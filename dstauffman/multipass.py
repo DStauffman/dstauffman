@@ -143,7 +143,7 @@ def parfor_wrapper(
                         result.re_raise()
                 else:
                     results.append(result)
-            except StopIteration:  # noqa: PERF203
+            except StopIteration:
                 break
     if ignore_errors and len(errors) > 0:
         logger.log(LogLevel.L2, "There were %i error(s) in the processing.", len(errors))
