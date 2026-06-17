@@ -39,7 +39,7 @@ make_envs:
   - deactivate
   - uv venv --allow-existing .cache/static
   - source .cache/static/bin/activate
-  - uv pip install black h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib
+  - uv pip install black h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib ty
   - deactivate
   - uv venv --allow-existing .cache/everything
   - source .cache/everything/bin/activate
@@ -71,7 +71,18 @@ ruff:
   - source .cache/static/bin/activate
   - python --version
   - ruff --version
-  - ruff check
+  - ruff check .
+
+ty:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+  - pwd
+  - ls -l
+  - source .cache/static/bin/activate
+  - python --version
+  - ty --version
+  - ty check .
 
 pylint:
   stage: Static Analysis
@@ -82,10 +93,7 @@ pylint:
   - source .cache/static/bin/activate
   - python --version
   - pylint --version
-  - pylint dstauffman || pylint-exit $?
-  - pylint nubs || pylint-exit $?
-  - pylint slog || pylint-exit $?
-  - pylint scripts || pylint-exit $?
+  - pylint . || pylint-exit $?
 
 black:
   stage: Static Analysis
@@ -107,7 +115,7 @@ isort:
   - source .cache/static/bin/activate
   - python --version
   - isort --version
-  - isort . --diff --skip .cache
+  - isort . --check-only --diff --skip .cache
 
 core_test:
   stage: Test

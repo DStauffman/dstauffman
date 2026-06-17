@@ -193,9 +193,6 @@ class Test_convert_date(unittest.TestCase):
         self.seconds = 3725.5
         self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.UTC)
         self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.UTC)
-        # When Python v3.11 and newer
-        # self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.UTC)
-        # self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.UTC)
         self.date = datetime.date(2022, 1, 17)
         if dcs.HAVE_NUMPY:
             self.numpy = np.datetime64("2020-06-01 01:02:05.500000", "ns")
@@ -359,9 +356,7 @@ class Test_convert_date(unittest.TestCase):
         out = dcs.convert_date(dates, "numpy", old_form="datetime")
         np.testing.assert_array_equal(out, np.array([self.np2, self.numpy]))
         if dcs.HAVE_MPL:  # pragma: no branch
-            # with warnings.catch_warnings(action="ignore", category=UserWarning):  # When Python v3.11+
-            with warnings.catch_warnings():
-                warnings.simplefilter("ignore", category=UserWarning)
+            with warnings.catch_warnings(action="ignore", category=UserWarning):
                 out = dcs.convert_date(dates, "matplotlib", old_form="datetime")
             np.testing.assert_array_equal(out, np.array([self.mpl2, self.matplotlib]))
         out = dcs.convert_date([self.seconds, self.seconds], "numpy", self.date_zero, old_form="sec")
