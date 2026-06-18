@@ -121,6 +121,7 @@ jobs:
         source $VENV_ROOT_DIR/static/bin/activate
         python --version
         ruff --version
+        python .github/workflows/replace_nubs_slog_locations.py
         ruff check .
 
     - name: Ty static analysis
@@ -130,6 +131,7 @@ jobs:
         source $VENV_ROOT_DIR/static/bin/activate
         python --version
         ty --version
+        python .github/workflows/replace_nubs_slog_locations.py
         ty check .
 
     - name: Pylint static analysis

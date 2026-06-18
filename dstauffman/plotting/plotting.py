@@ -1448,7 +1448,7 @@ def plot_histogram(  # noqa: C901
         handles, labels = ax.get_legend_handles_labels()
         handles.insert(0, p)
         labels.insert(0, "PDF")
-        ax.legend(handles, labels, loc=legend_loc)
+        ax.legend(handles, labels, loc=legend_loc)  # type: ignore[call-overload]
     if not skip_setup_plots:
         setup_plots(fig, opts=opts)
     return fig

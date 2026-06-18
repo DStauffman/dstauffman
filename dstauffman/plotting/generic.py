@@ -581,7 +581,7 @@ def make_time_plot(
     # add legend at the very end once everything has been done
     if legend_loc.lower() != "none":
         for this_axes in ax:
-            this_axes.legend(loc=legend_loc)
+            this_axes.legend(loc=legend_loc)  # type: ignore[call-overload]
 
     return fig
 
@@ -1079,7 +1079,7 @@ def make_difference_plot(  # noqa: C901
         for fig in figs:
             for this_axes in fig.axes:
                 if id(this_axes) in axes[id(fig)]:
-                    this_axes.legend(loc=legend_loc)
+                    this_axes.legend(loc=legend_loc)  # type: ignore[call-overload]
 
     if return_err:
         return (figs, err)
@@ -1518,7 +1518,7 @@ def make_error_bar_plot(
     # add legend at the very end once everything has been done
     if legend_loc.lower() != "none":
         for this_axes in ax:
-            this_axes.legend(loc=legend_loc)
+            this_axes.legend(loc=legend_loc)  # type: ignore[call-overload]
 
     return fig
 
@@ -1704,7 +1704,7 @@ def make_bar_plot(
 
     # add legend at the very end once everything has been done
     if legend_loc.lower() != "none":
-        ax.legend(loc=legend_loc)
+        ax.legend(loc=legend_loc)  # type: ignore[call-overload]
 
     return fig
 
@@ -1956,7 +1956,7 @@ def make_categories_plot(  # noqa: C901
     if legend_loc.lower() != "none":
         for ax in axes:
             for this_axes in ax:
-                this_axes.legend(loc=legend_loc)
+                this_axes.legend(loc=legend_loc)  # type: ignore[call-overload]
 
     return figs
 
@@ -2199,7 +2199,7 @@ def make_connected_sets(
     if bool(datashaders):
         add_datashaders(datashaders)
     if legend_loc.lower() != "none":
-        ax.legend(loc=legend_loc)
+        ax.legend(loc=legend_loc)  # type: ignore[call-overload]
 
     return fig
 
