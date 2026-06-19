@@ -6,7 +6,7 @@ THISDIR=${BASH_SOURCE%/*}
 
 if grep -i -q windows <<< "$OS"; then
     # Windows - (presumably via Git-Bash)
-    # Pass through to dcspython.bat
+    # Pass through to dcsipython.bat
     $THISDIR/dcsipython.bat ${@}
 else
     # Presumably Linux
@@ -17,10 +17,10 @@ else
     export PYTHONPATH="$THISDIR/..:$THISDIR/../../nubs:$THISDIR/../../slog:$THISDIR/../../dstauffman2:$PYTHONPATH"
 
     if command -v ipython3 &>/dev/null; then
-        # Try using python3
+        # Try using ipython3
         exec ipython3 ${@}
     else
-        # If that didn't work, then try just python
+        # If that didn't work, then try just ipython
         exec ipython ${@}
     fi
 

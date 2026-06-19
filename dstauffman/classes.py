@@ -396,7 +396,7 @@ def save_convert_hdf5(self: Any, **kwargs: Any) -> dict[str, bool]:
         assert HAVE_NUMPY, "Must have numpy to convert the dates."
         for key in datetime_fields:
             if (value := getattr(self, key)) is not None:
-                setattr(self, key, value.astype(int64))
+                setattr(self, key, value.astype(NP_DATETIME_FORM).astype(int64))
     return {"convert_dates": convert_dates}
 
 
