@@ -150,7 +150,7 @@ jobs:
         source $VENV_ROOT_DIR/static/bin/activate
         python --version
         black --version
-        black . --check
+        black . --check --fast
 
     - name: isort static analysis
       working-directory: ${{ env.DCS_ROOT_DIR }}

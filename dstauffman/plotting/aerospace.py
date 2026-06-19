@@ -92,6 +92,7 @@ if TYPE_CHECKING:
         use_zoh: NotRequired[bool]
         extra_plotter: NotRequired[ExtraPlotter | None]
         use_datashader: NotRequired[bool]
+        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
         classify: NotRequired[str]
 
     class _KfDiffKwargs(TypedDict):
@@ -123,7 +124,7 @@ if TYPE_CHECKING:
         use_zoh: NotRequired[bool]
         extra_plotter: NotRequired[ExtraPlotter | None]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]  # diff-only
+        fig_ax: NotRequired[tuple[tuple[Figure, Axes], ...] | None]
         classify: NotRequired[str]
 
     class _SetsKwargs(TypedDict):

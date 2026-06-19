@@ -1120,6 +1120,7 @@ def make_quaternion_plot(
     label_vert_lines: bool,
     extra_plotter: ExtraPlotter | None,
     use_datashader: bool,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None,
 ) -> _Figs: ...
 @overload
 def make_quaternion_plot(
@@ -1154,6 +1155,7 @@ def make_quaternion_plot(
     label_vert_lines: bool,
     extra_plotter: ExtraPlotter | None,
     use_datashader: bool,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None,
 ) -> tuple[_Figs, dict[str, _N]]: ...
 def make_quaternion_plot(
     description: str,
@@ -1187,6 +1189,7 @@ def make_quaternion_plot(
     label_vert_lines: bool = True,
     extra_plotter: ExtraPlotter | None = None,
     use_datashader: bool = False,
+    fig_ax: tuple[tuple[Figure, Axes], ...] | None = None,
 ) -> _Figs | tuple[_Figs, dict[str, _N]]:
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
@@ -1244,6 +1247,7 @@ def make_quaternion_plot(
     >>> label_vert_lines = True
     >>> extra_plotter    = None
     >>> use_datashader   = False
+    >>> fig_ax           = None
     >>> figs = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, \
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -1251,7 +1255,8 @@ def make_quaternion_plot(
     ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
     ...     plot_components=plot_components, second_units=second_units, leg_scale=leg_scale, \
     ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter, use_datashader=use_datashader)
+    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter, \
+    ...     use_datashader=use_datashader, fig_ax=fig_ax)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1297,6 +1302,7 @@ def make_quaternion_plot(
         use_zoh=use_zoh,
         label_vert_lines=label_vert_lines,
         use_datashader=use_datashader,
+        fig_ax=fig_ax,
         diff_type=diff_type,
     )
 

@@ -93,7 +93,7 @@ pylint:
   - source .cache/static/bin/activate
   - python --version
   - pylint --version
-  - pylint . || pylint-exit $?
+  - pylint . --ignore=.cache || pylint-exit $?
 
 black:
   stage: Static Analysis
@@ -104,7 +104,7 @@ black:
   - source .cache/static/bin/activate
   - python --version
   - black --version
-  - black . --check
+  - black . --check --fast
 
 isort:
   stage: Static Analysis

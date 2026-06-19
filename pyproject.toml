@@ -44,7 +44,7 @@ numeric = ["h5py>=3.7", "matplotlib>=3.7", "numpy>=2.0", "pandas>=2.0", "pyarrow
 shader = ["dstauffman[numeric]", "datashader>=0.15", "numba>=0.57"]
 aiml = ["jax>=0.10.0"]
 
-[project.dependency-groups]
+[dependency-groups]
 spyder = ["spyder-kernels>=2.4"]
 static = ["dstauffman[numeric]", "black>=25.0", "isort>=5.10", "mypy>=1.5", "pylint>=2.16", "PyQt5-stubs>=5.15"]
 test = ["pytest>=7.4", "pytest-cov>=4.0"]
@@ -56,6 +56,9 @@ Changelog = "https://github.com/DStauffman/dstauffman/blob/main/CHANGELOG.md"
 
 [project.scripts]
 dcs = "dstauffman.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["dstauffman", "scripts"]
 
 [tool.setuptools.package-data]
 dstauffman = ["CHANGELOG.md", "LICENSE.txt", "pyproject.toml", "README.rst", "*.png", "*.pdf", "*.rst", "*.tex", "*.bat", "*.sh"]
