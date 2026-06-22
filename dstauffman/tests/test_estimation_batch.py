@@ -728,7 +728,9 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        self.opti_opts: estm.OptiOpts = type("Class1", (object,), {"tol_cosmax_grad": 1, "tol_delta_step": 2, "tol_delta_cost": 3})  # type: ignore[assignment]
+        self.opti_opts: estm.OptiOpts = type(
+            "Class1", (object,), {"tol_cosmax_grad": 1, "tol_delta_step": 2, "tol_delta_cost": 3}
+        )  # type: ignore[assignment]
         self.cosmax = 10
         self.delta_step_len = 10
         self.pred_func_change = 10

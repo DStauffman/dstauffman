@@ -39,7 +39,7 @@ make_envs:
   - deactivate
   - uv venv --allow-existing .cache/static
   - source .cache/static/bin/activate
-  - uv pip install black h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib ty
+  - uv pip install black h5py matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib ty
   - deactivate
   - uv venv --allow-existing .cache/everything
   - source .cache/everything/bin/activate
@@ -105,17 +105,6 @@ black:
   - python --version
   - black --version
   - black . --check --fast
-
-isort:
-  stage: Static Analysis
-  allow_failure: true
-  script:
-  - pwd
-  - ls -l
-  - source .cache/static/bin/activate
-  - python --version
-  - isort --version
-  - isort . --check-only --diff --skip .cache
 
 core_test:
   stage: Test

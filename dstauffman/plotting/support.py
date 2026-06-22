@@ -738,7 +738,10 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> str | tuple[st
 
 # %% Functions - resolve_name
 def resolve_name(
-    name: str, force_win: bool | None = None, rep_token: str = "_", strip_classification: bool = True  # noqa: S107
+    name: str,
+    force_win: bool | None = None,
+    rep_token: str = "_",  # noqa: S107
+    strip_classification: bool = True,
 ) -> str:
     r"""
     Resolves the given name to something that can be saved on the current OS.

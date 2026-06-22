@@ -911,7 +911,10 @@ def np_digitize(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
         bad_left = np.flatnonzero(x < bmin)  # ty: ignore[unsupported-operator]
         bad_right = np.flatnonzero(x >= bmax)  # ty: ignore[unsupported-operator]
     if bad_bounds:
-        message = f"Some values ({len(bad_left)} left, {len(bad_right)} right) of x are outside the given bins ([{bmin}, {bmax}])."  # type: ignore[str-bytes-safe]
+        message = (
+            f"Some values ({len(bad_left)} left, {len(bad_right)} right) of x are outside "
+            f"the given bins ([{bmin}, {bmax}])."  # type: ignore[str-bytes-safe]
+        )
         if bad_left.size > 0:
             message += f" Such as {np.atleast_1d(x)[bad_left[0]]}"
             if bad_right.size > 0:

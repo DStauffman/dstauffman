@@ -900,7 +900,9 @@ def plot_velocity(
     r"""Plots the Line of Sight histories."""
     if fields is None:
         fields = {"vel": "Velocity"}
-    out = plot_position(kf1, kf2, truth=truth, opts=opts, skip_setup_plots=skip_setup_plots, return_err=return_err, fields=fields, **kwargs)  # type: ignore[call-overload]
+    out = plot_position(
+        kf1, kf2, truth=truth, opts=opts, skip_setup_plots=skip_setup_plots, return_err=return_err, fields=fields, **kwargs
+    )  # type: ignore[call-overload]
     return out  # type: ignore[no-any-return]
 
 

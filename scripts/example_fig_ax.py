@@ -108,7 +108,9 @@ if __name__ == "__main__":
     )
 
     # %% Example 3
-    fig_ax3 = fig_ax_factory(num_figs=None, num_axes=[2, 2], layout="rowwise", sharex=True, suptitle="Vector Plots", passthrough=not comb_plots)  # type: ignore[call-overload]
+    fig_ax3 = fig_ax_factory(
+        num_figs=None, num_axes=[2, 2], layout="rowwise", sharex=True, suptitle="Vector Plots", passthrough=not comb_plots
+    )  # type: ignore[call-overload]
     time = np.arange(30)
     plot_time_history("1st", time, np.ones(30), units="one", fig_ax=(fig_ax3[0],), skip_setup_plots=comb_plots)
     plot_time_history(
