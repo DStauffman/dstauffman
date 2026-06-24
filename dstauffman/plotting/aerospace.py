@@ -1930,13 +1930,7 @@ def plot_tci(
 
 
 # %% Functions - plot_kp
-def plot_kp(
-    time: _D,
-    data: _N,
-    *,
-    opts: Opts | None = None,
-    skip_setup_plots: bool = False,
-) -> Figure:
+def plot_kp(time: _D, data: _N, *, opts: Opts | None = None, skip_setup_plots: bool = False) -> Figure:
     """
     Plots the K planetary index 3-hourly data.
 

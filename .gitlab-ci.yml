@@ -260,6 +260,8 @@ build_code:
   except:
   - branches
   script:
+  - pwd
+  - ls -l
   - source .cache/setuptools/bin/activate
   - echo "Publishing to $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi"
   - python -m build
