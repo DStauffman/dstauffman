@@ -175,6 +175,74 @@ class Test_round_time(unittest.TestCase):
         np.testing.assert_array_equal(date_out, expected)
 
 
+# %% floor_datetime
+class Test_floor_datetime(unittest.TestCase):
+    r"""
+    Tests the floor_datetime function with the following cases:
+        normal use (round to one day)
+        get current time
+    """
+
+    def test_normal_use(self) -> None:
+        floored_time = dcs.floor_datetime(datetime.datetime(2015, 3, 13, 8, 4, 10))
+        self.assertEqual(floored_time, datetime.datetime(2015, 3, 13, 0, 0, 0))
+
+    def test_current_time(self) -> None:
+        dcs.floor_datetime()
+        self.assertTrue(True)
+
+
+# %% floor_np_datetime
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_floor_np_datetime(unittest.TestCase):
+    r"""
+    Tests the floor_np_datetime function with the following cases:
+        Nominal
+        Flooring
+    """
+
+    def setUp(self) -> None:
+        # fmt: off
+        date_zero       = np.datetime64(datetime.date(2020, 1, 1))
+        dt_sec          = np.array([0, 0.2, 172799.35, 0.45, 172800.59, 0.61])
+        self.date_in    = date_zero + np.round(1000 * dt_sec).astype("timedelta64[ms]")
+        self.expected   = date_zero + np.array([0, 0, 86400000, 0, 172800000, 0]).astype("timedelta64[ms]")
+        # fmt: on
+
+    def test_nominal(self) -> None:
+        date_out = dcs.floor_np_datetime(self.date_in)
+        np.testing.assert_array_equal(date_out, self.expected)
+
+    def test_nanoseconds(self) -> None:
+        date_out = dcs.floor_np_datetime(self.date_in.astype("datetime64[ns]"))
+        np.testing.assert_array_equal(date_out, self.expected.astype("datetime64[ns]"))
+
+
+# %% floor_num_datetime
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_floor_num_datetime(unittest.TestCase):
+    r"""
+    Tests the floor_num_datetime function with the following cases:
+        TBD
+    """
+
+    def setUp(self) -> None:
+        self.date_exact = np.arange(0, 10.1, 0.1)
+        self.date_exact[5] += 86400.0
+        self.date_exact[10] += 1.9 * 86400.0
+        self.date_exact[15] += 2.0 * 86400.0
+        self.date_in = self.date_exact + 0.001 * np.random.default_rng().random(101)
+        self.time_delta = 0.1
+        self.expected = np.zeros(self.date_exact.shape)
+        self.expected[5] += 86400.0
+        self.expected[10] += 86400.0
+        self.expected[15] += 2 * 86400.0
+
+    def test_nominal(self) -> None:
+        date_out = dcs.floor_num_datetime(self.date_in)
+        np.testing.assert_array_almost_equal(date_out, self.expected)
+
+
 # %% convert_date
 class Test_convert_date(unittest.TestCase):
     r"""

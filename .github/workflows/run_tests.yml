@@ -102,7 +102,7 @@ jobs:
       run: |
         uv venv static
         source $VENV_ROOT_DIR/static/bin/activate
-        uv pip install black h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib ty
+        uv pip install black h5py matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib ty
         deactivate
 
     - name: Mypy static analysis
@@ -123,6 +123,16 @@ jobs:
         ruff --version
         python .github/workflows/replace_nubs_slog_locations.py
         ruff check .
+
+    - name: Ruff format
+      working-directory: ${{ env.DCS_ROOT_DIR }}
+      if: always()
+      run: |
+        source $VENV_ROOT_DIR/static/bin/activate
+        python --version
+        ruff --version
+        python .github/workflows/replace_nubs_slog_locations.py
+        ruff format .
 
     - name: Ty static analysis
       working-directory: ${{ env.DCS_ROOT_DIR }}
@@ -151,14 +161,6 @@ jobs:
         python --version
         black --version
         black . --check --fast
-
-    - name: isort static analysis
-      working-directory: ${{ env.DCS_ROOT_DIR }}
-      if: always()
-      run: |
-        source $VENV_ROOT_DIR/static/bin/activate
-        isort --version
-        isort . --check-only --diff
 
   full_tests:
     runs-on: ubuntu-latest
@@ -200,7 +202,7 @@ jobs:
         deactivate
         uv venv static
         source $VENV_ROOT_DIR/static/bin/activate
-        uv pip install black h5py isort matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib ty
+        uv pip install black h5py matplotlib mypy numpy pandas pandas-stubs pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy ruff scipy scipy-stubs tblib ty
         deactivate
         uv venv everything
         source $VENV_ROOT_DIR/everything/bin/activate

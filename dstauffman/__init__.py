@@ -28,7 +28,8 @@ from .stats     import convert_annual_to_monthly_probability, \
                            monthly_probability_to_annual_rate, ar2mp, mp2ar, rand_draw, \
                            apply_prob_to_mask
 from .time      import get_np_time_units, get_ymd_from_np, round_datetime, round_np_datetime, \
-                           round_num_datetime, round_time, convert_date, convert_time_units, \
+                           round_num_datetime, round_time, floor_datetime, floor_np_datetime, \
+                           floor_num_datetime, convert_date, convert_time_units, \
                            convert_datetime_to_np, convert_duration_to_np, convert_num_dt_to_np, \
                            get_delta_time_str
 from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \

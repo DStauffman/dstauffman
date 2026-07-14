@@ -166,9 +166,9 @@ ignore = [
     "D203",  # one blank line required before class docstring
     "D212",  # multiline docstring summary should start at the first line
     "D401",  # first line of docstring should be in imperative mood
-    "E501",  # line too long, (use black to manage this)
     "B028",  # no explicit stacklevel keyword argument
     "B905",  # zip without an explicit strict parameter
+    "E501",  # line too long, (use black/ruff format to manage this)
     "S101",  # Use of assert
     "T201",  # `print` found
     "ANN401",  # dynamically typed expressions (Any) are disallowed in kwargs

@@ -344,6 +344,125 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
     return round_num_datetime(x, t_round.astype(np.int64) / NP_INT64_PER_SEC)  # type: ignore[arg-type]
 
 
+# %% Functions - floor_datetime
+def floor_datetime(dt: datetime.datetime | None = None) -> datetime.datetime:
+    r"""
+    Floors a datetime object to an integer date.
+
+    Parameters
+    ----------
+    dt : datetime.datetime
+        time to round, default now.
+
+    Returns
+    -------
+    datetime.datetime
+        Time floored to given date
+
+    See Also
+    --------
+    datetime.datetime
+
+    Notes
+    -----
+    #. Written by David C. Stauffer in July 2026.
+
+    Examples
+    --------
+    >>> from dstauffman import floor_datetime
+    >>> from datetime import datetime
+    >>> dt = datetime(2015, 3, 13, 8, 4, 10)
+    >>> floored_time = floor_datetime(dt)
+    >>> print(floored_time)
+    2015-03-13 00:00:00
+
+    """
+    return round_datetime(dt, round_to_sec=ONE_DAY, floor=True)
+
+
+# %% Functions - floor_np_datetime
+@overload
+def floor_np_datetime(date_in: np.datetime64) -> np.datetime64: ...
+@overload
+def floor_np_datetime(date_in: _D) -> _D: ...
+def floor_np_datetime(date_in: np.datetime64 | _D) -> np.datetime64 | _D:
+    r"""
+    Floors a numpy datetime64 time to the specified day.
+
+    Parameters
+    ----------
+    date_in : numpy.datetime64
+        Date to round
+
+    Returns
+    -------
+    date_out : numpy.datetime64
+        Floored date
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2026.
+
+    Examples
+    --------
+    >>> from dstauffman import floor_np_datetime
+    >>> import datetime
+    >>> import numpy as np
+    >>> date_zero  = np.datetime64(datetime.date(2020, 1, 1))
+    >>> dt_sec     = np.array([0, 0.2, 0.35, 0.45, 86400.59, 0.61])
+    >>> date_in    = date_zero + np.round(1000*dt_sec).astype("timedelta64[ms]")
+    >>> date_out   = floor_np_datetime(date_in)
+    >>> expected   = date_zero + np.array([0, 0, 0, 0, 86400000, 0]).astype("timedelta64[ms]")
+    >>> print(all(date_out == expected))
+    True
+
+    """
+    time_units = np.datetime_data(date_in.dtype)[0]
+    time_delta = np.timedelta64(ONE_DAY, "s").astype(f"timedelta64[{time_units}]")
+    return round_np_datetime(date_in, time_delta=time_delta, floor=True)
+
+
+# %% Functions - floor_num_datetime
+def floor_num_datetime(date_in: _N) -> _N:
+    r"""
+    Floors a numerical datetime to a given day.
+
+    Parameters
+    ----------
+    date_in : float
+        Date to round
+
+    Returns
+    -------
+    date_out: float
+        Rounded date
+
+    Notes
+    -----
+    #.  This date_in is assumed to be in seconds.
+    #.  Written by David C. Stauffer in July 2026.
+
+    Examples
+    --------
+    >>> from dstauffman import floor_num_datetime
+    >>> import numpy as np
+    >>> date_exact = np.arange(0, 10.1, 0.1)
+    >>> date_exact[5] += 86400.0
+    >>> date_exact[10] += 129600.0
+    >>> date_exact[15] += 172800.0
+    >>> date_in = date_exact + 0.001 * np.random.default_rng().random(101)
+    >>> date_out = floor_num_datetime(date_in)
+    >>> expected = np.zeros(date_in.shape)
+    >>> expected[5] += 86400.0
+    >>> expected[10] += 86400.0
+    >>> expected[15] += 2 * 86400.0
+    >>> print(np.all(np.abs(date_out - expected) < 1e-12))
+    True
+
+    """
+    return round_num_datetime(date_in, time_delta=ONE_DAY, floor=True)
+
+
 # %% Functions - convert_date
 def convert_date(  # noqa: C901
     date: Any,
