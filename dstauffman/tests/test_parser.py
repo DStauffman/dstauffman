@@ -9,6 +9,7 @@ Notes
 
 # %% Imports
 import argparse
+import dataclasses
 import logging
 import unittest
 from unittest.mock import patch
@@ -33,10 +34,16 @@ class Test__VALID_COMMANDS(unittest.TestCase):
 class Test_parser__Flags(unittest.TestCase):
     r"""
     Tests the parser._Flags function with the following cases:
-        TBD
+        Nominal and no further changes
     """
 
-    pass  # TODO: write this
+    def test_nominal(self) -> None:
+        flags = dcs.parser._Flags(5, True, False)
+        self.assertEqual(flags.log_level, 5)
+        self.assertTrue(flags.use_display)
+        self.assertFalse(flags.use_plotting)
+        with self.assertRaises(dataclasses.FrozenInstanceError):
+            flags.log_level = 10
 
 
 # %% parser._print_bad_command
@@ -58,10 +65,25 @@ class Test_parser__print_bad_command(unittest.TestCase):
 class Test_main(unittest.TestCase):
     r"""
     Tests the main function with the following cases:
-        TBD
+        Good command
+        Bad command
     """
 
-    pass  # TODO: write this
+    def test_valid_command(self) -> None:
+        with capture_output() as ctx, patch("sys.argv", ["name.py", "-h"]), self.assertRaises(SystemExit) as exc:
+            dcs.main()
+        output = ctx.get_output()
+        ctx.close()
+        self.assertEqual(exc.exception.code, 0)
+        self.assertTrue(output.startswith("##########\ndstauffman\n##########\n"))
+
+    def test_invalid_command(self) -> None:
+        with capture_output() as ctx, patch("sys.argv", ["name.py", "garbage"]), self.assertRaises(SystemExit) as exc:
+            dcs.main()
+        output = ctx.get_output()
+        ctx.close()
+        self.assertEqual(exc.exception.code, 1)
+        self.assertEqual(output, 'Command "garbage" is not understood.')
 
 
 # %% parse_wrapper

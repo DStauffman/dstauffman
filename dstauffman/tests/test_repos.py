@@ -32,8 +32,8 @@ class Test_run_docstrings(unittest.TestCase):
         with patch("dstauffman.repos.doctest.testfile", return_value=(0, 0)) as mock_tester:
             return_code = dcs.run_docstrings(files, verbose)
         self.assertEqual(return_code, ReturnCodes.clean)
-        mock_tester.assert_any_call(files[0], report=True, verbose=verbose, module_relative=False)
-        mock_tester.assert_called_with(files[1], report=True, verbose=verbose, module_relative=False)
+        mock_tester.assert_any_call(str(files[0]), report=True, verbose=verbose, module_relative=False)
+        mock_tester.assert_called_with(str(files[1]), report=True, verbose=verbose, module_relative=False)
 
     def test_with_failures(self) -> None:
         files = [dcs.get_tests_dir() / x for x in ("test_matlab.py", "test_repos.py")]
@@ -46,8 +46,8 @@ class Test_run_docstrings(unittest.TestCase):
         self.assertIn(exp, lines)
         exp = f'Testing "{dcs.get_tests_dir().joinpath("test_repos.py")}":'
         self.assertIn(exp, lines)
-        mock_tester.assert_any_call(files[0], report=True, verbose=verbose, module_relative=False)
-        mock_tester.assert_called_with(files[1], report=True, verbose=verbose, module_relative=False)
+        mock_tester.assert_any_call(str(files[0]), report=True, verbose=verbose, module_relative=False)
+        mock_tester.assert_called_with(str(files[1]), report=True, verbose=verbose, module_relative=False)
 
 
 # %% run_unittests

@@ -45,7 +45,7 @@ def main() -> int:
         command, args = parse_wrapper(sys.argv[1:])
     except ValueError:
         _print_bad_command(" ".join(sys.argv[1:]))
-        return ReturnCodes.bad_command
+        return sys.exit(ReturnCodes.bad_command)
     rc = execute_command(command, args)
     return sys.exit(rc)
 
