@@ -327,6 +327,8 @@ def anomaly_mean_2_eccentric(M: _FN, e: _FN) -> np.floating | _N:
     # check if orbit is circular or elliptical
     if np.any(e >= 1):
         raise ValueError("The mean anomaly is not defined when e >= 1")
+    if not HAVE_SCIPY:
+        raise RuntimeError("You must have scipy available to run this.")
     # check if M is outside the range of 0 to 2*pi
     if np.any((M > TAU) | (M < 0)):
         logger.log(LogLevel.L6, "The mean anomaly was outside the range of 0 to 2*pi")
@@ -363,6 +365,8 @@ def anomaly_mean_2_hyperbolic(M: _FN, e: _FN) -> np.floating | _N:
     # check if orbit is hyperbolic
     if np.any(e < 1):
         raise ValueError("The hyperbolic anomaly is not defined when e <= 1")
+    if not HAVE_SCIPY:
+        raise RuntimeError("You must have scipy available to run this.")
 
     # check if M is outside the range of 0 to 2*pi
     if np.any((M > TAU) | (M < 0)):
