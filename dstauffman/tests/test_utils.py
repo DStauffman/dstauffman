@@ -183,7 +183,7 @@ class Test_find_in_range(unittest.TestCase):
         tmin = np.datetime64("2020-09-01 00:02:00", "ns")
         tmax = np.datetime64("2020-09-01 00:04:00", "ns")
         exp = np.array([0, 0, 0, 0, 1, 1, 1, 0, 1, 0], dtype=bool)
-        valid = dcs.find_in_range(value, min_=tmin, max_=tmax, inclusive=True)
+        valid = dcs.find_in_range(value, min_=tmin, max_=tmax, inclusive=True, precision=np.timedelta64(0, "ns"))
         np.testing.assert_array_equal(valid, exp)
 
 
@@ -1314,8 +1314,8 @@ class Test_intersect(unittest.TestCase):
         date_zero = np.datetime64("2020-06-01 00:00:00", "ms")
         dt = np.arange(0, 11000, 1000).astype("timedelta64[ms]")
         a = date_zero + dt
-        dt[3] += 5
-        dt[5] -= 30
+        dt[3] += np.timedelta64(5, "ms")
+        dt[5] -= np.timedelta64(30, "ms")
         b = date_zero + dt
         # no tolerance
         exp = np.array([0, 1, 2, 4, 6, 7, 8, 9, 10])
@@ -1535,6 +1535,15 @@ class Test_linear_interp(unittest.TestCase):
         y = dcs.linear_interp(self.x, self.xp[ix], self.yp[ix], assume_sorted=False)
         np.testing.assert_array_almost_equal(y, self.y, 12)
 
+    def test_missing_scipy(self) -> None:
+        prng = np.random.default_rng()
+        ix = np.arange(self.xp.size)
+        while dcs.issorted(ix):
+            prng.shuffle(ix)
+        with self.assertRaises(RuntimeError) as err, patch("dstauffman.utils.HAVE_SCIPY", False):
+            dcs.linear_interp(self.x, self.xp[ix], self.yp[ix], assume_sorted=False)
+        self.assertEqual(str(err.exception), "You must have scipy available to run this.")
+
     def test_extrapolate_numpy(self) -> None:
         xp = self.xp.copy()
         yp = self.yp.copy()
@@ -1609,6 +1618,17 @@ class Test_linear_lowpass_interp(unittest.TestCase):
     def test_filter_parameters(self) -> None:
         y = dcs.linear_lowpass_interp(self.x, self.xp, self.yp, filt_order=4, filt_freq=0.02, filt_samp=0.1)
         self.assertTrue(np.all(y < 5.0))
+
+
+class Test_linear_lowpass_interp_noscipy(unittest.TestCase):
+    r"""Tests the linear_lowpass_interp function without scipy."""
+
+    def test_missing_scipy(self) -> None:
+        x = np.arange(0, 10.1, 0.1)
+        xp = np.array([0.0, 5.0, 10.0])
+        yp = np.array([0.0, 5.0, 0.0])
+        with self.assertRaises(RuntimeError), patch("dstauffman.utils.HAVE_SCIPY", False):
+            dcs.linear_lowpass_interp(x, xp, yp)
 
 
 # %% drop_following_time

@@ -13,7 +13,7 @@ from unittest.mock import patch
 
 from slog import LogLevel
 
-from dstauffman import HAVE_NUMPY
+from dstauffman import HAVE_NUMPY, HAVE_SCIPY
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -204,10 +204,12 @@ class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
         self.exp1 = 0.0
         self.exp2 = 1.2617030552531017  # TODO: come up with independently
 
+    @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_nominal(self) -> None:
         E = space.anomaly_mean_2_eccentric(self.M2, self.e2)
         self.assertEqual(E, self.exp2)
 
+    @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_vector1(self) -> None:
         M = np.array([self.M1, self.M2])
         e = self.e2
@@ -216,6 +218,7 @@ class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
         self.assertEqual(E.shape, (2,))
         self.assertEqual(E[1], self.exp2)
 
+    @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_vector2(self) -> None:
         M = self.M2
         e = np.array([self.e1, self.e2])
@@ -224,6 +227,7 @@ class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
         self.assertEqual(E.shape, (2,))
         self.assertEqual(E[1], self.exp2)
 
+    @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_vector3(self) -> None:
         M = np.array([self.M1, self.M2])
         e = np.array([self.e1, self.e2])
@@ -232,6 +236,10 @@ class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
         self.assertEqual(E.shape, (2,))
         self.assertEqual(E[0], self.exp1)
         self.assertEqual(E[1], self.exp2)
+
+    def test_missing_scipy(self) -> None:
+        with self.assertRaises(RuntimeError), patch("dstauffman.aerospace.orbit_conv.HAVE_SCIPY", False):
+            space.anomaly_mean_2_eccentric(self.M2, self.e2)
 
 
 # %% aerospace.anomaly_mean_2_true

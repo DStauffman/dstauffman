@@ -65,7 +65,6 @@ class Test_parfor_wrapper(unittest.TestCase):
         np.testing.assert_array_equal(results[0], _model_wrapper(self.temp, self.temp))
 
     def test_parallel(self) -> None:
-        # TODO: check if this works with numpy, but without tblib installed
         results = dcs.parfor_wrapper(_model_wrapper, self.args, use_parfor=True, max_cores=self.max_cores)
         np.testing.assert_array_equal(results[0], _model_wrapper(self.temp, self.temp))
 

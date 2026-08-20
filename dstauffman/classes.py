@@ -46,7 +46,6 @@ if TYPE_CHECKING:
 
     _B = NDArray[np.bool_]
     _T = TypeVar("_T")
-    _SingleNum = int | float | np.datetime64
     _Sets = set[str] | frozenset[str]
     _Time = float | np.datetime64
 
@@ -546,7 +545,7 @@ def chop_time(
     tf: _Time = inf,
     inclusive: bool = False,
     mask: bool | _B | None = None,
-    precision: _SingleNum = 0,
+    precision: float | np.timedelta64 = 0,
     left: bool = True,
     right: bool = True,
 ) -> None:

@@ -54,7 +54,6 @@ if TYPE_CHECKING:
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
-    _SingleNum = int | float | np.datetime64
     _Lists = _N | list[_N] | tuple[_N, ...]
     _FN = float | np.floating | _N
     _Array = _B | _D | _I | _N
@@ -164,12 +163,12 @@ def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: PLR0911
 # %% Functions - find_in_range
 def find_in_range(
     value: ArrayLike,
-    min_: _SingleNum = -inf,
-    max_: _SingleNum = inf,
+    min_: float | np.datetime64 = -inf,
+    max_: float | np.datetime64 = inf,
     *,
     inclusive: bool = False,
     mask: bool | _B | None = None,
-    precision: _SingleNum = 0,
+    precision: float | np.timedelta64 = 0,
     left: bool = False,
     right: bool = False,
 ) -> _D | _I | _N:

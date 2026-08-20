@@ -1124,7 +1124,9 @@ class Test_aerospace_convert_att_quat_to_body_rate(unittest.TestCase):
         num_pts = 12
         rates = np.tile(np.array([[-0.01], [0.05], [-0.03]]), num_pts)
         dt = 0.1 * NP_ONE_SECOND
-        time = np.datetime64("2025-04-10T13:50:00", NP_DATETIME_UNITS) + np.arange(0, num_pts * dt, dt)
+        time = np.datetime64("2025-04-10T13:50:00", NP_DATETIME_UNITS) + np.arange(
+            np.timedelta64(0, NP_DATETIME_UNITS), num_pts * dt, dt
+        )
         init_quat = np.array([-0.5, 0.5, -0.5, 0.5])
         quat = np.empty((4, num_pts))
         quat[:, 0] = init_quat

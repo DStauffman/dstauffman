@@ -13,7 +13,7 @@ import unittest
 
 from slog import read_text_file
 
-from dstauffman import get_data_dir, HAVE_NUMPY, NP_DATETIME_FORM, NP_NAT
+from dstauffman import get_data_dir, HAVE_NUMPY, HAVE_SCIPY, NP_DATETIME_FORM, NP_NAT
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -288,7 +288,7 @@ class Test_aerospace_orbits__fix_instab(unittest.TestCase):
 
 
 # %% aerospace.two_line_elements
-@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@unittest.skipIf(not HAVE_NUMPY or not HAVE_SCIPY, "Skipping due to missing numpy/scipy dependency.")
 class Test_aerospace_two_line_elements(unittest.TestCase):
     r"""
     Tests the aerospace.two_line_elements function with the following cases:
@@ -552,7 +552,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
 
 
 # %% aerospace.advance_true_anomaly
-@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@unittest.skipIf(not HAVE_NUMPY or not HAVE_SCIPY, "Skipping due to missing numpy/scipy dependency.")
 class Test_aerospace_advance_true_anomaly(unittest.TestCase):
     r"""
     Tests the aerospace.advance_true_anomaly function with the following cases:
@@ -623,7 +623,7 @@ class Test_aerospace_advance_true_anomaly(unittest.TestCase):
 
 
 # %% aerospace.advance_elements
-@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@unittest.skipIf(not HAVE_NUMPY or not HAVE_SCIPY, "Skipping due to missing numpy/scipy dependency.")
 class Test_aerospace_advance_elements(unittest.TestCase):
     r"""
     Tests the aerospace.advance_elements function with the following cases:

@@ -430,6 +430,7 @@ class Test_aerospace_linear_interp(unittest.TestCase):
         exp = np.vstack([self.y, self.y])
         np.testing.assert_array_almost_equal(y, exp, 12)
 
+    @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_lowpass(self) -> None:
         x = np.arange(0, 10.1, 0.1)
         xp = np.array([0.0, 5.0, 10.0])
@@ -437,6 +438,7 @@ class Test_aerospace_linear_interp(unittest.TestCase):
         y = space.interp_vector(x, xp, yp, btype="lowpass", filt_order=4)
         self.assertTrue(np.all(y < 5.0))
 
+    @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_bad_arguments(self) -> None:
         with self.assertRaises(TypeError):
             space.interp_vector(self.x, self.xp, self.yp, filt_order=2)
