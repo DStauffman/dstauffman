@@ -115,7 +115,7 @@ class Test_plotting_COLOR_LISTS(unittest.TestCase):
         colormap = plot.COLOR_LISTS["quat_diff"]
         self.assertEqual(colormap.N, 8)
         self.assertEqual(colormap.colors[0], "xkcd:fuchsia")  # type: ignore[index]
-        self.assertEqual(colormap.colors[7], "xkcd:chocolate")  # type: ignore[index, misc]
+        self.assertEqual(colormap.colors[7], "xkcd:chocolate")  # type: ignore[index]
 
 
 # %% plotting._HoverButton
@@ -357,28 +357,28 @@ class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
         self.assertEqual(clist.N, 3)
         self.assertEqual(clist.colors[0], "#1f77b4")  # type: ignore[index]
         self.assertEqual(clist.colors[1], "xkcd:blue")  # type: ignore[index]
-        self.assertEqual(clist.colors[2], "#1f77b4")  # type: ignore[index, misc]
+        self.assertEqual(clist.colors[2], "#1f77b4")  # type: ignore[index]
 
     def test_two(self) -> None:
         clist = plot.get_nondeg_colorlists(2)
         self.assertEqual(clist.N, 6)
         self.assertEqual(clist.colors[0], "xkcd:red")  # type: ignore[index]
-        self.assertEqual(clist.colors[2], "xkcd:fuchsia")  # type: ignore[index, misc]
-        self.assertEqual(clist.colors[4], "xkcd:red")  # type: ignore[index, misc]
+        self.assertEqual(clist.colors[2], "xkcd:fuchsia")  # type: ignore[index]
+        self.assertEqual(clist.colors[4], "xkcd:red")  # type: ignore[index]
 
     def test_three(self) -> None:
         clist = plot.get_nondeg_colorlists(3)
         self.assertEqual(clist.N, 9)
         self.assertEqual(clist.colors[0], "xkcd:red")  # type: ignore[index]
-        self.assertEqual(clist.colors[3], "xkcd:fuchsia")  # type: ignore[index, misc]
-        self.assertEqual(clist.colors[6], "xkcd:red")  # type: ignore[index, misc]
+        self.assertEqual(clist.colors[3], "xkcd:fuchsia")  # type: ignore[index]
+        self.assertEqual(clist.colors[6], "xkcd:red")  # type: ignore[index]
 
     def test_four(self) -> None:
         clist = plot.get_nondeg_colorlists(4)
         self.assertEqual(clist.N, 12)
         self.assertEqual(clist.colors[0], "xkcd:red")  # type: ignore[index]
-        self.assertEqual(clist.colors[4], "xkcd:fuchsia")  # type: ignore[index, misc]
-        self.assertEqual(clist.colors[8], "xkcd:red")  # type: ignore[index, misc]
+        self.assertEqual(clist.colors[4], "xkcd:fuchsia")  # type: ignore[index]
+        self.assertEqual(clist.colors[8], "xkcd:red")  # type: ignore[index]
 
     def test_five_to_ten(self) -> None:
         cmap = mpl.colormaps["tab20"]

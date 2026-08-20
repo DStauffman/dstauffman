@@ -83,7 +83,7 @@ def norm(x: _N) -> _N:
 # %% Functions - dot
 def dot(x: _N, y: _N) -> _N:
     r"""Dot product between two vectors."""
-    return np.sum(x * y, axis=0)  # type: ignore[no-any-return]
+    return np.sum(x * y, axis=0)
 
 
 # %% Functions - cross
@@ -858,7 +858,7 @@ def get_sun_distance(time_jd: _FN) -> np.floating | _N:
     n = time_jd - JULIAN["jd_2000_01_01"]
     # Mean anomaly of the Sun
     g = np.mod(6.2400408 + 0.01720197 * n, TAU)
-    return 1.000_14 - 0.016_71 * np.cos(g) - 0.000_14 * np.cos(2 * g)  # type: ignore[no-any-return]
+    return 1.000_14 - 0.016_71 * np.cos(g) - 0.000_14 * np.cos(2 * g)
 
 
 # %% Functions - get_moon_radec_approx

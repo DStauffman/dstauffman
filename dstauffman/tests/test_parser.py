@@ -43,7 +43,7 @@ class Test_parser__Flags(unittest.TestCase):
         self.assertTrue(flags.use_display)
         self.assertFalse(flags.use_plotting)
         with self.assertRaises(dataclasses.FrozenInstanceError):
-            flags.log_level = 10
+            flags.log_level = 10  # type: ignore[misc]
 
 
 # %% parser._print_bad_command

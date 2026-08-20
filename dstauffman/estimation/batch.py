@@ -492,7 +492,7 @@ def _calc_sum_squares(data: ArrayLike, axis: int | None = None, keepdims: bool =
         return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
-        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)
+        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)  # type: ignore[call-overload]
     # check for all NaNs case
     elif np.all(np.isnan(data)):
         if axis is None:
@@ -505,9 +505,9 @@ def _calc_sum_squares(data: ArrayLike, axis: int | None = None, keepdims: bool =
                 shape = (*data.shape[:axis], *data.shape[axis + 1 :])
             out = np.full(shape, np.nan)
     else:
-        out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
+        out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)  # type: ignore[call-overload]
     # return the result
-    return out  # type: ignore[return-value]
+    return out  # type: ignore[no-any-return]
 
 
 # %% _function_wrapper
@@ -1019,7 +1019,7 @@ def _double_dogleg(
 
 
 # %% _dogleg_search
-def _dogleg_search(  # pylint: disable=too-many-positional-arguments
+def _dogleg_search(  # pylint: disable=too-many-positional-arguments  # noqa: PLR0917
     opti_opts: OptiOpts,
     model_args: dict[str, Any],
     bpe_results: BpeResults,
@@ -1271,7 +1271,7 @@ def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M,
     # Update SVD and covariance for the normalized parameters (but correlation remains as calculated above)
     if normalized:
         try:
-            _, S_jacobian, Vh_jacobian = np.linalg.svd(jacobian, full_matrices=False)
+            _, S_jacobian, Vh_jacobian = np.linalg.svd(jacobian, full_matrices=False)  # type: ignore[assignment]
             V_jacobian = Vh_jacobian.T
             covariance = V_jacobian @ np.diag(S_jacobian**-2) @ Vh_jacobian
         except MemoryError:  # pragma: no cover
@@ -1483,7 +1483,7 @@ def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:
             delta_param = _levenberg_marquardt(jacobian, cur_results.innovs, lambda_=0)
 
         # find the step length
-        delta_step_len: float = norm(delta_param)  # type: ignore[assignment]
+        delta_step_len: float = norm(delta_param)
         pred_func_change = _predict_func_change(delta_param, gradient, hessian)
 
         # check for convergence conditions

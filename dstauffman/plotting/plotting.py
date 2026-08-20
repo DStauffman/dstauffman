@@ -1390,7 +1390,7 @@ def plot_histogram(  # noqa: C901
             cdf_bin = plotting_bins
         else:
             cdf = np.hstack([np.arange(data_size) / data_size, 1.0])
-            cdf_bin = np.hstack([0.0, np.sort(data)])  # type: ignore[arg-type]
+            cdf_bin = np.hstack([0.0, np.sort(data)])  # type: ignore[assignment, list-item, type-var]
     if show_cdf:
         # plot the CDF
         if not cdf_same_axis:

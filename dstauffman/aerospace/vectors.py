@@ -260,12 +260,12 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     # handle small floating point errors (but let others still crash)
     if temp.ndim == 0:
         if temp > 1.0 and temp < 1 + 3 * np.finfo(float).eps:  # pylint: disable=chained-comparison
-            temp = 1.0
+            temp = 1.0  # type: ignore[assignment]
     else:
         temp[(temp > 1.0) & (temp < 1 + 3 * np.finfo(float).eps)] = 1.0
     dot_result = np.arccos(temp)  # np.arccos(temp, out=np.full(temp.shape, np.nan), where=temp <= 1.0)
     if not use_cross:
-        return dot_result  # type: ignore[no-any-return]
+        return dot_result
     # if desired, use cross product result, which is more accurate for small differences, but has
     # an ambiguity for angles greater than pi/2 (90 deg).  Use the dot product result to resolve
     # the ambiguity.
@@ -281,7 +281,7 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
         cross_result = np.arcsin(temp) if temp <= 1.0 else dot_result
     else:
         cross_result = np.arcsin(temp, out=dot_result.copy(), where=temp <= 1.0)
-    return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)  # type: ignore[no-any-return]
+    return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)
 
 
 # %% Functions - cart2sph

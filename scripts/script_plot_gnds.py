@@ -36,7 +36,7 @@ num_axes   = 2  # fmt: skip
 num_innovs = 11
 
 t_bounds1 = np.array([2, 8])
-t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_ONE_SECOND * t_bounds1  # type: ignore[operator]
+t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_ONE_SECOND * t_bounds1
 
 bins = [-np.inf, -5e-6, -5e-7, 0.0, 5e-7, 5e-6, np.inf]
 
@@ -121,7 +121,7 @@ if plots["fpl"]:
     f1 = plot.plot_innov_fplocs(kf1.innov, opts=opts1)
     f2 = plot.plot_innov_fplocs(kd1.innov, opts=opts2)
     f3 = plot.plot_innov_fplocs(kf1.innov, opts=opts3, t_bounds=t_bounds1)  # type: ignore[arg-type]
-    f4 = plot.plot_innov_fplocs(kd1.innov, opts=opts4, t_bounds=t_bounds2)  # type: ignore[arg-type]
+    f4 = plot.plot_innov_fplocs(kd1.innov, opts=opts4, t_bounds=t_bounds2)
 
 if plots["inn"]:
     f1 = plot.plot_innovations(kf1.innov, kf2.innov, opts=opts1)  # type: ignore[call-overload]

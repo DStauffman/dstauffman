@@ -271,7 +271,7 @@ def ecf2geod(
         ang  = (eps2 + 1) * zz / Ne
         lat  = np.arcsin(ang, out=np.full(ang.shape, np.nan), where=np.abs(ang) <= 1.0)
         lon  = np.arctan2(y, x)
-        alt  = r0 * np.cos(lat) + z * np.sin(lat) - a**2 / Ne
+        alt  = r0 * np.cos(lat) + z * np.sin(lat) - a**2 / Ne  # type: ignore[operator]
         # fmt: on
     elif algorithm == "gersten":
         flattening = 1.0 / _finv
@@ -348,7 +348,7 @@ def ecf2geod(
     if output == "combined":
         return np.array([lat, lon, alt]) if lat.size == 1 else np.vstack([lat, lon, alt])
     if output == "split":
-        return (lat, lon, alt)
+        return (lat, lon, alt)  # type: ignore[return-value]
     raise ValueError(f'Unexpected value for output: "{output}"')
 
 

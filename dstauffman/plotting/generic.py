@@ -139,8 +139,8 @@ def _make_time_and_data_lists(
         assert len(time) == num_chan, f"The number of time channels must match the number of data channels, not {len(time)} and {num_chan}."  # fmt: skip
         times = list(time)
     else:
-        this_time = np.atleast_1d(time)  # type: ignore[arg-type]
-        times = [this_time] * num_chan
+        this_time = np.atleast_1d(time)  # type: ignore[type-var]
+        times = [this_time] * num_chan  # type: ignore[list-item]
     return times, datum  # type: ignore[return-value]
 
 
@@ -321,7 +321,7 @@ def _plot_zoh(ax: Axes, time: _Times, data: _Data, symbol: str, *args: Any, **kw
 
 
 # %% Functions - _label_x
-def _label_x(  # pylint: disable=too-many-positional-arguments
+def _label_x(  # pylint: disable=too-many-positional-arguments  # noqa: PLR0917
     this_axes: Axes,
     disp_xmin: _Time,
     disp_xmax: _Time,
@@ -2124,14 +2124,14 @@ def make_connected_sets(
             max_innov = np.max(innov_mags)
         else:
             sorted_innovs = np.sort(innov_mags)
-            max_innov = sorted_innovs[int(np.ceil(mag_ratio * innov_mags.size)) - 1] if innov_mags.size > 0 else 0
+            max_innov = sorted_innovs[int(np.ceil(mag_ratio * innov_mags.size)) - 1] if innov_mags.size > 0 else 0  # type: ignore[assignment]
         innov_cmap  = ColorMap(colormap="autumn_r" if colormap is None else colormap, low=0, high=max_innov)
         colors_line = tuple(innov_cmap.get_color(x) for x in innov_mags[ix])
         colors_pred = colors_line
         extra_text  = " (Colored by Magnitude)"
         ds_value    = innov_mags
         ds_low      = 0
-        ds_high     = max_innov
+        ds_high     = max_innov  # type: ignore[assignment]
         ds_color    = "autumn_r" if not isinstance(colormap, str) else colormap
     else:
         raise ValueError(f'Unexpected value for color_by of "{color_by}"')

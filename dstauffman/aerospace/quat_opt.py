@@ -480,7 +480,7 @@ def quat_norm_single(x: _Q, inplace: bool = False) -> _Q:
     if inplace:
         x /= np.sqrt(np.sum(x * x, axis=0))
         return x
-    return x / np.sqrt(np.sum(x * x, axis=0))  # type: ignore[no-any-return]
+    return x / np.sqrt(np.sum(x * x, axis=0))
 
 
 # %% Functions - quat_prop_single

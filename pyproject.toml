@@ -173,6 +173,7 @@ ignore = [
     "T201",  # `print` found
     "ANN401",  # dynamically typed expressions (Any) are disallowed in kwargs
     "COM812",  # Add trailing comma
+	"CPY001",  # Missing copyright notice at top of file
     "DTZ001",  # datetime called without a tzinfo argument
     "DTZ005",  # datetime.now called without a tz argument
     "EM101",  # exception must not use string literal

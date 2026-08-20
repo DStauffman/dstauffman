@@ -285,7 +285,7 @@ def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
         return np.array(np.nan)
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
-        out = np.sqrt(np.mean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[arg-type]
+        out = np.sqrt(np.mean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[call-overload]
     # check for all NaNs case
     elif np.all(np.isnan(data)):
         if axis is None:
@@ -298,7 +298,7 @@ def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
                 shape = (*data.shape[:axis], *data.shape[axis + 1 :])
             out = np.full(shape, np.nan)
     else:
-        out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[arg-type]
+        out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[call-overload]
     # return the result
     return out  # type: ignore[no-any-return]
 
@@ -353,7 +353,7 @@ def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
         return np.array(np.nan)
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
-        out = np.sqrt(np.sum(data * np.conj(data), axis=axis, keepdims=keepdims))
+        out = np.sqrt(np.sum(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[call-overload]
     # check for all NaNs case
     elif np.all(np.isnan(data)):
         if axis is None:
@@ -366,9 +366,9 @@ def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
                 shape = (*data.shape[:axis], *data.shape[axis + 1 :])
             out = np.full(shape, np.nan)
     else:
-        out = np.sqrt(np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims))
+        out = np.sqrt(np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[call-overload]
     # return the result
-    return out
+    return out  # type: ignore[no-any-return]
 
 
 # %% Functions - compare_two_classes
@@ -691,7 +691,7 @@ def magnitude(data: _Lists, axis: int = 0) -> np.floating | _N:
     assert isinstance(data, np.ndarray)
     if axis >= data.ndim:
         raise ValueError(f"axis {axis} is out of bounds for array of dimension {data.ndim}")
-    return np.sqrt(np.sum(data * np.conj(data), axis=axis))  # type: ignore[no-any-return]
+    return np.sqrt(np.sum(data * np.conj(data), axis=axis))
 
 
 # %% Functions - unit

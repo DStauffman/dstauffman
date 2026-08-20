@@ -1091,7 +1091,7 @@ class Test_combine_per_year(unittest.TestCase):
     def test_other_funcs(self) -> None:
         data2a = dcs.combine_per_year(self.data, func=self.func1)
         data2b = dcs.combine_per_year(self.data, func=self.func2)
-        np.testing.assert_array_almost_equal(12 * data2a, data2b)  # type: ignore[arg-type, operator]
+        np.testing.assert_array_almost_equal(12 * data2a, data2b)  # type: ignore[arg-type, operator]  # ty: ignore[unsupported-operator]
 
     def test_bad_func1(self) -> None:
         with self.assertRaises(AssertionError):

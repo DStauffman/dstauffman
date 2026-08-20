@@ -509,7 +509,7 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
     # to avoid a divide by zero warning.
     if np.isscalar(mag):
         if mag == 0:
-            mag = 1
+            mag = 1  # type: ignore[assignment]
     else:
         mag[mag == 0] = 1
 
@@ -602,7 +602,7 @@ def quat_from_euler(angles: ArrayLike, seq: ArrayLike | None = None, **kwargs: U
         raise ValueError(f'Unexpected number of dimensions in angle: "{ndim}"')
     # get the number of quaternions to end up making
     assert isinstance(angles, np.ndarray)
-    num = angles.shape[1]
+    num = angles.shape[1]  # ty: ignore[index-out-of-bounds]
     # initialize output
     quat = np.zeros((QUAT_SIZE, num))
     # check that seq is iterable
@@ -1309,8 +1309,8 @@ def convert_att_quat_to_body_rate(
     dt = np.diff(time) / NP_ONE_SECOND if is_datetime(time) else np.diff(time)
     rates = delta_error / dt
     if append:
-        return postpend(rates, rates[..., -1:])  # type: ignore[call-overload, no-any-return]
-    return rates
+        return postpend(rates, rates[..., -1:])
+    return rates  # type: ignore[no-any-return]
 
 
 # %% quat_standards

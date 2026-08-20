@@ -276,7 +276,7 @@ def anomaly_hyperbolic_2_true(F: _FN, e: _FN) -> np.floating | _N:
         else:
             assert isinstance(nu, np.ndarray)
             nu[ix] += TAU
-    return nu  # type: ignore[no-any-return]
+    return nu
 
 
 # %% Functions - anomaly_mean_2_eccentric

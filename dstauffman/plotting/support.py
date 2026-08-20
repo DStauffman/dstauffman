@@ -204,7 +204,7 @@ _QUALITATIVE_COLORMAPS: frozenset[str] = frozenset(
 
 
 # %% Classes - _HoverButton
-class _HoverButton(QPushButton):
+class _HoverButton(QPushButton):  # ty: ignore[unsupported-base]
     r"""Custom button that allows hovering and icons."""
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -219,11 +219,11 @@ class _HoverButton(QPushButton):
                 self.setIcon(this_arg)
                 self.setIconSize(QSize(24, 24))
 
-    def enterEvent(self, event: QEvent) -> None:  # pylint: disable=unused-argument  # ty: ignore[invalid-method-override]  # noqa: N802, ARG002  # fmt: skip
+    def enterEvent(self, event: QEvent) -> None:  # pylint: disable=unused-argument  # noqa: N802, ARG002  # fmt: skip
         r"""Draw border on hover."""
         self.setStyleSheet("border: 1px; border-style: solid;")  # pragma: no cover
 
-    def leaveEvent(self, event: QEvent) -> None:  # pylint: disable=unused-argument  # ty: ignore[invalid-method-override]  # noqa: N802, ARG002  # fmt: skip
+    def leaveEvent(self, event: QEvent) -> None:  # pylint: disable=unused-argument  # noqa: N802, ARG002  # fmt: skip
         r"""Delete border after hover."""
         self.setStyleSheet("border: 0px;")  # pragma: no cover
 
