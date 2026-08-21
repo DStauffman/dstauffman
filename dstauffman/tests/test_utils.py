@@ -1620,6 +1620,7 @@ class Test_linear_lowpass_interp(unittest.TestCase):
         self.assertTrue(np.all(y < 5.0))
 
 
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_linear_lowpass_interp_noscipy(unittest.TestCase):
     r"""Tests the linear_lowpass_interp function without scipy."""
 
