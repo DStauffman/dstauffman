@@ -48,6 +48,7 @@ except ImportError:
 
 from dstauffman import (
     convert_date,
+    floor_np_datetime,
     Frozen,
     get_images_dir,
     get_username,
@@ -59,6 +60,10 @@ from dstauffman import (
     is_datetime,
     IS_WINDOWS,
     NP_DATETIME_FORM,
+    NP_ONE_DAY,
+    NP_ONE_SECOND,
+    ONE_DAY,
+    zero_order_hold,
 )
 
 if HAVE_MPL:
@@ -86,10 +91,11 @@ if HAVE_NUMPY:
     import numpy as np
 
     inf = np.inf
+    nan = np.nan
     if HAVE_MPL:
         munits.registry[np.datetime64] = converter
 else:
-    from math import inf
+    from math import inf, nan
 if HAVE_PANDAS:
     import pandas as pd
 if HAVE_SCIPY:
@@ -1827,7 +1833,7 @@ def get_classification(classify: str) -> tuple[str, str]:
     # check for empty case, default to unclassified
     if not classify:
         # check if not using any classification and if so return empties
-        if not DEFAULT_CLASSIFICATION:
+        if not DEFAULT_CLASSIFICATION:  # ty: ignore[redundant-condition]
             return ("", "")
         # DCS: modify this section if you want a different default on your system (potentially put into a file instead?)
         classify = DEFAULT_CLASSIFICATION
@@ -2502,6 +2508,81 @@ def extra_plotter_factory(t_events: dict[str, np.datetime64], c_events: dict[str
     if not bool(t_events):
         return None
     return _extra_plotter
+
+
+# %% Functions - build_bar_breakdown
+def build_bar_breakdown(
+    time: _D,
+    data: _N,
+    *,
+    left: float | str = nan,
+    values: _N | None = None,
+    hold_last: bool = False,
+) -> tuple[_D, _N]:
+    """
+    Creates the data that goes into plot_bar_breakdown.
+
+    Parameters
+    ----------
+    time: ndarray (N,)
+        Time history
+    data: ndarray (N,)
+        Data history
+    left : float, optional
+        Value to prepend when doing zero order hold, default is NaN
+    values : (A,), optional
+        Set of values to look for, which may or may not all be in the dataset
+    hold_last : bool, optional, default is False
+        Whether to hold the final value past the final time point
+
+    Returns
+    -------
+    bar_time : ndarray (M,)
+        Evenly spaced time at once per day
+    bar_data : ndarray (M,)
+        Evenly spaced data after evaluating each day at 1Hz
+
+    Change Log
+    ----------
+    #.  Written by David C Stauffer in September 2026.
+
+    Prototype
+    ---------
+    >>> from dstauffman.plotting import build_bar_breakdown, plot_bar_breakdown
+    >>> import numpy as np
+    >>> description = "Test"
+    >>> time = np.array([
+    ...     np.datetime64("2026-09-28T15:23:45", "ns"),
+    ...     np.datetime64("2026-09-30T03:33:54", "ns"),
+    ...     np.datetime64("2026-10-02T18:18:18", "ns"),
+    ...     np.datetime64("2026-10-03T21:59:59", "ns"),
+    ... ], dtype="datetime64[ns]")
+    >>> data = np.array(["On", "Off", "On", "On"])
+    >>> values = ("On", "Off", "Invalid")
+    >>> left = "NaN"
+    >>> bar_time, bar_data = build_bar_breakdown(time, data, left=left, values=values)
+    >>> print(f"{bar_data[0, 0]:.6}")
+    0.358507
+
+    """
+    if np.size(time) < 2:
+        raise ValueError("Can only build breakdowns with a minimun of two data points.")
+    if values is None:
+        values = np.unique(data)
+    one_day_in_sec = np.arange(ONE_DAY) * NP_ONE_SECOND
+    first_date = floor_np_datetime(time[0])
+    last_date = floor_np_datetime(time[-1])
+    num_days = ((last_date - first_date) / NP_ONE_DAY).astype(int) + 1
+    bar_time = first_date + NP_ONE_DAY * np.arange(num_days)
+    bar_data = np.full((len(values), num_days), np.nan)
+    for j, this_date in enumerate(bar_time):
+        this_data = zero_order_hold(this_date + one_day_in_sec, time, data, assume_sorted=True, left=left)
+        if not hold_last and this_date == last_date:
+            this_data[this_date + one_day_in_sec > time[-1]] = left
+        for i, value in enumerate(values):
+            bar_data[i, j] = np.count_nonzero(this_data == value) / ONE_DAY
+
+    return bar_time, bar_data
 
 
 # %% Unit test

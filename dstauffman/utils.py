@@ -221,7 +221,7 @@ def find_in_range(
     # find those greater than the minimum bound
     if np.isfinite(min_):
         func = np.greater_equal if inclusive or left else np.greater
-        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # fmt: skip  # ty: ignore[unsupported-operator]
+        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # fmt: skip  # ty: ignore[deprecated, unsupported-operator]
     else:
         if np.isnan(min_) or np.sign(min_) > 0:
             raise AssertionError("The minimum should be -np.inf if not finite.")
@@ -229,7 +229,7 @@ def find_in_range(
     # combine with those less than the maximum bound
     if np.isfinite(max_):
         func = np.less_equal if inclusive or right else np.less  # type: ignore[assignment]
-        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # fmt: skip  # ty: ignore[unsupported-operator]
+        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # fmt: skip  # ty: ignore[deprecated, unsupported-operator]
     elif np.isnan(max_) or np.sign(max_) < 0:
         raise AssertionError("The maximum should be np.inf if not finite.")
     return valid  # type: ignore[no-any-return]
@@ -1716,8 +1716,8 @@ def linear_interp(
     else:
         bounds_error = True
         fill_value = None
-    func = interp1d(xp, yp, kind="linear", fill_value=fill_value, bounds_error=bounds_error, assume_sorted=False)  # type: ignore[arg-type]
-    return func(x).astype(yp.dtype)
+    func = interp1d(xp, yp, kind="linear", fill_value=fill_value, bounds_error=bounds_error, assume_sorted=False)  # type: ignore[call-overload]
+    return func(x).astype(yp.dtype)  # type: ignore[no-any-return]
 
 
 # %% linear_lowpass_interp
@@ -1789,7 +1789,7 @@ def linear_lowpass_interp(
     else:
         bounds_error = True
         fill_value = None
-    func = interp1d(xp, yp, kind="linear", bounds_error=bounds_error, fill_value=fill_value, assume_sorted=assume_sorted)  # type: ignore[arg-type]
+    func = interp1d(xp, yp, kind="linear", bounds_error=bounds_error, fill_value=fill_value, assume_sorted=assume_sorted)  # type: ignore[call-overload]
     temp = func(x).astype(yp.dtype)
     sos = butter(filt_order, filt_freq, fs=filt_samp, output="sos", **kwargs)
     return sosfiltfilt(sos, temp)

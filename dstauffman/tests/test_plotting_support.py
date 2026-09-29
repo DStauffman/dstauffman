@@ -1433,6 +1433,83 @@ class Test_plotting_extra_plotter_factory(unittest.TestCase):
         self.assertIsNone(extra_plotter)
 
 
+# %% plotting.build_bar_breakdown
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_build_bar_breakdown(unittest.TestCase):
+    r"""
+    Tests the plotting.build_bar_breakdown function with the following cases:
+        Nominal
+        Empty
+        Single Point
+    """
+
+    def test_nominal(self) -> None:
+        time = np.array([
+            np.datetime64("2026-09-28T15:23:45", "ns"),
+            np.datetime64("2026-09-30T03:33:54", "ns"),
+            np.datetime64("2026-10-02T18:18:18", "ns"),
+            np.datetime64("2026-10-03T21:59:59", "ns"),
+        ], dtype="datetime64[ns]")  # fmt: skip
+        data = np.array(["On", "Off", "On", "On"])
+        # Note: this should get sorted to ("Off", "On")
+        bar_time, bar_data = plot.build_bar_breakdown(time, data, left="NaN")
+        exp_time = np.array([
+            np.datetime64("2026-09-28T00:00:00", "ns"),
+            np.datetime64("2026-09-29T00:00:00", "ns"),
+            np.datetime64("2026-09-30T00:00:00", "ns"),
+            np.datetime64("2026-10-01T00:00:00", "ns"),
+            np.datetime64("2026-10-02T00:00:00", "ns"),
+            np.datetime64("2026-10-03T00:00:00", "ns"),
+        ])  # fmt: skip
+        per1 = (15 * 3600 + 23 * 60 + 45) / 86400
+        per2 = 1.0
+        per3 = (3 * 3600 + 33 * 60 + 54) / 86400
+        per4 = 0.0
+        per5 = 1.0 - (18 * 3600 + 18 * 60 + 18) / 86400
+        per6 = (21 * 3600 + 59 * 60 + 59 + 1) / 86400
+        exp_data = np.array([[0, 1 - per2, 1 - per3, 1 - per4, 1 - per5, 0], [1 - per1, per2, per3, per4, per5, per6]])
+        np.testing.assert_array_equal(bar_time, exp_time)
+        np.testing.assert_array_almost_equal(bar_data, exp_data, 14)
+
+    def test_empty(self) -> None:
+        with self.assertRaises(ValueError):
+            plot.build_bar_breakdown(np.array([], dtype="datetime64[ns]"), np.array([]))
+
+    def test_single_point(self) -> None:
+        time = np.array([np.datetime64("2026-09-28T15:23:45", "ns")])
+        data = np.array([5])
+        with self.assertRaises(ValueError):
+            plot.build_bar_breakdown(time, data)
+
+    def test_short_span(self) -> None:
+        time = np.array([np.datetime64("2026-09-28T15:23:45", "ns"), np.datetime64("2026-09-28T15:53:55", "ns")])
+        data = np.array([5, 5])
+        values = np.array([3, 4, 5])
+        bar_time, bar_data = plot.build_bar_breakdown(time, data, values=values)
+        exp_time = np.array([np.datetime64("2026-09-28T00:00:00", "ns")])
+        per = (30 * 60 + 10 + 1) / 86400
+        exp_data = np.array([[0.0], [0.0], [per]])
+        np.testing.assert_array_equal(bar_time, exp_time)
+        np.testing.assert_array_almost_equal(bar_data, exp_data, 14)
+
+    def test_hold_last(self) -> None:
+        time = np.array([np.datetime64("2026-07-01T00:23:45", "ns"), np.datetime64("2026-07-03T15:53:55", "ns")])
+        data = np.array([5, 6])
+        bar_time, bar_data = plot.build_bar_breakdown(time, data, left=5, hold_last=True)
+        exp_time = np.array([
+            np.datetime64("2026-07-01T00:00:00", "ns"),
+            np.datetime64("2026-07-02T00:00:00", "ns"),
+            np.datetime64("2026-07-03T00:00:00", "ns"),
+        ])  # fmt: skip
+        per = (15 * 3600 + 53 * 60 + 55) / 86400
+        exp_data = np.array([[1.0, 1.0, per], [0.0, 0.0, 1 - per]])
+        np.testing.assert_array_equal(bar_time, exp_time)
+        np.testing.assert_array_almost_equal(bar_data, exp_data, 14)
+        bar_time, bar_data = plot.build_bar_breakdown(time, data, left=5, hold_last=False)
+        exp_data = np.array([[1.0, 1.0, 86399 / 86400], [0.0, 0.0, 1 / 86400]])
+        np.testing.assert_array_almost_equal(bar_data, exp_data, 14)
+
+
 # %% Unit test execution
 if __name__ == "__main__":
     plot.suppress_plots()

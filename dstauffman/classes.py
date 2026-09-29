@@ -376,7 +376,7 @@ def load_method(
         raise ValueError("No file specified to load.")
     out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
     if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # noqa: SLF001
-        out._save_restore_hdf5(**kwargs)  # noqa: SLF001  # ty: ignore[call-top-callable]
+        out._save_restore_hdf5(**kwargs)  # noqa: SLF001
     return out  # type: ignore[no-any-return]
 
 
@@ -695,7 +695,7 @@ class Frozen:
     @overload
     def pprint(self: Any, return_text: Literal[False], **kwargs: Unpack[_PPrintKwArgs]) -> None: ...
     @overload
-    def pprint(self: Any, **kwargs: Unpack[_PPrintKwArgs]) -> str | None: ...
+    def pprint(self: Any, **kwargs: Unpack[_PPrintKwArgs]) -> str | None: ...  # ty: ignore[invalid-overload]
     def pprint(self: Any, return_text: bool = False, **kwargs: Unpack[_PPrintKwArgs]) -> str | None:
         r"""Displays a pretty print version of the class."""
         name = kwargs.pop("name") if "name" in kwargs else self.__class__.__name__
