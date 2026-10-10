@@ -183,7 +183,7 @@ class Test_find_in_range(unittest.TestCase):
         tmin = np.datetime64("2020-09-01 00:02:00", "ns")
         tmax = np.datetime64("2020-09-01 00:04:00", "ns")
         exp = np.array([0, 0, 0, 0, 1, 1, 1, 0, 1, 0], dtype=bool)
-        valid = dcs.find_in_range(value, min_=tmin, max_=tmax, inclusive=True, precision=np.timedelta64(0, "ns"))
+        valid = dcs.find_in_range(value, min_=tmin, max_=tmax, inclusive=True, precision=dcs.ZERO_NP_SECONDS)
         np.testing.assert_array_equal(valid, exp)
 
 

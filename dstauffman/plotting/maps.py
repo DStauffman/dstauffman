@@ -107,6 +107,7 @@ def plot_map(
     land_colors: str = "same",
     color_by: tuple[str, _N] | None = None,
     cbar_colormap: str | ColorMap | None = None,
+    latlon_size: int = 10,
     map_labels: dict[str, tuple[float, float]] | None = None,
     map_colors: dict[str, int | str] | None = None,
     dir_skip: int | None = None,
@@ -145,6 +146,8 @@ def plot_map(
         What data to color the orbit by, usually altitude
     cbar_colormap: str| ColorMap, optional
         Colormap used to color the orbit
+    latlon_size : int
+        Size of the latitude/longitude dots on th e map, optional, default is 10
     map_labels : dict[str, tuple[float, float]], optional
         Dict of label and lat/lon positions
     map_colors : dict[str, int | str], optional
@@ -248,7 +251,7 @@ def plot_map(
             colors = tuple(cbar_cmap.get_color(x) for x in cbar_data)
         else:
             colors = "xkcd:orange"  # type: ignore[assignment]
-        ax.scatter(latlon_scale * lon, latlon_scale * lat, s=10, c=colors, label="Trace", zorder=6)
+        ax.scatter(latlon_scale * lon, latlon_scale * lat, s=latlon_size, c=colors, label="Trace", zorder=6)
         if dir_skip is not None:
             ang = unit(np.vstack([np.diff(lon), np.diff(lat)]), axis=0)
             ax.quiver(
@@ -319,6 +322,7 @@ def plot_map_3d(
     land_colors: str = "same",
     color_by: tuple[str, _N] | None = None,
     cbar_colormap: str | ColorMap | None = None,
+    lla_size: int = 10,
     map_labels: dict[str, tuple[float, float]] | None = None,
     map_colors: dict[str, int | str] | None = None,
     dir_skip: int | None = None,
@@ -361,6 +365,8 @@ def plot_map_3d(
         What data to color the orbit by, usually altitude
     cbar_colormap: str| ColorMap, optional
         Colormap used to color the orbit
+    lla_size : int
+        Size of the latitude/longitude/altitude dots on the map, optional, default is 10
     map_labels : dict[str, tuple[float, float]], optional
         Dict of label and lat/lon positions
     map_colors : dict[str, int | str], optional
@@ -499,7 +505,7 @@ def plot_map_3d(
         if alt is None:
             alt = np.zeros_like(lat)
         x, y, z = geod2ecf(lat, lon, alt, output="split")  # type: ignore[assignment]
-        ax.scatter(x, y, z, s=10, c=colors, label="Trace", zorder=6)
+        ax.scatter(x, y, z, s=lla_size, c=colors, label="Trace", zorder=6)
         if dir_skip is not None:
             ang = unit(np.vstack([np.diff(lon), np.diff(lat), np.diff(alt) / earth_radius]), axis=0)
             ax.quiver(
