@@ -13,7 +13,7 @@ from __future__ import annotations
 import copy
 import doctest
 from pathlib import Path
-from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, TypeVar, Unpack
+from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, NP_NAT, save_method
@@ -32,7 +32,6 @@ if TYPE_CHECKING:
     _Chan = list[str] | tuple[str, ...]
     _Sets = set[str] | frozenset[str]
     _Time = float | np.datetime64
-    _T = TypeVar("_T")
     _Array = _B | _D | _I | _N
 
     class _KfKwargs(TypedDict):
@@ -43,8 +42,8 @@ if TYPE_CHECKING:
 
 # %% Support Functions
 @overload
-def _chop_wrapper(
-    orig: _T,
+def _chop_wrapper[T](
+    orig: T,
     exclude: _Sets,
     ti: _Time = ...,
     tf: _Time = ...,
@@ -53,10 +52,10 @@ def _chop_wrapper(
     inplace: bool = ...,
     return_ends: Literal[True],
     subclasses: _Sets = ...,
-) -> tuple[_T, _T, _T]: ...
+) -> tuple[T, T, T]: ...
 @overload
-def _chop_wrapper(
-    orig: _T,
+def _chop_wrapper[T](
+    orig: T,
     exclude: _Sets,
     ti: _Time = ...,
     tf: _Time = ...,
@@ -65,9 +64,9 @@ def _chop_wrapper(
     inplace: bool = ...,
     return_ends: Literal[False] = ...,
     subclasses: _Sets = ...,
-) -> _T: ...
-def _chop_wrapper(
-    orig: _T,
+) -> T: ...
+def _chop_wrapper[T](
+    orig: T,
     exclude: _Sets,
     ti: _Time | None = None,
     tf: _Time | None = None,
@@ -76,7 +75,7 @@ def _chop_wrapper(
     inplace: bool = False,
     return_ends: bool = False,
     subclasses: _Sets | None = None,
-) -> _T | tuple[_T, _T, _T]:
+) -> T | tuple[T, T, T]:
     assert orig.time is not None, "You can't chop an uninitialized time field."  # type: ignore[attr-defined]
     use_dates = is_datetime(orig.time)  # type: ignore[attr-defined]
     if ti is None:

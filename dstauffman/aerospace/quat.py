@@ -297,12 +297,12 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
     elif np.isscalar(angle):
         # single angle, multiple axis case
         quat = np.tile(np.array([[0], [0], [0], [np.cos(angle / 2)]]), (1, np.size(axis)))  # ty: ignore[unsupported-operator]
-        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[index]  # ty: ignore[unsupported-operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # ty: ignore[unsupported-operator]
     else:
         # multiple axis, multiple angle case
         assert np.size(axis) == np.size(angle)
         quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # fmt: skip  # ty: ignore[unsupported-operator]
-        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[index]  # ty: ignore[unsupported-operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # ty: ignore[unsupported-operator]
     enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
@@ -508,8 +508,8 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
     # set any magnitude that is identically 0 to be 1 instead
     # to avoid a divide by zero warning.
     if np.isscalar(mag):
-        if mag == 0:
-            mag = 1  # type: ignore[assignment]
+        if mag == 0:  # type: ignore[unreachable]
+            mag = 1
     else:
         mag[mag == 0] = 1
 
@@ -674,7 +674,7 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
         num = len(ti)
     except TypeError:
         if np.isscalar(ti):
-            ti = np.array([ti])
+            ti = np.array([ti])  # type: ignore[unreachable]
             num = len(ti)
         else:  # pragma: no cover
             raise

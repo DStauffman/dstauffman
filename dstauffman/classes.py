@@ -16,7 +16,7 @@ from collections.abc import Callable
 import doctest
 from pathlib import Path
 import sys
-from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, TypeVar, Unpack
+from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 import warnings
 
@@ -45,7 +45,6 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _B = NDArray[np.bool_]
-    _T = TypeVar("_T")
     _Sets = set[str] | frozenset[str]
     _Time = float | np.datetime64
 
@@ -205,28 +204,28 @@ def save_hdf5(
 
 # %% Methods - load_hdf5
 @overload
-def load_hdf5(cls: type[_T], filename: Path | None, return_meta: Literal[False] = ...) -> _T: ...
+def load_hdf5[T](cls: type[T], filename: Path | None, return_meta: Literal[False] = ...) -> T: ...
 @overload
-def load_hdf5(
+def load_hdf5[T](
     cls: dict[str, None] | list[str] | set[str] | tuple[str, ...],
     filename: Path | None,
     return_meta: Literal[False] = ...,
 ) -> type[Any]: ...
 @overload
-def load_hdf5(cls: None, filename: Path | None, return_meta: Literal[False] = ...) -> type[Any]: ...
+def load_hdf5[T](cls: None, filename: Path | None, return_meta: Literal[False] = ...) -> type[Any]: ...
 @overload
-def load_hdf5(cls: type[_T], filename: Path | None, return_meta: Literal[True]) -> tuple[_T, dict[str, Any]]: ...
+def load_hdf5[T](cls: type[T], filename: Path | None, return_meta: Literal[True]) -> tuple[T, dict[str, Any]]: ...
 @overload
-def load_hdf5(
+def load_hdf5[T](
     cls: dict[str, None] | list[str] | set[str] | tuple[str, ...], filename: Path | None, return_meta: Literal[True]
 ) -> tuple[type[Any], dict[str, Any]]: ...
 @overload
-def load_hdf5(cls: None, filename: Path | None, return_meta: Literal[True]) -> tuple[type[Any], dict[str, Any]]: ...
-def load_hdf5(  # type: ignore[misc]
-    cls: type[_T] | dict[str, None] | list[str] | set[str] | tuple[str, ...] | None,
+def load_hdf5[T](cls: None, filename: Path | None, return_meta: Literal[True]) -> tuple[type[Any], dict[str, Any]]: ...
+def load_hdf5[T](  # type: ignore[misc]
+    cls: type[T] | dict[str, None] | list[str] | set[str] | tuple[str, ...] | None,
     filename: Path | None = None,
     return_meta: bool = False,
-) -> _T | type[Any] | tuple[_T, dict[str, Any]] | tuple[type[Any] | dict[str, Any]]:
+) -> T | type[Any] | tuple[T, dict[str, Any]] | tuple[type[Any] | dict[str, Any]]:
     r"""
     Load the object from disk.
 
@@ -276,7 +275,7 @@ def load_hdf5(  # type: ignore[misc]
     if filename is None:
         raise ValueError("No file specified to load.")
     # Load data
-    out: _T | type[Any]
+    out: T | type[Any]
     if cls is None:
         out = type("Temp", (object,), {})
         limit_fields = False
@@ -349,14 +348,14 @@ def save_method(
 
 # %% Methods - load_method
 @overload
-def load_method(cls: type[_T], filename: Path | None, return_meta: Literal[False] = ..., **kwargs: Any) -> _T: ...
+def load_method[T](cls: type[T], filename: Path | None, return_meta: Literal[False] = ..., **kwargs: Any) -> T: ...
 @overload
-def load_method(
-    cls: type[_T], filename: Path | None, return_meta: Literal[True], **kwargs: Any
-) -> tuple[_T, dict[str, Any]]: ...
-def load_method(
-    cls: type[_T], filename: Path | None = None, return_meta: bool = False, **kwargs: Any
-) -> _T | tuple[_T, dict[str, Any]]:
+def load_method[T](
+    cls: type[T], filename: Path | None, return_meta: Literal[True], **kwargs: Any
+) -> tuple[T, dict[str, Any]]: ...
+def load_method[T](
+    cls: type[T], filename: Path | None = None, return_meta: bool = False, **kwargs: Any
+) -> T | tuple[T, dict[str, Any]]:
     r"""
     Load the object from disk.
 

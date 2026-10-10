@@ -978,7 +978,7 @@ def histcounts(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
 
 # %% full_print
 @contextmanager
-def full_print(**kwargs: Unpack[_PrintOptsKwArgs]) -> Generator[None, None, None]:
+def full_print(**kwargs: Unpack[_PrintOptsKwArgs]) -> Generator[None]:
     r"""
     Context manager for printing full numpy arrays.
 

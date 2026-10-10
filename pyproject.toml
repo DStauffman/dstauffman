@@ -23,7 +23,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Langauge :: Python :: 3.11",
     "Programming Langauge :: Python :: 3.12",
     "Programming Langauge :: Python :: 3.13",
     "Programming Langauge :: Python :: 3.14",
@@ -156,7 +155,7 @@ ignore-paths = "^(.*[/\\\\]|)tests[/\\\\]test_.*$"
 include = ["pyproject.toml", "dstauffman/**/*.py", "scripts/**/*.py"]
 line-length = 128
 indent-width = 4
-target-version = "py311"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -183,6 +182,7 @@ ignore = [
     "FBT002",  # boolean default in positional argument
     "FBT003",  # boolean value in functional call
     "FIX002",  # line contains TODO
+	"ICN001",  # datetime should be imported as dt (eventually do this)
     "PLC0414",  # import alias does not rename original package
     "PLR0912",  # too many branches
     "PLR0913",  # too many arguments in function definition
