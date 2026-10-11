@@ -191,6 +191,16 @@ if HAVE_MPL:
     COLOR_LISTS["matlab_glow"] = colors.ListedColormap(("#268cdd", "#f57729", "#ffe864", "#c05cfb", "#49db40", "#6cf4ff", "#f267c5"))
     COLOR_LISTS["matlab_old"]  = colors.ListedColormap(("#0000ff", "#008000", "#ff0000", "#00bfbf", "#bf00bf", "#bfbf00", "#404040"))
     COLOR_LISTS["ltt_minmax"]  = colors.ListedColormap(("xkcd:emerald green", "xkcd:royal purple", "xkcd:bluegreen"))
+    # GPS
+    COLOR_LISTS["gps_sats"]    = colors.ListedColormap(np.vstack([
+        colors.to_rgba("xkcd:dark red"),
+        colors.to_rgba("xkcd:red"),
+        colors.to_rgba("xkcd:orange"),
+        colors.to_rgba("xkcd:sun yellow"),
+        colors.to_rgba("xkcd:green"),
+        colors.to_rgba("xkcd:teal"),
+        colors.LinearSegmentedColormap.from_list("blues", [colors.to_hex("xkcd:bright blue"), colors.to_hex("xkcd:royal blue")], N=11)((np.linspace(0, 1, 11))),
+    ]))
     # fmt: on
 
 # %% Set Matplotlib global settings
