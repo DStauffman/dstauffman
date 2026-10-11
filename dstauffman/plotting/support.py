@@ -199,7 +199,7 @@ if HAVE_MPL:
         colors.to_rgba("xkcd:sun yellow"),
         colors.to_rgba("xkcd:green"),
         colors.to_rgba("xkcd:teal"),
-        colors.LinearSegmentedColormap.from_list("blues", [colors.to_hex("xkcd:bright blue"), colors.to_hex("xkcd:royal blue")], N=11)((np.linspace(0, 1, 11))),
+        colors.LinearSegmentedColormap.from_list("blues", [colors.to_hex("xkcd:bright blue"), colors.to_hex("xkcd:royal blue")], N=11)(np.linspace(0, 1, 11)),
     ]))
     # fmt: on
 
