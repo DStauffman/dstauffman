@@ -12,7 +12,7 @@ Notes
 from __future__ import annotations
 
 from collections.abc import Sequence
-import datetime
+import datetime as dt
 import doctest
 from pathlib import Path
 from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
@@ -34,7 +34,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     _CM = str | Colormap | ListedColormap | ColorMap
     _Figs = list[Figure]
-    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
+    _Time = int | float | np.floating | dt.datetime | dt.date | np.datetime64 | None
 
     class _BpeKwArgs(TypedDict):
         name: NotRequired[str]

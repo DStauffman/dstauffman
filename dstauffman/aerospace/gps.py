@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import doctest
 from typing import Literal, Never, overload, TYPE_CHECKING
 import unittest
@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     _N = NDArray[np.floating]
 
 # %% Constants
-GPS_DATE_ZERO = datetime.datetime(1980, 1, 6, 0, 0, 0)
+GPS_DATE_ZERO = dt.datetime(1980, 1, 6, 0, 0, 0)
 ONE_DAY       = 86400  # fmt: skip
 DAYS_PER_WEEK = 7
 WEEK_ROLLOVER = 1024
@@ -381,16 +381,16 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
 
 # %% Functions - gps_to_datetime
 @overload
-def gps_to_datetime(week: int | _I, time: float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
+def gps_to_datetime(week: int | _I, time: float | _I | _N) -> dt.datetime | list[dt.datetime]: ...
 @overload
 def gps_to_datetime(
     week: int | _I, time: float | _I | _N, form: Literal["datetime"] = ...
-) -> datetime.datetime | list[datetime.datetime]: ...
+) -> dt.datetime | list[dt.datetime]: ...
 @overload
 def gps_to_datetime(week: int | _I, time: float | _I | _N, form: Literal["numpy"]) -> np.datetime64 | _D: ...
 def gps_to_datetime(
     week: int | _I, time: float | _I | _N, form: Literal["datetime", "numpy"] = "datetime"
-) -> datetime.datetime | list[datetime.datetime] | np.datetime64 | _D:
+) -> dt.datetime | list[dt.datetime] | np.datetime64 | _D:
     r"""
     Converts a GPS week and time to a Python datetime.
 
@@ -424,13 +424,13 @@ def gps_to_datetime(
     Examples
     --------
     >>> from dstauffman.aerospace import gps_to_datetime
-    >>> import datetime
+    >>> import datetime as dt
     >>> import numpy as np
     >>> week     = np.array([1782, 1783])
     >>> time     = np.array([425916, 4132])
     >>> date_gps = gps_to_datetime(week, time)
-    >>> assert(date_gps[0] == datetime.datetime(2014, 3, 6, 22, 18, 36))
-    >>> assert(date_gps[1] == datetime.datetime(2014, 3, 9,  1,  8, 52))
+    >>> assert(date_gps[0] == dt.datetime(2014, 3, 6, 22, 18, 36))
+    >>> assert(date_gps[1] == dt.datetime(2014, 3, 9,  1,  8, 52))
 
     """
     week = np.asanyarray(week)
@@ -439,25 +439,25 @@ def gps_to_datetime(
     # based on the date returned by the 'now' command.
     ix = week < WEEK_ROLLOVER
     if np.any(ix):
-        num_rollovers = np.floor((datetime.datetime.now() - GPS_DATE_ZERO).days / (DAYS_PER_WEEK * WEEK_ROLLOVER)).astype(int)
+        num_rollovers = np.floor((dt.datetime.now() - GPS_DATE_ZERO).days / (DAYS_PER_WEEK * WEEK_ROLLOVER)).astype(int)
         week[ix] += num_rollovers * WEEK_ROLLOVER
 
     # GPS start week
-    date_gps: datetime.datetime | list[datetime.datetime] | np.datetime64
+    date_gps: dt.datetime | list[dt.datetime] | np.datetime64
     if form == "datetime":
         # fmt: off
         if np.size(week) == 1:
-            start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
+            start_week = GPS_DATE_ZERO + dt.timedelta(days=int(DAYS_PER_WEEK * week))
             whole_sec  = int(time)
             micros     = round(1e6 * (time - whole_sec))  # type: ignore[call-overload]
-            date_gps   = start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros)
+            date_gps   = start_week + dt.timedelta(seconds=whole_sec, microseconds=micros)
         else:
             date_gps = []
             for (w, t) in zip(week, time):
-                start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * w))
+                start_week = GPS_DATE_ZERO + dt.timedelta(days=int(DAYS_PER_WEEK * w))
                 whole_sec  = int(t)
                 micros     = round(1e6 * (t - whole_sec))
-                date_gps.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
+                date_gps.append(start_week + dt.timedelta(seconds=whole_sec, microseconds=micros))
         # fmt: on
     elif form == "numpy":
         assert NP_GPS_DATE_ZERO is not None
@@ -535,14 +535,14 @@ def get_gps_to_utc_offset(days_since_gps_date_zero: float | _I | _N) -> _N:
 
 # %% Functions - gps_to_utc_datetime
 @overload
-def gps_to_utc_datetime(week: int | _I, time: float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
+def gps_to_utc_datetime(week: int | _I, time: float | _I | _N) -> dt.datetime | list[dt.datetime]: ...
 @overload
 def gps_to_utc_datetime(
     week: int | _I,
     time: float | _I | _N,
     gps_to_utc_offset: int | _I | None,
     form: Literal["datetime"] = ...,
-) -> datetime.datetime | list[datetime.datetime]: ...
+) -> dt.datetime | list[dt.datetime]: ...
 @overload
 def gps_to_utc_datetime(
     week: int | _I, time: float | _I | _N, gps_to_utc_offset: int | _I | None, form: Literal["numpy"]
@@ -552,7 +552,7 @@ def gps_to_utc_datetime(
     time: float | _I | _N,
     gps_to_utc_offset: int | _I | None = None,
     form: Literal["datetime", "numpy"] = "datetime",
-) -> datetime.datetime | list[datetime.datetime] | np.datetime64 | _D:
+) -> dt.datetime | list[dt.datetime] | np.datetime64 | _D:
     r"""
     Converts a GPS week and time to UTC time as a datetime.
 
@@ -594,13 +594,13 @@ def gps_to_utc_datetime(
     Examples
     --------
     >>> from dstauffman.aerospace import gps_to_utc_datetime
-    >>> import datetime
+    >>> import datetime as dt
     >>> import numpy as np
     >>> week     = np.array([1782, 1783])
     >>> time     = np.array([425916, 4132])
     >>> date_utc = gps_to_utc_datetime(week, time)
-    >>> assert(date_utc[0] == datetime.datetime(2014, 3, 6, 22, 18, 20))
-    >>> assert(date_utc[1] == datetime.datetime(2014, 3, 9,  1,  8, 36))
+    >>> assert(date_utc[0] == dt.datetime(2014, 3, 6, 22, 18, 20))
+    >>> assert(date_utc[1] == dt.datetime(2014, 3, 9,  1,  8, 36))
 
     """
     week = np.asanyarray(week)
@@ -609,7 +609,7 @@ def gps_to_utc_datetime(
     # based on the date returned by the 'now' command.
     ix = week < WEEK_ROLLOVER
     if np.any(ix):
-        num_rollovers = np.floor((datetime.datetime.now() - GPS_DATE_ZERO).days / (DAYS_PER_WEEK * WEEK_ROLLOVER)).astype(int)
+        num_rollovers = np.floor((dt.datetime.now() - GPS_DATE_ZERO).days / (DAYS_PER_WEEK * WEEK_ROLLOVER)).astype(int)
         week[ix] += num_rollovers * WEEK_ROLLOVER
 
     # check for optional inputs
@@ -619,23 +619,23 @@ def gps_to_utc_datetime(
     gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
 
     # GPS start week
-    date_utc: datetime.datetime | list[datetime.datetime] | np.datetime64 | _D
+    date_utc: dt.datetime | list[dt.datetime] | np.datetime64 | _D
     if form == "datetime":
         # fmt: off
         if np.size(week) == 1:
-            start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
+            start_week = GPS_DATE_ZERO + dt.timedelta(days=int(DAYS_PER_WEEK * week))
             frac_sec   = time + gps_to_utc_offset
             whole_sec  = int(frac_sec)
             micros     = round(1e6 * (frac_sec - whole_sec))  # type: ignore[call-overload]
-            date_utc   = start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros)
+            date_utc   = start_week + dt.timedelta(seconds=whole_sec, microseconds=micros)
         else:
             date_utc = []
             for (w, t, off) in zip(week, time, gps_to_utc_offset):
-                start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * w))
+                start_week = GPS_DATE_ZERO + dt.timedelta(days=int(DAYS_PER_WEEK * w))
                 frac_sec   = t + off
                 whole_sec  = int(frac_sec)
                 micros     = round(1e6 * (frac_sec - whole_sec))
-                date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
+                date_utc.append(start_week + dt.timedelta(seconds=whole_sec, microseconds=micros))
         # fmt: on
     elif form == "numpy":
         assert NP_GPS_DATE_ZERO is not None

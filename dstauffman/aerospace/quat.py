@@ -1290,14 +1290,14 @@ def convert_att_quat_to_body_rate(
     >>> import numpy as np
     >>> num_pts = 5
     >>> rates = np.tile(np.array([[0.01], [0.02], [-0.03]]), num_pts)
-    >>> dt = 0.1
-    >>> time = np.arange(0, num_pts*dt, dt)
+    >>> delta_time = 0.1
+    >>> time = np.arange(0, num_pts*delta_time, delta_time)
     >>> init_quat = np.array([0.5, 0.5, -0.5, 0.5])
     >>> quat = np.empty((4, num_pts))
     >>> quat[:, 0] = init_quat
     >>> for i in range(1, num_pts):
     ...     quat[:, i] = quat_prop(quat[:, i-1], rates[:, i-1])
-    >>> exp = 1/dt * rates
+    >>> exp = 1/delta_time * rates
     >>> out = convert_att_quat_to_body_rate(time, quat)
     >>> np.testing.assert_array_almost_equal(out, exp, decimal=4)
 
@@ -1306,8 +1306,8 @@ def convert_att_quat_to_body_rate(
         # Note: could return NaNs instead?
         raise QuatAssertionError("Must have a time history of quaternions to calculate rate.")
     _, delta_error = quat_angle_diff(quat[:, :-1], quat[:, 1:], **kwargs)
-    dt = np.diff(time) / NP_ONE_SECOND if is_datetime(time) else np.diff(time)
-    rates = delta_error / dt
+    delta_time = np.diff(time) / NP_ONE_SECOND if is_datetime(time) else np.diff(time)
+    rates = delta_error / delta_time
     if append:
         return postpend(rates, rates[..., -1:])
     return rates  # type: ignore[no-any-return]

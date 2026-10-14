@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import doctest
 import logging
 from pathlib import Path
@@ -59,8 +59,8 @@ if TYPE_CHECKING:
     _Q = NDArray[np.floating]
     _CM = str | Colormap | ListedColormap | ColorMap
     _Data = int | float | np.floating | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
-    _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
+    _Time = int | float | np.floating | dt.datetime | dt.date | np.datetime64 | None
+    _Times = int | float | np.floating | dt.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.floating | np.timedelta64
     _Figs = list[Figure]
     _SecUnits = str | int | float | np.floating | tuple[str, float] | tuple[str, np.floating] | None

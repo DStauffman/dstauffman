@@ -8,7 +8,7 @@ Notes
 """
 
 # %% Imports
-import datetime
+import datetime as dt
 import unittest
 from unittest.mock import Mock, patch
 
@@ -215,7 +215,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.elements         = ["x", "y"]
         self.units            = "rad"
         self.time_units       = "sec"
-        self.start_date       = str(datetime.datetime.now())
+        self.start_date       = str(dt.datetime.now())
         self.rms_xmin         = 0
         self.rms_xmax         = 10
         self.disp_xmin        = -2
@@ -675,7 +675,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.name_one         = "test1"
         self.name_two         = "test2"
         self.time_units       = "sec"
-        self.start_date       = str(datetime.datetime.now())
+        self.start_date       = str(dt.datetime.now())
         self.plot_components  = True
         self.rms_xmin         = 0
         self.rms_xmax         = 10
@@ -998,7 +998,7 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
         self.elements         = ["x", "y", "z"]
         self.units            = "rad"
         self.time_units       = "sec"
-        self.start_date       = "  t0 = " + str(datetime.datetime.now())
+        self.start_date       = "  t0 = " + str(dt.datetime.now())
         self.rms_xmin         = 1
         self.rms_xmax         = 10
         self.disp_xmin        = -2

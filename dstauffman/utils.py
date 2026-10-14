@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Generator, Iterable, Mapping
 from contextlib import contextmanager
-import datetime
+import datetime as dt
 import doctest
 from functools import reduce
 import inspect
@@ -1335,7 +1335,7 @@ def get_username() -> str:
 
 
 # %% Functions - is_datetime
-def is_datetime(time: datetime.datetime | ArrayLike | None) -> bool:
+def is_datetime(time: dt.datetime | ArrayLike | None) -> bool:
     r"""
     Determines if the given time is either a datetime.datetime or np.datetime64 or just a regular number.
 
@@ -1356,11 +1356,11 @@ def is_datetime(time: datetime.datetime | ArrayLike | None) -> bool:
     Examples
     --------
     >>> from dstauffman import is_datetime
-    >>> import datetime
+    >>> import datetime as dt
     >>> import numpy as np
     >>> time1 = 0.5
     >>> time2 = np.datetime64("now")
-    >>> time3 = datetime.datetime.now()
+    >>> time3 = dt.datetime.now()
     >>> print(is_datetime(time1))
     False
 
@@ -1372,7 +1372,7 @@ def is_datetime(time: datetime.datetime | ArrayLike | None) -> bool:
 
     """
     out = False
-    if isinstance(time, datetime.datetime) or (hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)):  # type: ignore[union-attr]
+    if isinstance(time, dt.datetime) or (hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)):  # type: ignore[union-attr]
         out = True
     return out
 

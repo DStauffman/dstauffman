@@ -749,9 +749,9 @@ def raan_2_mltan(raan: _FN, time_jd: _FN, return_descending: bool = False) -> np
     --------
     >>> from dstauffman.aerospace import numpy_to_jd, raan_2_mltan, r_2_hms
     >>> from dstauffman import convert_datetime_to_np, DEG2RAD
-    >>> import datetime
+    >>> import datetime as dt
     >>> raan = DEG2RAD * 178.739073
-    >>> date = datetime.datetime(2010, 6, 20, 15, 30, 45)
+    >>> date = dt.datetime(2010, 6, 20, 15, 30, 45)
     >>> time_jd = numpy_to_jd(convert_datetime_to_np(date))
     >>> mltan = raan_2_mltan(raan, time_jd)
     >>> mltan_hms = r_2_hms(mltan)
@@ -780,8 +780,8 @@ def jd_2_sidereal(time_jd: _FN) -> np.floating | _N:
     --------
     >>> from dstauffman.aerospace import jd_2_sidereal, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
-    >>> import datetime
-    >>> date = datetime.datetime(1992, 8, 20, 12, 14, 0)
+    >>> import datetime as dt
+    >>> date = dt.datetime(1992, 8, 20, 12, 14, 0)
     >>> time_jd = numpy_to_jd(convert_datetime_to_np(date))
     >>> lst = jd_2_sidereal(time_jd)
 
@@ -810,8 +810,8 @@ def quat_eci_2_ecf_approx(time_jd: _FN) -> _Q:
     --------
     >>> from dstauffman.aerospace import quat_eci_2_ecf_approx, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
-    >>> import datetime
-    >>> date = datetime.datetime(1992, 8, 20, 12, 14, 0)
+    >>> import datetime as dt
+    >>> date = dt.datetime(1992, 8, 20, 12, 14, 0)
     >>> time_jd = numpy_to_jd(convert_datetime_to_np(date))
     >>> quat = quat_eci_2_ecf_approx(time_jd)
 

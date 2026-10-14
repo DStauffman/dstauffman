@@ -13,7 +13,7 @@ Notes
 from __future__ import annotations
 
 import copy
-import datetime
+import datetime as dt
 import doctest
 from typing import Literal, overload, TYPE_CHECKING
 import unittest
@@ -357,7 +357,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
 
     # fmt: off
     time = (
-        (datetime.datetime(2000 + year, 1, 1, 0, 0, 0) - datetime.datetime(2000, 1, 1, 0, 0, 0)).days
+        (dt.datetime(2000 + year, 1, 1, 0, 0, 0) - dt.datetime(2000, 1, 1, 0, 0, 0)).days
         + JULIAN["jd_2000_01_01"] - 0.5 + day - 1
     )
 
@@ -526,7 +526,7 @@ def rv_2_oe(r: _N, v: _N, mu: _FN = 1.0, unit: bool = False, precision: float = 
     orbit_type[ix] = OrbitType.elliptic
     # T (only defined for elliptic, as parabolic and hyperbolic don't have a period)
     T = TAU * np.sqrt(a**3 / mu, where=ix, out=np.full_like(a, np.nan))
-    # dt = np.divide(T / TAU * M, where=ix, out=np.full_like(T, np.nan))
+    # delta_t = np.divide(T / TAU * M, where=ix, out=np.full_like(T, np.nan))
     circular = np.where(ix & (np.abs(e_mag) < precision), True, False)
     # parabolic
     ix = E == 0.0

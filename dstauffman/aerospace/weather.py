@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import doctest
 from pathlib import Path
 import unittest
@@ -59,10 +59,10 @@ AP_TO_KP[400] = 9.000  # "9o"
 def read_tci_data(filename: Path) -> pd.DataFrame:
     r"""Reads the TCI data from files provided online."""
 
-    def _convert_m_d_y(text: str) -> datetime.datetime:
+    def _convert_m_d_y(text: str) -> dt.datetime:
         """Convert a m-d-y string when each are floats (yet still whole integers)."""
         m, d, y = text.split("-")
-        return datetime.datetime(int(float(y)), int(float(m)), int(float(d)))
+        return dt.datetime(int(float(y)), int(float(m)), int(float(d)))
 
     names = ["Date", "TCI"]
     converters = {"Date": _convert_m_d_y}
@@ -110,12 +110,12 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:
     def _get_solar_cycle(text: str) -> int:
         return int(text.rsplit("Solar cycle ", maxsplit=1)[-1])
 
-    def _get_date(text: str) -> datetime.datetime | np.datetime64:
+    def _get_date(text: str) -> dt.datetime | np.datetime64:
         if not text:
             return NP_NAT
         if text.startswith("("):
             return NP_NAT
-        return datetime.datetime.strptime(text.strip(), "%Y-%m")  # noqa: DTZ007
+        return dt.datetime.strptime(text.strip(), "%Y-%m")  # noqa: DTZ007
 
     def _remove_parens(text: str) -> int | float:
         if not text:

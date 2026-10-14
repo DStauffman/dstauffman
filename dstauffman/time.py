@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import doctest
 import re
 from time import gmtime, strftime
@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
     _TD = NDArray[np.timedelta64]
-    _AllDates = int | float | datetime.datetime | datetime.date | np.datetime64 | _D | _I | _N | None
+    _AllDates = int | float | dt.datetime | dt.date | np.datetime64 | _D | _I | _N | None
     _NPDates = np.datetime64 | _D | _N
 
 # %% Constants
@@ -135,18 +135,18 @@ def get_ymd_from_np(date: _NPDates) -> tuple[_I, _I, _I]:
 
 
 # %% Functions - round_datetime
-def round_datetime(dt: datetime.datetime | None = None, /, round_to_sec: int = 60, floor: bool = False) -> datetime.datetime:
+def round_datetime(date_time: dt.datetime | None = None, /, round_to_sec: int = 60, floor: bool = False) -> dt.datetime:
     r"""
     Round a datetime object to any time lapse in seconds.
 
     Parameters
     ----------
-    dt : datetime.datetime
+    date_time : datetime.datetime
         time to round, default now.
     round_to_sec : int
         Closest number of seconds to round to, default 60 seconds (i.e. rounds to nearest minute)
     floor : bool, optional default is False
-        Whether to floor the time, instead of rounding to the nearest dt
+        Whether to floor the time, instead of rounding to the nearest round_to_sec value
 
     Returns
     -------
@@ -165,23 +165,23 @@ def round_datetime(dt: datetime.datetime | None = None, /, round_to_sec: int = 6
     Examples
     --------
     >>> from dstauffman import round_datetime
-    >>> from datetime import datetime
-    >>> dt = datetime(2015, 3, 13, 8, 4, 10)
-    >>> rounded_time = round_datetime(dt)
+    >>> import datetime as dt
+    >>> date_time = dt.datetime(2015, 3, 13, 8, 4, 10)
+    >>> rounded_time = round_datetime(date_time)
     >>> print(rounded_time)
     2015-03-13 08:04:00
 
     """
-    # set default for dt
-    if dt is None:
-        dt = datetime.datetime.now()
+    # set default for date_time
+    if date_time is None:
+        date_time = dt.datetime.now()
     # get the current elasped time in seconds
-    seconds = (dt - dt.min).seconds
+    seconds = (date_time - date_time.min).seconds
     # round to the nearest whole second
     rounding: float
     rounding = seconds // round_to_sec * round_to_sec if floor else (seconds + round_to_sec / 2) // round_to_sec * round_to_sec
     # return the rounded result
-    return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
+    return date_time + dt.timedelta(0, rounding - seconds, -date_time.microsecond)
 
 
 # %% Functions - round_np_datetime
@@ -217,9 +217,9 @@ def round_np_datetime(
     Examples
     --------
     >>> from dstauffman import round_np_datetime
-    >>> import datetime
+    >>> import datetime as dt
     >>> import numpy as np
-    >>> date_zero  = np.datetime64(datetime.date(2020, 1, 1))
+    >>> date_zero  = np.datetime64(dt.date(2020, 1, 1))
     >>> dt_sec     = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
     >>> date_in    = date_zero + np.round(1000*dt_sec).astype("timedelta64[ms]")
     >>> time_delta = np.timedelta64(200, "ms")
@@ -318,9 +318,9 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
     Examples
     --------
     >>> from dstauffman import NP_DATETIME_FORM, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM, round_time
-    >>> import datetime
+    >>> import datetime as dt
     >>> import numpy as np
-    >>> date_zero = np.datetime64(datetime.date(2020, 1, 1)).astype(NP_DATETIME_FORM)
+    >>> date_zero = np.datetime64(dt.date(2020, 1, 1)).astype(NP_DATETIME_FORM)
     >>> x_sec     = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
     >>> x_np      = date_zero + np.round(NP_INT64_PER_SEC * x_sec).astype(NP_TIMEDELTA_FORM)
     >>> t_round   = np.timedelta64(200, "ms").astype(NP_TIMEDELTA_FORM)
@@ -345,13 +345,13 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
 
 
 # %% Functions - floor_datetime
-def floor_datetime(dt: datetime.datetime | None = None) -> datetime.datetime:
+def floor_datetime(date_time: dt.datetime | None = None) -> dt.datetime:
     r"""
     Floors a datetime object to an integer date.
 
     Parameters
     ----------
-    dt : datetime.datetime
+    date_time : datetime.datetime
         time to round, default now.
 
     Returns
@@ -370,14 +370,14 @@ def floor_datetime(dt: datetime.datetime | None = None) -> datetime.datetime:
     Examples
     --------
     >>> from dstauffman import floor_datetime
-    >>> from datetime import datetime
-    >>> dt = datetime(2015, 3, 13, 8, 4, 10)
-    >>> floored_time = floor_datetime(dt)
+    >>> import datetime as dt
+    >>> date_time = dt.datetime(2015, 3, 13, 8, 4, 10)
+    >>> floored_time = floor_datetime(date_time)
     >>> print(floored_time)
     2015-03-13 00:00:00
 
     """
-    return round_datetime(dt, round_to_sec=ONE_DAY, floor=True)
+    return round_datetime(date_time, round_to_sec=ONE_DAY, floor=True)
 
 
 # %% Functions - floor_np_datetime
@@ -406,9 +406,9 @@ def floor_np_datetime(date_in: np.datetime64 | _D) -> np.datetime64 | _D:
     Examples
     --------
     >>> from dstauffman import floor_np_datetime
-    >>> import datetime
+    >>> import datetime as dt
     >>> import numpy as np
-    >>> date_zero  = np.datetime64(datetime.date(2020, 1, 1))
+    >>> date_zero  = np.datetime64(dt.date(2020, 1, 1))
     >>> dt_sec     = np.array([0, 0.2, 0.35, 0.45, 86400.59, 0.61])
     >>> date_in    = date_zero + np.round(1000*dt_sec).astype("timedelta64[ms]")
     >>> date_out   = floor_np_datetime(date_in)
@@ -467,7 +467,7 @@ def floor_num_datetime(date_in: _N) -> _N:
 def convert_date(  # noqa: C901
     date: Any,
     form: str,
-    date_zero: datetime.datetime | None = None,
+    date_zero: dt.datetime | None = None,
     *,
     old_form: str = "sec",
     numpy_form: str = "datetime64[ns]",
@@ -504,10 +504,10 @@ def convert_date(  # noqa: C901
     Examples
     --------
     >>> from dstauffman import convert_date
-    >>> from datetime import datetime
+    >>> import datetime as dt
     >>> date = 3725.5
     >>> form = "datetime"
-    >>> date_zero = datetime(2020, 6, 1, 0, 0, 0)
+    >>> date_zero = dt.datetime(2020, 6, 1, 0, 0, 0)
     >>> out = convert_date(date, form, date_zero)
     >>> print(out)
     2020-06-01 01:02:05.500000
@@ -540,11 +540,11 @@ def convert_date(  # noqa: C901
     # determine if you have real dates to process
     elif date is None:
         is_actual_date = False
-    elif isinstance(date, (datetime.datetime, datetime.date)):
+    elif isinstance(date, (dt.datetime, dt.date)):
         is_actual_date = True
     elif isinstance(date, list):
         # Note: this assumes all entries of the list are the same
-        is_actual_date = len(date) > 0 and isinstance(date[0], (datetime.datetime, datetime.date))
+        is_actual_date = len(date) > 0 and isinstance(date[0], (dt.datetime, dt.date))
     elif isinstance(date, (int, float)):
         is_actual_date = isfinite(date)
     else:
@@ -553,14 +553,14 @@ def convert_date(  # noqa: C901
     if form in time_forms or (old_form in time_forms and is_actual_date):
         if date_zero is None:
             raise ValueError("You must specify a date_zero.")
-        if not isinstance(date_zero, datetime.datetime):
+        if not isinstance(date_zero, dt.datetime):
             raise ValueError("The date_zero is expected to be a datetime object.")
     # do all possible conversions
     # from seconds
     if old_form in time_forms:
         is_num = isfinite(date) if is_actual_date else False
         if form == "datetime":
-            out = date_zero + datetime.timedelta(seconds=date) if is_num else None  # type: ignore[assignment, operator]  # ty: ignore[unsupported-operator]
+            out = date_zero + dt.timedelta(seconds=date) if is_num else None  # type: ignore[assignment, operator]  # ty: ignore[unsupported-operator]
         elif form == "numpy":
             out = np.full(date.shape, NP_NAT, dtype=numpy_form)
             if np.any(is_num):
@@ -587,15 +587,15 @@ def convert_date(  # noqa: C901
             out = dates.date2num(date) if is_num else np.nan
         elif form in time_forms:  # pragma: no branch
             if is_num:
-                dt = date - date_zero
-                out = ONE_DAY * dt.days + dt.seconds + dt.microseconds / 1000000
+                delta_time = date - date_zero
+                out = ONE_DAY * delta_time.days + delta_time.seconds + delta_time.microseconds / 1000000
             else:
                 out = nan
     # from numpy
     elif old_form == "numpy":
         is_num = ~np.isnat(date)
         if form == "datetime":
-            out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.UTC) if is_num else None  # fmt: skip
+            out = dt.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=dt.UTC) if is_num else None  # fmt: skip
         elif form == "matplotlib":
             out = dates.date2num(date)
         elif form in time_forms:  # pragma: no branch
@@ -665,12 +665,10 @@ def convert_time_units(time: float, old_unit: str, new_unit: str) -> int | float
 
 # %% Functions - convert_datetime_to_np
 @overload
-def convert_datetime_to_np(time: datetime.datetime, /, units: str = ...) -> np.datetime64: ...
+def convert_datetime_to_np(time: dt.datetime, /, units: str = ...) -> np.datetime64: ...
 @overload
-def convert_datetime_to_np(time: list[datetime.datetime], /, units: str = ...) -> _D: ...
-def convert_datetime_to_np(
-    time: datetime.datetime | list[datetime.datetime], /, units: str = NP_DATETIME_UNITS
-) -> np.datetime64 | _D:
+def convert_datetime_to_np(time: list[dt.datetime], /, units: str = ...) -> _D: ...
+def convert_datetime_to_np(time: dt.datetime | list[dt.datetime], /, units: str = NP_DATETIME_UNITS) -> np.datetime64 | _D:
     r"""
     Convenience wrapper to convert a datetime.datetime to a numpy.datetime64 with the desired units.
 
@@ -693,8 +691,8 @@ def convert_datetime_to_np(
     Examples
     --------
     >>> from dstauffman import convert_datetime_to_np
-    >>> import datetime
-    >>> time = datetime.datetime(2020, 10, 1, 12, 34, 56, 789)
+    >>> import datetime as dt
+    >>> time = dt.datetime(2020, 10, 1, 12, 34, 56, 789)
     >>> print(convert_datetime_to_np(time))
     2020-10-01T12:34:56.000789000
 
@@ -708,13 +706,13 @@ def convert_datetime_to_np(
 
 
 # %% Functions - convert_duration_to_np
-def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_UNITS) -> np.timedelta64:
+def convert_duration_to_np(date_time: dt.timedelta, /, units: str = NP_DATETIME_UNITS) -> np.timedelta64:
     r"""
     Convenience wrapper to convert a datetime.timedelta to a numpy.timedelta64 with the desired units.
 
     Parameters
     ----------
-    dt : datetime.timedelta
+    date_time : datetime.timedelta
         time duration
     units : str, optional
         Units to use within numpy.datetime64
@@ -731,23 +729,23 @@ def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_U
     Examples
     --------
     >>> from dstauffman import convert_duration_to_np
-    >>> import datetime
-    >>> dt = datetime.timedelta(minutes=90)
-    >>> print(convert_duration_to_np(dt))
+    >>> import datetime as dt
+    >>> date_time = dt.timedelta(minutes=90)
+    >>> print(convert_duration_to_np(date_time))
     5400000000000 nanoseconds
 
     """
-    return np.timedelta64(dt, units)  # type: ignore[call-overload, no-any-return]
+    return np.timedelta64(date_time, units)  # type: ignore[call-overload, no-any-return]
 
 
 # %% Functions - convert_num_dt_to_np
-def convert_num_dt_to_np(dt: float, /, units: str = "sec", np_units: str = NP_TIMEDELTA_FORM) -> np.timedelta64:
+def convert_num_dt_to_np(date_time: float, /, units: str = "sec", np_units: str = NP_TIMEDELTA_FORM) -> np.timedelta64:
     r"""
     Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
 
     Parameters
     ----------
-    dt: numpy.ndarray of float
+    date_time: numpy.ndarray of float
         time duration [sec]
     units : str, optional
         Units to use within numpy.datetime64
@@ -766,20 +764,19 @@ def convert_num_dt_to_np(dt: float, /, units: str = "sec", np_units: str = NP_TI
     Examples
     --------
     >>> from dstauffman import convert_num_dt_to_np, ONE_MINUTE
-    >>> import datetime
-    >>> dt = 90 * ONE_MINUTE
-    >>> print(convert_num_dt_to_np(dt))
+    >>> date_time = 90 * ONE_MINUTE
+    >>> print(convert_num_dt_to_np(date_time))
     5400000000000 nanoseconds
 
     """
     units = _NP_MAP.get(units, units)
-    return np.timedelta64(dt, units).astype(np_units)  # type: ignore[call-overload, no-any-return]
+    return np.timedelta64(date_time, units).astype(np_units)  # type: ignore[call-overload, no-any-return]
 
 
 # %% Functions - get_delta_time_str
 def get_delta_time_str(
-    start_time: datetime.datetime | datetime.timedelta,
-    final_time: datetime.datetime | None = None,
+    start_time: dt.datetime | dt.timedelta,
+    final_time: dt.datetime | None = None,
     *,
     format_: str = "%H:%M:%S",
 ) -> str:
@@ -808,18 +805,18 @@ def get_delta_time_str(
     Examples
     --------
     >>> from dstauffman import get_delta_time_str
-    >>> import datetime
-    >>> start_time = datetime.datetime.now()
-    >>> final_time = start_time + datetime.timedelta(seconds=5, microseconds=10000)
+    >>> import datetime as dt
+    >>> start_time = dt.datetime.now()
+    >>> final_time = start_time + dt.timedelta(seconds=5, microseconds=10000)
     >>> print(get_delta_time_str(start_time, final_time))
     00:00:05
 
     """
-    if isinstance(start_time, datetime.timedelta):
+    if isinstance(start_time, dt.timedelta):
         delta_time = start_time
         assert final_time is None
     elif final_time is None:
-        delta_time = datetime.datetime.now() - start_time
+        delta_time = dt.datetime.now() - start_time
     else:
         delta_time = final_time - start_time
     return strftime(format_, gmtime(delta_time.total_seconds()))

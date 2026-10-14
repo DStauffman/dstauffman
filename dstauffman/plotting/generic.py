@@ -11,7 +11,7 @@ Notes
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable
-import datetime
+import datetime as dt
 import doctest
 import logging
 from typing import Any, Literal, NotRequired, overload, Protocol, TYPE_CHECKING, TypedDict
@@ -80,8 +80,8 @@ if TYPE_CHECKING:
     _Q = NDArray[np.floating]
     _CM = str | Colormap | ListedColormap | ColorMap
     _Data = int | float | np.floating | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
-    _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
+    _Time = int | float | np.floating | dt.datetime | dt.date | np.datetime64 | None
+    _Times = int | float | np.floating | dt.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.floating | np.timedelta64
     _Figs = list[Figure]
     _SecUnits = str | int | float | np.floating | tuple[str, float] | tuple[str, np.floating] | None
@@ -729,7 +729,7 @@ def make_difference_plot(  # noqa: C901
     --------
     >>> from dstauffman.plotting import make_difference_plot, get_nondeg_colorlists
     >>> import numpy as np
-    >>> from datetime import datetime
+    >>> import datetime as dt
     >>> prng             = np.random.default_rng()
     >>> description      = "example"
     >>> time_one         = np.arange(11)
@@ -741,7 +741,7 @@ def make_difference_plot(  # noqa: C901
     >>> elements         = ["x", "y"]
     >>> units            = "rad"
     >>> time_units       = "sec"
-    >>> start_date       = ", t0 = " + str(datetime.now())
+    >>> start_date       = ", t0 = " + str(dt.datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
     >>> disp_xmin        = -2
@@ -1215,7 +1215,7 @@ def make_quaternion_plot(
     >>> from dstauffman.plotting import make_quaternion_plot
     >>> from dstauffman.aerospace import quat_norm
     >>> import numpy as np
-    >>> from datetime import datetime
+    >>> import datetime as dt
     >>> prng = np.random.default_rng()
     >>> description      = "example"
     >>> time_one         = np.arange(11)
@@ -1225,7 +1225,7 @@ def make_quaternion_plot(
     >>> name_one         = "test1"
     >>> name_two         = "test2"
     >>> time_units       = "sec"
-    >>> start_date       = ", t0 = " + str(datetime.now())
+    >>> start_date       = ", t0 = " + str(dt.datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
     >>> disp_xmin        = -2
@@ -1359,7 +1359,7 @@ def make_error_bar_plot(
     --------
     >>> from dstauffman.plotting import make_error_bar_plot
     >>> import numpy as np
-    >>> from datetime import datetime
+    >>> import datetime as dt
     >>> prng             = np.random.default_rng()
     >>> description      = "Random Data Error Bars"
     >>> time             = np.arange(11)
@@ -1370,7 +1370,7 @@ def make_error_bar_plot(
     >>> elements         = ["x", "y", "z"]
     >>> units            = "rad"
     >>> time_units       = "sec"
-    >>> start_date       = ", t0 = " + str(datetime.now())
+    >>> start_date       = ", t0 = " + str(dt.datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
     >>> disp_xmin        = -2

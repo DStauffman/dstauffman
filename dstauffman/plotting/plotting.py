@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import doctest
 import logging
 from pathlib import Path
@@ -70,15 +70,15 @@ if TYPE_CHECKING:
     _M = NDArray[np.floating]  # 2D
     _CM = str | colors.Colormap | colors.ListedColormap | ColorMap
     _Data = int | float | np.floating | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
-    _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
+    _Time = int | float | np.floating | dt.datetime | dt.date | np.datetime64 | None
+    _Times = int | float | np.floating | dt.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.floating | np.timedelta64
     _Figs = list[Figure]
     _Gnds = Kf | KfInnov | None
 
     class _OptsKwargs(TypedDict):
         case_name: NotRequired[str]
-        date_zero: NotRequired[datetime.datetime | None]
+        date_zero: NotRequired[dt.datetime | None]
         save_plot: NotRequired[bool]
         save_path: NotRequired[Path | None]
         show_plot: NotRequired[bool]
@@ -273,7 +273,7 @@ class Opts(Frozen):
         """
         # fmt: off
         self.case_name: str   = ""
-        self.date_zero: datetime.datetime | None = None
+        self.date_zero: dt.datetime | None = None
         self.save_plot: bool  = False
         self.save_path: Path | None = None
         self.show_plot: bool  = True
@@ -337,7 +337,7 @@ class Opts(Frozen):
         name_two = kwargs.pop("name_two", kf2.name if kf2 is not None and bool(kf2.name) else self.get_names(1))
         return (name_one, name_two)
 
-    def get_date_zero_str(self, date: datetime.datetime | list[int] | None = None) -> str:
+    def get_date_zero_str(self, date: dt.datetime | list[int] | None = None) -> str:
         r"""
         Gets a string representation of date_zero, typically used to print on an X axis.
 
@@ -349,9 +349,9 @@ class Opts(Frozen):
         Examples
         --------
         >>> from dstauffman.plotting import Opts
-        >>> from datetime import datetime
+        >>> import datetime as dt
         >>> opts = Opts()
-        >>> opts.date_zero = datetime(2019, 4, 1, 18, 0, 0)
+        >>> opts.date_zero = dt.datetime(2019, 4, 1, 18, 0, 0)
         >>> print(opts.get_date_zero_str())
           t(0) = 01-Apr-2019 18:00:00 Z
 
@@ -362,10 +362,10 @@ class Opts(Frozen):
                 start_date: str = ""
             else:
                 start_date = "  t(0) = " + self.date_zero.strftime(TIMESTR_FORMAT) + " Z"
-        elif isinstance(date, datetime.datetime):
+        elif isinstance(date, dt.datetime):
             start_date = "  t(0) = " + date.strftime(TIMESTR_FORMAT) + " Z"
         else:
-            temp_date = datetime.datetime(*date)  # type: ignore[arg-type]
+            temp_date = dt.datetime(*date)  # type: ignore[arg-type]
             start_date = "  t(0) = " + temp_date.strftime(TIMESTR_FORMAT) + " Z"
         return start_date
 

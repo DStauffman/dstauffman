@@ -8,7 +8,7 @@ Notes
 """
 
 # %% Imports
-import datetime
+import datetime as dt
 import unittest
 
 from dstauffman import convert_datetime_to_np, HAVE_NUMPY, issorted
@@ -507,7 +507,7 @@ class Test_aerospace_get_sun_radec(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        date = datetime.datetime(2010, 6, 20, 15, 30, 45)
+        date = dt.datetime(2010, 6, 20, 15, 30, 45)
         np_date = convert_datetime_to_np(date)
         self.time_jd = space.numpy_to_jd(np_date)
 
@@ -532,8 +532,8 @@ class Test_aerospace_get_sun_distance(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        date_jan = datetime.datetime(2023, 1, 5)
-        date_jul = datetime.datetime(2023, 7, 7)
+        date_jan = dt.datetime(2023, 1, 5)
+        date_jul = dt.datetime(2023, 7, 7)
         np_date_jan = convert_datetime_to_np(date_jan)
         np_date_jul = convert_datetime_to_np(date_jul)
         self.time_jd_jan = space.numpy_to_jd(np_date_jan)

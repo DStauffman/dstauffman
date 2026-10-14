@@ -8,7 +8,7 @@ Notes
 """
 
 # %% Imports
-import datetime
+import datetime as dt
 import unittest
 import warnings
 
@@ -36,11 +36,11 @@ class Test_get_np_time_units(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        units = dcs.get_np_time_units(np.datetime64(datetime.datetime.now()))
+        units = dcs.get_np_time_units(np.datetime64(dt.datetime.now()))
         self.assertEqual(units, "us")
 
     def test_nanoseconds(self) -> None:
-        units = dcs.get_np_time_units(np.datetime64(datetime.datetime(2020, 1, 1), "ns"))
+        units = dcs.get_np_time_units(np.datetime64(dt.datetime(2020, 1, 1), "ns"))
         self.assertEqual(units, "ns")
 
 
@@ -83,20 +83,20 @@ class Test_round_datetime(unittest.TestCase):
     """
 
     def test_normal_use(self) -> None:
-        rounded_time = dcs.round_datetime(datetime.datetime(2015, 3, 13, 8, 4, 10))
-        self.assertEqual(rounded_time, datetime.datetime(2015, 3, 13, 8, 4, 0))
+        rounded_time = dcs.round_datetime(dt.datetime(2015, 3, 13, 8, 4, 10))
+        self.assertEqual(rounded_time, dt.datetime(2015, 3, 13, 8, 4, 0))
 
     def test_extended_use(self) -> None:
-        rounded_time = dcs.round_datetime(datetime.datetime(2015, 3, 13, 8, 4, 10), round_to_sec=300)
-        self.assertEqual(rounded_time, datetime.datetime(2015, 3, 13, 8, 5, 0))
+        rounded_time = dcs.round_datetime(dt.datetime(2015, 3, 13, 8, 4, 10), round_to_sec=300)
+        self.assertEqual(rounded_time, dt.datetime(2015, 3, 13, 8, 5, 0))
 
     def test_current_time(self) -> None:
         dcs.round_datetime()
         self.assertTrue(True)
 
     def test_flooring(self) -> None:
-        rounded_time = dcs.round_datetime(datetime.datetime(2015, 3, 13, 8, 4, 45), round_to_sec=60, floor=True)
-        self.assertEqual(rounded_time, datetime.datetime(2015, 3, 13, 8, 4, 0))
+        rounded_time = dcs.round_datetime(dt.datetime(2015, 3, 13, 8, 4, 45), round_to_sec=60, floor=True)
+        self.assertEqual(rounded_time, dt.datetime(2015, 3, 13, 8, 4, 0))
 
 
 # %% round_np_datetime
@@ -110,7 +110,7 @@ class Test_round_np_datetime(unittest.TestCase):
 
     def setUp(self) -> None:
         # fmt: off
-        date_zero       = np.datetime64(datetime.date(2020, 1, 1))
+        date_zero       = np.datetime64(dt.date(2020, 1, 1))
         dt_sec          = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
         self.date_in    = date_zero + np.round(1000 * dt_sec).astype("timedelta64[ms]")
         self.time_delta = np.timedelta64(200, "ms")
@@ -157,7 +157,7 @@ class Test_round_time(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.date_zero = np.datetime64(datetime.date(2020, 1, 1)).astype(dcs.NP_DATETIME_FORM)
+        self.date_zero = np.datetime64(dt.date(2020, 1, 1)).astype(dcs.NP_DATETIME_FORM)
         self.x_sec = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
         self.x_np = self.date_zero + np.round(dcs.NP_INT64_PER_SEC * self.x_sec).astype(dcs.NP_TIMEDELTA_FORM)
         self.t_round = np.timedelta64(200, "ms").astype(dcs.NP_TIMEDELTA_FORM)
@@ -184,8 +184,8 @@ class Test_floor_datetime(unittest.TestCase):
     """
 
     def test_normal_use(self) -> None:
-        floored_time = dcs.floor_datetime(datetime.datetime(2015, 3, 13, 8, 4, 10))
-        self.assertEqual(floored_time, datetime.datetime(2015, 3, 13, 0, 0, 0))
+        floored_time = dcs.floor_datetime(dt.datetime(2015, 3, 13, 8, 4, 10))
+        self.assertEqual(floored_time, dt.datetime(2015, 3, 13, 0, 0, 0))
 
     def test_current_time(self) -> None:
         dcs.floor_datetime()
@@ -203,7 +203,7 @@ class Test_floor_np_datetime(unittest.TestCase):
 
     def setUp(self) -> None:
         # fmt: off
-        date_zero       = np.datetime64(datetime.date(2020, 1, 1))
+        date_zero       = np.datetime64(dt.date(2020, 1, 1))
         dt_sec          = np.array([0, 0.2, 172799.35, 0.45, 172800.59, 0.61])
         self.date_in    = date_zero + np.round(1000 * dt_sec).astype("timedelta64[ms]")
         self.expected   = date_zero + np.array([0, 0, 86400000, 0, 172800000, 0]).astype("timedelta64[ms]")
@@ -259,9 +259,9 @@ class Test_convert_date(unittest.TestCase):
 
     def setUp(self) -> None:
         self.seconds = 3725.5
-        self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.UTC)
-        self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.UTC)
-        self.date = datetime.date(2022, 1, 17)
+        self.date_zero = dt.datetime(2020, 6, 1, 0, 0, 0, tzinfo=dt.UTC)
+        self.datetime = dt.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=dt.UTC)
+        self.date = dt.date(2022, 1, 17)
         if dcs.HAVE_NUMPY:
             self.numpy = np.datetime64("2020-06-01 01:02:05.500000", "ns")
             self.nat = np.datetime64("nat", "ns")
@@ -314,7 +314,7 @@ class Test_convert_date(unittest.TestCase):
     @unittest.skipIf(not dcs.HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_matplotlibs(self) -> None:
         out = dcs.convert_date(self.matplotlib, "datetime", old_form="matplotlib")
-        exp = self.datetime.replace(tzinfo=datetime.UTC)
+        exp = self.datetime.replace(tzinfo=dt.UTC)
         self.assertEqual(out, exp)
         out = dcs.convert_date(self.matplotlib, "numpy", old_form="matplotlib")
         self.assertEqual(out, self.numpy)
@@ -523,7 +523,7 @@ class Test_convert_datetime_to_np(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        time = datetime.datetime(2020, 10, 1, 12, 34, 56, 789)
+        time = dt.datetime(2020, 10, 1, 12, 34, 56, 789)
         out = dcs.convert_datetime_to_np(time)
         exp = np.datetime64("2020-10-01T12:34:56.000789000").astype(dcs.NP_DATETIME_FORM)
         self.assertEqual(out, exp)
@@ -538,8 +538,8 @@ class Test_convert_duration_to_np(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        dt = datetime.timedelta(minutes=90)
-        out = dcs.convert_duration_to_np(dt)
+        delta_time = dt.timedelta(minutes=90)
+        out = dcs.convert_duration_to_np(delta_time)
         exp = np.timedelta64(90, "m").astype(dcs.NP_TIMEDELTA_FORM)
         self.assertEqual(out, exp)
 
@@ -555,15 +555,15 @@ class Test_convert_num_dt_to_np(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        dt = 90 * 60
-        out = dcs.convert_num_dt_to_np(dt)
+        delta_time = 90 * 60
+        out = dcs.convert_num_dt_to_np(delta_time)
         exp = np.timedelta64(5400, "s").astype(dcs.NP_TIMEDELTA_FORM)
         self.assertEqual(out, exp)
 
     def test_numpy_units(self) -> None:
         for key in ("Y", "M", "W", "D", "h", "m", "s", "ms", "us", "ns", "ps", "fs", "as"):
-            dt = 105
-            out = dcs.convert_num_dt_to_np(dt, units=key)
+            delta_time = 105
+            out = dcs.convert_num_dt_to_np(delta_time, units=key)
             exp = np.timedelta64(105, key).astype(dcs.NP_TIMEDELTA_FORM)
             self.assertEqual(out, exp)
 
@@ -581,8 +581,8 @@ class Test_convert_num_dt_to_np(unittest.TestCase):
             "sec": "s",
         }
         for key, value in map_.items():
-            dt = 90
-            out = dcs.convert_num_dt_to_np(dt, units=key)
+            delta_time = 90
+            out = dcs.convert_num_dt_to_np(delta_time, units=key)
             exp = np.timedelta64(90, value).astype(dcs.NP_TIMEDELTA_FORM)  # type: ignore[call-overload]
             self.assertEqual(out, exp)
 
@@ -595,8 +595,8 @@ class Test_get_delta_time_str(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.start_time = datetime.datetime.now()
-        self.final_time = self.start_time + datetime.timedelta(seconds=5, microseconds=10000)
+        self.start_time = dt.datetime.now()
+        self.final_time = self.start_time + dt.timedelta(seconds=5, microseconds=10000)
         self.exp_str1 = "00:00:05"
         self.exp_str2 = "00:00"
         self.format_ = "%H:%M"
@@ -608,7 +608,7 @@ class Test_get_delta_time_str(unittest.TestCase):
         self.assertEqual(dcs.get_delta_time_str(self.start_time, self.final_time, format_=self.format_), self.exp_str2)
 
     def test_duration(self) -> None:
-        self.assertEqual(dcs.get_delta_time_str(datetime.timedelta(seconds=5402)), "01:30:02")
+        self.assertEqual(dcs.get_delta_time_str(dt.timedelta(seconds=5402)), "01:30:02")
 
 
 # %% Unit test execution

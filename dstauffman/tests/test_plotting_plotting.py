@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
@@ -74,7 +74,7 @@ class Test_plotting_Opts(unittest.TestCase):
         opts = plot.Opts()
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str, "")
-        opts.date_zero = datetime.datetime(2019, 4, 1, 18, 0, 0)
+        opts.date_zero = dt.datetime(2019, 4, 1, 18, 0, 0)
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str, "  t(0) = 01-Apr-2019 18:00:00 Z")
 
@@ -94,11 +94,11 @@ class Test_plotting_Opts(unittest.TestCase):
 
     def test_get_time_limits2(self) -> None:
         opts = plot.Opts().convert_dates("datetime")
-        opts.disp_xmin = datetime.datetime(2020, 6, 1, 0, 0, 0)
-        opts.disp_xmax = datetime.datetime(2020, 6, 1, 12, 0, 0)
+        opts.disp_xmin = dt.datetime(2020, 6, 1, 0, 0, 0)
+        opts.disp_xmax = dt.datetime(2020, 6, 1, 12, 0, 0)
         d1, d2, r1, r2 = opts.get_time_limits()
-        self.assertEqual(d1, datetime.datetime(2020, 6, 1, 0, 0, 0))
-        self.assertEqual(d2, datetime.datetime(2020, 6, 1, 12, 0, 0))
+        self.assertEqual(d1, dt.datetime(2020, 6, 1, 0, 0, 0))
+        self.assertEqual(d2, dt.datetime(2020, 6, 1, 12, 0, 0))
         self.assertIsNone(r1)
         self.assertIsNone(r2)
 
@@ -139,17 +139,17 @@ class Test_plotting_Opts(unittest.TestCase):
 
     @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_convert_dates2(self) -> None:
-        opts = plot.Opts(date_zero=datetime.datetime(2020, 6, 1))
+        opts = plot.Opts(date_zero=dt.datetime(2020, 6, 1))
         opts.rms_xmin = -10
         opts.rms_xmax = 10
         opts.disp_xmin = 5
         opts.disp_xmax = 150
         opts.convert_dates("datetime")
         self.assertEqual(opts.time_base, "datetime")
-        self.assertEqual(opts.rms_xmin, datetime.datetime(2020, 5, 31, 23, 59, 50))
-        self.assertEqual(opts.rms_xmax, datetime.datetime(2020, 6, 1, 0, 0, 10))
-        self.assertEqual(opts.disp_xmin, datetime.datetime(2020, 6, 1, 0, 0, 5))
-        self.assertEqual(opts.disp_xmax, datetime.datetime(2020, 6, 1, 0, 2, 30))
+        self.assertEqual(opts.rms_xmin, dt.datetime(2020, 5, 31, 23, 59, 50))
+        self.assertEqual(opts.rms_xmax, dt.datetime(2020, 6, 1, 0, 0, 10))
+        self.assertEqual(opts.disp_xmin, dt.datetime(2020, 6, 1, 0, 0, 5))
+        self.assertEqual(opts.disp_xmax, dt.datetime(2020, 6, 1, 0, 2, 30))
 
 
 # %% plotting.suppress_plots and plotting.unsupress_plots
@@ -592,7 +592,7 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         )
 
     def test_datetimes(self) -> None:
-        date_zero = np.datetime64(datetime.date(2021, 2, 1)).astype(NP_DATETIME_FORM)
+        date_zero = np.datetime64(dt.date(2021, 2, 1)).astype(NP_DATETIME_FORM)
         data_np = date_zero + np.round(NP_INT64_PER_SEC * self.data).astype(NP_TIMEDELTA_FORM)
         bins_np = date_zero + np.round(NP_INT64_PER_SEC * self.bins).astype(NP_TIMEDELTA_FORM)
         # TODO: would prefer to handle this case better

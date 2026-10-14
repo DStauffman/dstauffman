@@ -1109,22 +1109,24 @@ class Test_aerospace_convert_att_quat_to_body_rate(unittest.TestCase):
     def test_nominal(self) -> None:
         num_pts = 5
         rates = np.tile(np.array([[0.01], [0.02], [-0.03]]), num_pts)
-        dt = 0.1
-        time = np.arange(0, num_pts * dt, dt)
+        delta_time = 0.1
+        time = np.arange(0, num_pts * delta_time, delta_time)
         init_quat = np.array([0.5, 0.5, -0.5, 0.5])
         quat = np.empty((4, num_pts))
         quat[:, 0] = init_quat
         for i in range(1, num_pts):
             quat[:, i] = space.quat_prop(quat[:, i - 1], rates[:, i - 1])
-        exp = 1 / dt * rates
+        exp = 1 / delta_time * rates
         out = space.convert_att_quat_to_body_rate(time, quat)
         np.testing.assert_array_almost_equal(out, exp, decimal=4)
 
     def test_datetime64(self) -> None:
         num_pts = 12
         rates = np.tile(np.array([[-0.01], [0.05], [-0.03]]), num_pts)
-        dt = 0.1 * NP_ONE_SECOND
-        time = np.datetime64("2025-04-10T13:50:00", NP_DATETIME_UNITS) + np.arange(ZERO_NP_SECONDS, num_pts * dt, dt)
+        delta_time = 0.1 * NP_ONE_SECOND
+        time = np.datetime64("2025-04-10T13:50:00", NP_DATETIME_UNITS) + np.arange(
+            ZERO_NP_SECONDS, num_pts * delta_time, delta_time
+        )
         init_quat = np.array([-0.5, 0.5, -0.5, 0.5])
         quat = np.empty((4, num_pts))
         quat[:, 0] = init_quat
@@ -1152,23 +1154,23 @@ class Test_aerospace_convert_att_quat_to_body_rate(unittest.TestCase):
     def test_two_quats(self) -> None:
         quat1 = np.array([0.5, -0.5, -0.5, 0.5])
         rate = np.array([-0.1, -0.2, -0.3])
-        dt = 10.0
+        delta_time = 10.0
         quat2 = space.quat_prop(quat1, rate)
-        time = np.array([100.0, 100.0 + dt])
+        time = np.array([100.0, 100.0 + delta_time])
         quat = np.vstack([quat1, quat2]).T
-        exp = 1 / dt * np.vstack([rate, rate]).T
+        exp = 1 / delta_time * np.vstack([rate, rate]).T
         out = space.convert_att_quat_to_body_rate(time, quat)
         np.testing.assert_array_almost_equal(out, exp, decimal=3)
 
     def test_no_append(self) -> None:
         quat1 = np.array([0.5, -0.5, -0.5, 0.5])
         rate = np.array([-0.001, -0.002, -0.003])
-        dt = 0.2
+        delta_time = 0.2
         quat2 = space.quat_prop(quat1, rate)
         quat3 = space.quat_prop(quat1, 2 * rate)
-        time = np.array([10.0, 10.0 + dt, 10.0 + 2 * dt])
+        time = np.array([10.0, 10.0 + delta_time, 10.0 + 2 * delta_time])
         quat = np.vstack([quat1, quat2, quat3]).T
-        exp = 1 / dt * np.vstack([rate, rate]).T
+        exp = 1 / delta_time * np.vstack([rate, rate]).T
         out = space.convert_att_quat_to_body_rate(time, quat, append=False)
         np.testing.assert_array_almost_equal(out, exp, decimal=5)
 

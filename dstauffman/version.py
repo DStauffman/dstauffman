@@ -8,7 +8,7 @@ Notes
 """
 
 # %% Constants
-version_info = (3, 10, 2)
+version_info = (3, 11, 0)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
@@ -30,6 +30,7 @@ Nov 04, 2024: dstauffman 3.7
 Apr 16, 2025: dstauffman 3.8
 Jun 20, 2025: dstauffman 3.9
 Aug 27, 2025: dstauffman 3.10
+Oct 13, 2026: dstauffman 3.11
 """
 
 # Historical notes:
@@ -52,3 +53,4 @@ Aug 27, 2025: dstauffman 3.10
 # v3.8 Ditch poetry entirely, use setuptools (and uv instead)
 # v3.9 Removed setup_dir and read/write text files and put into slog instead.
 # v3.10 Substantial refactor of plotting routines for clarity, better typing, and expanded capability.
+# v3.11 Drop python v3.11, use newer typing, import datetime as dt, try lazy imports.

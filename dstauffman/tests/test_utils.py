@@ -1312,11 +1312,11 @@ class Test_intersect(unittest.TestCase):
 
     def test_datetimes(self) -> None:
         date_zero = np.datetime64("2020-06-01 00:00:00", "ms")
-        dt = np.arange(0, 11000, 1000).astype("timedelta64[ms]")
-        a = date_zero + dt
-        dt[3] += np.timedelta64(5, "ms")
-        dt[5] -= np.timedelta64(30, "ms")
-        b = date_zero + dt
+        delta_time = np.arange(0, 11000, 1000).astype("timedelta64[ms]")
+        a = date_zero + delta_time
+        delta_time[3] += np.timedelta64(5, "ms")
+        delta_time[5] -= np.timedelta64(30, "ms")
+        b = date_zero + delta_time
         # no tolerance
         exp = np.array([0, 1, 2, 4, 6, 7, 8, 9, 10])
         c, ia, ib = dcs.intersect(a, b, tolerance=0, return_indices=True)  # type: ignore[call-overload]

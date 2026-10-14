@@ -2,7 +2,7 @@
 
 # %% Imports
 from copy import deepcopy
-import datetime
+import datetime as dt
 
 import numpy as np
 
@@ -28,7 +28,7 @@ q1 = space.quat_norm(np.array([0.1, -0.2, 0.3, 0.4]))
 dq = space.quat_from_euler(1e-6 * np.array([-300, 100, 200]), [3, 1, 2])
 q2 = space.quat_mult(dq, q1)
 
-date_zero = datetime.datetime(2020, 12, 19, 14, 20, 0)
+date_zero = dt.datetime(2020, 12, 19, 14, 20, 0)
 
 num_points = 11
 num_states = 6

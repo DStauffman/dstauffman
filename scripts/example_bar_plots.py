@@ -1,7 +1,7 @@
 """Earth Plotting Examples."""
 
 # %% Imports
-import datetime
+import datetime as dt
 
 import numpy as np
 
@@ -12,7 +12,7 @@ import dstauffman.plotting as plot
 if __name__ == "__main__":
     # Settings
     use_datetime = True
-    date_zero = datetime.datetime(2024, 12, 16, 23, 50, 0)
+    date_zero = dt.datetime(2024, 12, 16, 23, 50, 0)
 
     # Create data
     if use_datetime:  # noqa: SIM108

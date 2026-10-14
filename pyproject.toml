@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "dstauffman"
-version = "3.10.2"
+version = "3.11.0"
 description = "Generic python utilities for Aerospace applications"
 readme = "README.rst"
 dependencies = ["nubs", "slog"]
-requires-python = ">=3.11,<4.0"
+requires-python = ">=3.12,<4.0"
 authors = [
   {name = "David C. Stauffer", email = "dstauffman@yahoo.com"},
 ]
@@ -123,13 +123,6 @@ mypy_path              = [
     "$MYPY_CONFIG_FILE_DIR/../nubs",
     "$MYPY_CONFIG_FILE_DIR/../slog"]
 untyped_calls_exclude  = ["matplotlib"]
-#linecount_report       = ".mypy_report"
-#any_exprs_report       = ".mypy_report"
-#html_report            = ".mypy_report"
-#cobertura_xml_report   = ".mypy_report"
-#linecoverage_report    = ".mypy_report"
-#lineprecision_report   = ".mypy_report"
-#xml_report             = ".mypy_report"
 
 [[tool.mypy.overrides]]
 module = [
@@ -172,7 +165,7 @@ ignore = [
     "T201",  # `print` found
     "ANN401",  # dynamically typed expressions (Any) are disallowed in kwargs
     "COM812",  # Add trailing comma
-	"CPY001",  # Missing copyright notice at top of file
+    "CPY001",  # Missing copyright notice at top of file
     "DTZ001",  # datetime called without a tzinfo argument
     "DTZ005",  # datetime.now called without a tz argument
     "EM101",  # exception must not use string literal
@@ -182,7 +175,6 @@ ignore = [
     "FBT002",  # boolean default in positional argument
     "FBT003",  # boolean value in functional call
     "FIX002",  # line contains TODO
-	"ICN001",  # datetime should be imported as dt (eventually do this)
     "PLC0414",  # import alias does not rename original package
     "PLR0912",  # too many branches
     "PLR0913",  # too many arguments in function definition

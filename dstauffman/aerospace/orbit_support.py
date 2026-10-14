@@ -686,8 +686,8 @@ def get_sun_radec_approx(time_jd: _FN) -> tuple[np.floating, np.floating] | tupl
     --------
     >>> from dstauffman.aerospace import get_sun_radec_approx, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
-    >>> import datetime
-    >>> date = datetime.datetime(2010, 6, 20, 15, 30, 45)
+    >>> import datetime as dt
+    >>> date = dt.datetime(2010, 6, 20, 15, 30, 45)
     >>> np_date = convert_datetime_to_np(date)
     >>> time_jd = numpy_to_jd(np_date)
     >>> (ra, dec) = get_sun_radec_approx(time_jd)
@@ -763,8 +763,8 @@ def get_sun_radec(time_jd: _FN, return_early: bool = False) -> tuple[np.floating
     --------
     >>> from dstauffman.aerospace import get_sun_radec, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
-    >>> import datetime
-    >>> date = datetime.datetime(2010, 6, 21, 3, 30, 45)
+    >>> import datetime as dt
+    >>> date = dt.datetime(2010, 6, 21, 3, 30, 45)
     >>> np_date = convert_datetime_to_np(date)
     >>> time_jd = numpy_to_jd(np_date)
     >>> (ra, dec) = get_sun_radec(time_jd)
@@ -845,8 +845,8 @@ def get_sun_distance(time_jd: _FN) -> np.floating | _N:
     --------
     >>> from dstauffman.aerospace import get_sun_distance, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
-    >>> import datetime
-    >>> date = datetime.datetime(2010, 6, 21, 3, 30, 45)
+    >>> import datetime as dt
+    >>> date = dt.datetime(2010, 6, 21, 3, 30, 45)
     >>> np_date = convert_datetime_to_np(date)
     >>> time_jd = numpy_to_jd(np_date)
     >>> sun_dist_au = get_sun_distance(time_jd)
@@ -896,8 +896,8 @@ def get_moon_radec_approx(time_jd: _FN) -> tuple[np.floating, np.floating] | tup
     --------
     >>> from dstauffman.aerospace import get_moon_radec_approx, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
-    >>> import datetime
-    >>> date = datetime.datetime(2025,  7,  8, 22, 34, 16)
+    >>> import datetime as dt
+    >>> date = dt.datetime(2025,  7,  8, 22, 34, 16)
     >>> np_date = convert_datetime_to_np(date)
     >>> time_jd = numpy_to_jd(np_date)
     >>> (ra, dec) = get_moon_radec_approx(time_jd)
@@ -969,8 +969,8 @@ def get_moon_distance(time_jd: _FN) -> np.floating | _N:
     --------
     >>> from dstauffman.aerospace import get_moon_distance, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
-    >>> import datetime
-    >>> date = datetime.datetime(2025,  7,  1,  0, 34, 25)
+    >>> import datetime as dt
+    >>> date = dt.datetime(2025,  7,  1,  0, 34, 25)
     >>> np_date = convert_datetime_to_np(date)
     >>> time_jd = numpy_to_jd(np_date)
     >>> moon_dist_eu = get_moon_distance(time_jd)

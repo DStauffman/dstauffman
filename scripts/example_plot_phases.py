@@ -3,7 +3,7 @@
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from typing import TYPE_CHECKING
 
 from matplotlib.axes import Axes
@@ -53,13 +53,13 @@ if __name__ == "__main__":
 
     # %% Through wrapper
     dates = [
-        (datetime.datetime(2022, 11, 11, 11, 0, 0), datetime.datetime(2022, 11, 11, 11, 0, 30)),
-        (datetime.datetime(2022, 11, 11, 11, 5, 0), datetime.datetime(2022, 11, 11, 11, 6, 0)),
-        (datetime.datetime(2022, 11, 11, 11, 8, 15), datetime.datetime(2022, 11, 11, 11, 8, 30)),
+        (dt.datetime(2022, 11, 11, 11, 0, 0), dt.datetime(2022, 11, 11, 11, 0, 30)),
+        (dt.datetime(2022, 11, 11, 11, 5, 0), dt.datetime(2022, 11, 11, 11, 6, 0)),
+        (dt.datetime(2022, 11, 11, 11, 8, 15), dt.datetime(2022, 11, 11, 11, 8, 30)),
     ]
     time_phases = np.vstack([convert_datetime_to_np([d1, d2]) for d1, d2 in dates]).T
     temp = np.arange(601)
-    time2 = convert_datetime_to_np(datetime.datetime(2022, 11, 11, 11, 0, 0, 0)) + temp * NP_ONE_SECOND
+    time2 = convert_datetime_to_np(dt.datetime(2022, 11, 11, 11, 0, 0, 0)) + temp * NP_ONE_SECOND
     data2 = np.vstack([np.sin(temp / 10), np.cos(temp / 20)])
     extra_plotter = extra_plotter_func(time_phases, labels="Times", group_all=True, use_legend=False)
     fig2 = make_time_plot(

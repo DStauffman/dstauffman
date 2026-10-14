@@ -208,8 +208,8 @@ class Test_ecdf(unittest.TestCase):
     def test_nominal(self) -> None:
         y = np.random.default_rng().random(10000)
         x, f = dcs.ecdf(y)
-        dt = x[1] - x[0]
-        exp = np.arange(x[0], x[-1] + dt, dt)
+        dx = x[1] - x[0]
+        exp = np.arange(x[0], x[-1] + dx, dx)
         np.testing.assert_array_almost_equal(f, exp, 1)
 
     def test_integers(self) -> None:

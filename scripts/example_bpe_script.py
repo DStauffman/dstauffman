@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 from pathlib import Path
 from typing import Any, TYPE_CHECKING
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
     opti_opts.cost_args = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
     opti_opts.get_param_func = get_parameter
     opti_opts.set_param_func = set_parameter
-    opti_opts.output_folder  = dcs.get_output_dir() / datetime.datetime.now().strftime("%Y-%m-%d")
+    opti_opts.output_folder  = dcs.get_output_dir() / dt.datetime.now().strftime("%Y-%m-%d")
     opti_opts.output_results = Path("bpe_results.hdf5")
     opti_opts.params         = []
 

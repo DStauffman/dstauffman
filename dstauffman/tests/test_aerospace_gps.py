@@ -8,7 +8,7 @@ Notes
 """
 
 # %% Imports
-import datetime
+import datetime as dt
 from typing import Final
 import unittest
 
@@ -28,7 +28,7 @@ class Test_aerospace_gps_constants(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        self.assertIsInstance(space.GPS_DATE_ZERO, datetime.datetime)
+        self.assertIsInstance(space.GPS_DATE_ZERO, dt.datetime)
         self.assertIsInstance(space.ONE_DAY, int)
         self.assertIsInstance(space.DAYS_PER_WEEK, int)
         self.assertIsInstance(space.WEEK_ROLLOVER, int)
@@ -206,14 +206,14 @@ class Test_aerospace_gps_to_datetime(unittest.TestCase):
         week = np.array([1782, 1783])
         time = np.array([425916, 4132])
         date_gps = space.gps_to_datetime(week, time)
-        exp = [datetime.datetime(2014, 3, 6, 22, 18, 36), datetime.datetime(2014, 3, 9, 1, 8, 52)]
+        exp = [dt.datetime(2014, 3, 6, 22, 18, 36), dt.datetime(2014, 3, 9, 1, 8, 52)]
         self.assertEqual(date_gps, exp)
 
     def test_wrapped(self) -> None:
         week = 758  # 2806 when unrolled in 2021
         time = 425915.34
         date_gps = space.gps_to_datetime(week, time)
-        exp = datetime.datetime(2033, 10, 20, 22, 18, 35, 340000)
+        exp = dt.datetime(2033, 10, 20, 22, 18, 35, 340000)
         self.assertEqual(date_gps, exp)
 
     def test_alt_form(self) -> None:
@@ -239,53 +239,53 @@ class Test_aerospace_get_gps_to_utc_offset(unittest.TestCase):
     """
 
     def test_recent(self) -> None:
-        gps_days = (datetime.datetime.now() - datetime.datetime(1980, 1, 6)).days
+        gps_days = (dt.datetime.now() - dt.datetime(1980, 1, 6)).days
         gps_to_utc_offset = space.get_gps_to_utc_offset(gps_days)
         self.assertEqual(gps_to_utc_offset, -18)
 
     def test_bounds(self) -> None:
         for date, offset in [
-            (datetime.datetime(1980, 3, 1),   0), (datetime.datetime(1980, 9, 1),   0),
-            (datetime.datetime(1981, 3, 1),   0), (datetime.datetime(1981, 9, 1),  -1),
-            (datetime.datetime(1982, 3, 1),  -1), (datetime.datetime(1982, 9, 1),  -2),
-            (datetime.datetime(1983, 3, 1),  -2), (datetime.datetime(1983, 9, 1),  -3),
-            (datetime.datetime(1984, 3, 1),  -3), (datetime.datetime(1984, 9, 1),  -3),
-            (datetime.datetime(1985, 3, 1),  -3), (datetime.datetime(1985, 9, 1),  -4),
-            (datetime.datetime(1986, 3, 1),  -4), (datetime.datetime(1986, 9, 1),  -4),
-            (datetime.datetime(1987, 3, 1),  -4), (datetime.datetime(1987, 9, 1),  -4),
-            (datetime.datetime(1988, 3, 1),  -5), (datetime.datetime(1988, 9, 1),  -5),
-            (datetime.datetime(1989, 3, 1),  -5), (datetime.datetime(1989, 9, 1),  -5),
-            (datetime.datetime(1990, 3, 1),  -6), (datetime.datetime(1990, 9, 1),  -6),
-            (datetime.datetime(1991, 3, 1),  -7), (datetime.datetime(1991, 9, 1),  -7),
-            (datetime.datetime(1992, 3, 1),  -7), (datetime.datetime(1992, 9, 1),  -8),
-            (datetime.datetime(1993, 3, 1),  -8), (datetime.datetime(1993, 9, 1),  -9),
-            (datetime.datetime(1994, 3, 1),  -9), (datetime.datetime(1994, 9, 1), -10),
-            (datetime.datetime(1995, 3, 1), -10), (datetime.datetime(1995, 9, 1), -10),
-            (datetime.datetime(1996, 3, 1), -11), (datetime.datetime(1996, 9, 1), -11),
-            (datetime.datetime(1997, 3, 1), -11), (datetime.datetime(1997, 9, 1), -12),
-            (datetime.datetime(1998, 3, 1), -12), (datetime.datetime(1998, 9, 1), -12),
-            (datetime.datetime(1999, 3, 1), -13), (datetime.datetime(1999, 9, 1), -13),
-            (datetime.datetime(2000, 3, 1), -13), (datetime.datetime(2000, 9, 1), -13),
-            (datetime.datetime(2001, 3, 1), -13), (datetime.datetime(2001, 9, 1), -13),
-            (datetime.datetime(2002, 3, 1), -13), (datetime.datetime(2002, 9, 1), -13),
-            (datetime.datetime(2003, 3, 1), -13), (datetime.datetime(2003, 9, 1), -13),
-            (datetime.datetime(2004, 3, 1), -13), (datetime.datetime(2004, 9, 1), -13),
-            (datetime.datetime(2005, 3, 1), -13), (datetime.datetime(2005, 9, 1), -13),
-            (datetime.datetime(2006, 3, 1), -14), (datetime.datetime(2006, 9, 1), -14),
-            (datetime.datetime(2007, 3, 1), -14), (datetime.datetime(2007, 9, 1), -14),
-            (datetime.datetime(2008, 3, 1), -14), (datetime.datetime(2008, 9, 1), -14),
-            (datetime.datetime(2009, 3, 1), -15), (datetime.datetime(2009, 9, 1), -15),
-            (datetime.datetime(2010, 3, 1), -15), (datetime.datetime(2010, 9, 1), -15),
-            (datetime.datetime(2011, 3, 1), -15), (datetime.datetime(2011, 9, 1), -15),
-            (datetime.datetime(2012, 3, 1), -15), (datetime.datetime(2012, 9, 1), -16),
-            (datetime.datetime(2013, 3, 1), -16), (datetime.datetime(2013, 9, 1), -16),
-            (datetime.datetime(2014, 3, 1), -16), (datetime.datetime(2014, 9, 1), -16),
-            (datetime.datetime(2015, 3, 1), -16), (datetime.datetime(2015, 9, 1), -17),
-            (datetime.datetime(2016, 3, 1), -17), (datetime.datetime(2016, 9, 1), -17),
-            (datetime.datetime(2017, 3, 1), -18), (datetime.datetime(2017, 9, 1), -18),
-            (datetime.datetime(2018, 3, 1), -18), (datetime.datetime(2018, 9, 1), -18),
+            (dt.datetime(1980, 3, 1),   0), (dt.datetime(1980, 9, 1),   0),
+            (dt.datetime(1981, 3, 1),   0), (dt.datetime(1981, 9, 1),  -1),
+            (dt.datetime(1982, 3, 1),  -1), (dt.datetime(1982, 9, 1),  -2),
+            (dt.datetime(1983, 3, 1),  -2), (dt.datetime(1983, 9, 1),  -3),
+            (dt.datetime(1984, 3, 1),  -3), (dt.datetime(1984, 9, 1),  -3),
+            (dt.datetime(1985, 3, 1),  -3), (dt.datetime(1985, 9, 1),  -4),
+            (dt.datetime(1986, 3, 1),  -4), (dt.datetime(1986, 9, 1),  -4),
+            (dt.datetime(1987, 3, 1),  -4), (dt.datetime(1987, 9, 1),  -4),
+            (dt.datetime(1988, 3, 1),  -5), (dt.datetime(1988, 9, 1),  -5),
+            (dt.datetime(1989, 3, 1),  -5), (dt.datetime(1989, 9, 1),  -5),
+            (dt.datetime(1990, 3, 1),  -6), (dt.datetime(1990, 9, 1),  -6),
+            (dt.datetime(1991, 3, 1),  -7), (dt.datetime(1991, 9, 1),  -7),
+            (dt.datetime(1992, 3, 1),  -7), (dt.datetime(1992, 9, 1),  -8),
+            (dt.datetime(1993, 3, 1),  -8), (dt.datetime(1993, 9, 1),  -9),
+            (dt.datetime(1994, 3, 1),  -9), (dt.datetime(1994, 9, 1), -10),
+            (dt.datetime(1995, 3, 1), -10), (dt.datetime(1995, 9, 1), -10),
+            (dt.datetime(1996, 3, 1), -11), (dt.datetime(1996, 9, 1), -11),
+            (dt.datetime(1997, 3, 1), -11), (dt.datetime(1997, 9, 1), -12),
+            (dt.datetime(1998, 3, 1), -12), (dt.datetime(1998, 9, 1), -12),
+            (dt.datetime(1999, 3, 1), -13), (dt.datetime(1999, 9, 1), -13),
+            (dt.datetime(2000, 3, 1), -13), (dt.datetime(2000, 9, 1), -13),
+            (dt.datetime(2001, 3, 1), -13), (dt.datetime(2001, 9, 1), -13),
+            (dt.datetime(2002, 3, 1), -13), (dt.datetime(2002, 9, 1), -13),
+            (dt.datetime(2003, 3, 1), -13), (dt.datetime(2003, 9, 1), -13),
+            (dt.datetime(2004, 3, 1), -13), (dt.datetime(2004, 9, 1), -13),
+            (dt.datetime(2005, 3, 1), -13), (dt.datetime(2005, 9, 1), -13),
+            (dt.datetime(2006, 3, 1), -14), (dt.datetime(2006, 9, 1), -14),
+            (dt.datetime(2007, 3, 1), -14), (dt.datetime(2007, 9, 1), -14),
+            (dt.datetime(2008, 3, 1), -14), (dt.datetime(2008, 9, 1), -14),
+            (dt.datetime(2009, 3, 1), -15), (dt.datetime(2009, 9, 1), -15),
+            (dt.datetime(2010, 3, 1), -15), (dt.datetime(2010, 9, 1), -15),
+            (dt.datetime(2011, 3, 1), -15), (dt.datetime(2011, 9, 1), -15),
+            (dt.datetime(2012, 3, 1), -15), (dt.datetime(2012, 9, 1), -16),
+            (dt.datetime(2013, 3, 1), -16), (dt.datetime(2013, 9, 1), -16),
+            (dt.datetime(2014, 3, 1), -16), (dt.datetime(2014, 9, 1), -16),
+            (dt.datetime(2015, 3, 1), -16), (dt.datetime(2015, 9, 1), -17),
+            (dt.datetime(2016, 3, 1), -17), (dt.datetime(2016, 9, 1), -17),
+            (dt.datetime(2017, 3, 1), -18), (dt.datetime(2017, 9, 1), -18),
+            (dt.datetime(2018, 3, 1), -18), (dt.datetime(2018, 9, 1), -18),
         ]:  # fmt: skip
-            gps_days = (date - datetime.datetime(1980, 1, 6)).days
+            gps_days = (date - dt.datetime(1980, 1, 6)).days
             gps_to_utc_offset = space.get_gps_to_utc_offset(gps_days)
             self.assertEqual(gps_to_utc_offset, offset, f"For date {date}")
 
@@ -311,14 +311,14 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
         week = np.array([1782, 1783])
         time = np.array([425916, 4132])
         date_utc = space.gps_to_utc_datetime(week, time)
-        exp = [datetime.datetime(2014, 3, 6, 22, 18, 20), datetime.datetime(2014, 3, 9, 1, 8, 36)]
+        exp = [dt.datetime(2014, 3, 6, 22, 18, 20), dt.datetime(2014, 3, 9, 1, 8, 36)]
         self.assertEqual(date_utc, exp)
 
     def test_wrapped(self) -> None:
         week = 758  # 2806 when unrolled in 2021
         time = 425915.34
         date_utc = space.gps_to_utc_datetime(week, time)
-        exp = datetime.datetime(2033, 10, 20, 22, 18, 17, 340000)  # Note: will change with leap seconds
+        exp = dt.datetime(2033, 10, 20, 22, 18, 17, 340000)  # Note: will change with leap seconds
         self.assertEqual(date_utc, exp)
 
     def test_alt_form(self) -> None:
@@ -332,7 +332,7 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
         week = 2806
         time = 425915
         date_utc = space.gps_to_utc_datetime(week, time, gps_to_utc_offset=-200)
-        exp = datetime.datetime(2033, 10, 20, 22, 15, 15)
+        exp = dt.datetime(2033, 10, 20, 22, 15, 15)
         self.assertEqual(date_utc, exp)
 
     def test_unknown_form(self) -> None:

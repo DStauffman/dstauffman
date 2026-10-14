@@ -11,7 +11,7 @@ Notes
 from __future__ import annotations
 
 from collections.abc import Callable
-import datetime
+import datetime as dt
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -38,7 +38,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
     save: Callable[[Path | None], None]
     # fmt: on
 
-    def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None) -> None:
+    def __init__(self, num: float = 0, date_zero: dt.datetime | None = None) -> None:
         self.time = np.arange(num)
         self.data = np.random.default_rng().random(self.time.shape)
         self.date = np.full(self.time.shape, NP_NAT)
@@ -58,7 +58,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
 if __name__ == "__main__":
     # inputs
     num_pts = 100.0
-    origin = datetime.datetime(2022, 7, 1)
+    origin = dt.datetime(2022, 7, 1)
     filename = get_tests_dir() / "temp_results.hdf5"
 
     # create original structure and save to disk

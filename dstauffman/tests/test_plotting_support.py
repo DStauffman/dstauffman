@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime
+import datetime as dt
 import os
 import pathlib
 import platform
@@ -473,7 +473,7 @@ class Test_plotting_whitten(unittest.TestCase):
         self.assertEqual(new_color, (1.0, 0.58, 0.3))
 
     def test_blacken(self) -> None:
-        new_color = plot.whitten((1.0, 0.4, 0.0, 0.5), white=(0.0, 0.0, 0.0, 0.0), dt=0.5)
+        new_color = plot.whitten((1.0, 0.4, 0.0, 0.5), white=(0.0, 0.0, 0.0, 0.0), delta=0.5)
         self.assertEqual(new_color, (0.5, 0.2, 0.0, 0.25))
 
 
@@ -728,7 +728,7 @@ class Test_plotting_disp_xlimits(unittest.TestCase):
         plot.disp_xlimits(self.fig, xmax=NP_NAT, xmin=self.xmin)
 
     def test_datetime(self) -> None:
-        plot.disp_xlimits(self.fig, xmin=np.inf, xmax=datetime.datetime(2020, 4, 15, 0, 0, 0))
+        plot.disp_xlimits(self.fig, xmin=np.inf, xmax=dt.datetime(2020, 4, 15, 0, 0, 0))
 
     def tearDown(self) -> None:
         plt.close(self.fig)
@@ -1055,8 +1055,8 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
             np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_datetime(self) -> None:
-        date_zero = datetime.datetime(2026, 1, 15, 9, 0, 0)
-        ONE_SECOND = datetime.timedelta(seconds=1)
+        date_zero = dt.datetime(2026, 1, 15, 9, 0, 0)
+        ONE_SECOND = dt.timedelta(seconds=1)
         time_one = date_zero + self.time_one * ONE_SECOND  # type: ignore[operator]  # ty: ignore[unsupported-operator]
         time_two = date_zero + self.time_two * ONE_SECOND  # type: ignore[operator]  # ty: ignore[unsupported-operator]
         time_overlap = date_zero + self.time_overlap * ONE_SECOND  # type: ignore[operator]  # ty: ignore[unsupported-operator]

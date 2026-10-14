@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 import contextlib
-import datetime
+import datetime as dt
 import doctest
 from functools import partial
 import gc
@@ -81,8 +81,8 @@ if HAVE_MPL:
     import matplotlib.units as munits
 
     converter = ConciseDateConverter()
-    munits.registry[datetime.date] = converter
-    munits.registry[datetime.datetime] = converter
+    munits.registry[dt.date] = converter
+    munits.registry[dt.datetime] = converter
     if HAVE_DS:
         import datashader as ds
         from datashader.mpl_ext import alpha_colormap, dsshow
@@ -113,8 +113,8 @@ if TYPE_CHECKING:
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
     _M = NDArray[np.floating]  # 2D
-    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
-    _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...] | None  # fmt: skip
+    _Time = int | float | np.floating | dt.datetime | dt.date | np.datetime64 | None
+    _Times = int | float | np.floating | dt.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...] | None  # fmt: skip
     _Data = int | float | np.floating | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...] | None  # fmt: skip
     _FigOrListFig = Figure | list[Figure]
 
@@ -658,7 +658,9 @@ def ignore_plot_data(data: _Data | None, ignore_empties: bool, col: int | None =
 
 
 # %% Functions - whitten
-def whitten(color: tuple[float, ...], white: tuple[float, ...] = (1.0, 1.0, 1.0, 1.0), dt: float = 0.30) -> tuple[float, ...]:
+def whitten(
+    color: tuple[float, ...], white: tuple[float, ...] = (1.0, 1.0, 1.0, 1.0), delta: float = 0.30
+) -> tuple[float, ...]:
     r"""
     Shift an RGBA color towards white.
 
@@ -668,7 +670,7 @@ def whitten(color: tuple[float, ...], white: tuple[float, ...] = (1.0, 1.0, 1.0,
         Given color
     white : tuple, optional
         Color to *whitten* towards, usually assumed to be white
-    dt : float, optional
+    delta : float, optional
         Amount to move towards white, from 0 (none) to 1 (all the way), default is 0.3
 
     Examples
@@ -681,7 +683,7 @@ def whitten(color: tuple[float, ...], white: tuple[float, ...] = (1.0, 1.0, 1.0,
 
     """
     # apply the shift
-    new_color = tuple(c * (1 - dt) + w * dt for (c, w) in zip(color, white))
+    new_color = tuple(c * (1 - delta) + w * delta for (c, w) in zip(color, white))
     return new_color
 
 
@@ -1336,20 +1338,20 @@ def show_zero_ylim(ax: Axes) -> None:
     """
     # get the current y-limits, and the delta between them
     ylim = ax.get_ylim()
-    dt = ylim[1] - ylim[0]
+    dy = ylim[1] - ylim[0]
     changed = False
     # set zero to always be included
     if min(ylim) > 0:
         changed = True
         ax.set_ylim(bottom=0)
-        new_dt = ylim[1] - 0
+        new_dy = ylim[1] - 0
     if max(ylim) < 0:
         assert not changed, "Should never change both axes."
         changed = True
         ax.set_ylim(top=0)
-        new_dt = 0 - ylim[0]
+        new_dy = 0 - ylim[0]
     # if the old values fit within the top 5% of the original values, then pad by 10%
-    if changed and abs(dt) < abs(0.05 * new_dt):
+    if changed and abs(dy) < abs(0.05 * new_dy):
         ax.set_ylim(*(1.1 * x for x in ax.get_ylim()))
 
 
@@ -1532,7 +1534,7 @@ def get_rms_indices(
         if is_datetime(time):
             # if datetime, it's either the datetime.datetime version, or np.datetime64 version
             # process if any of the data is in the bound
-            process = func(time, t_bound) if isinstance(time, datetime.datetime) else not np.isnat(time)  # type: ignore[arg-type]
+            process = func(time, t_bound) if isinstance(time, dt.datetime) else not np.isnat(time)  # type: ignore[arg-type]
         elif time is None:
             process = False
         else:
@@ -2172,7 +2174,7 @@ def save_figs_to_pdf(
     assert isinstance(figs, list)
     assert len(figs) > 0, "There must be at least one figure to create a PDF from."
 
-    creation_date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+    creation_date = dt.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
     if dpi is None:
         dpi = 2 * (int(plt.rcParams["figure.dpi"]),)
     elif isinstance(dpi, int):
@@ -2282,10 +2284,10 @@ def save_images_to_pdf(
         folder = Path.cwd()
 
     # create the metadata
-    meta: dict[str, str | datetime.datetime] = {}
+    meta: dict[str, str | dt.datetime] = {}
     meta["Title"] = "PDF Figures"
     meta["Author"] = get_username()
-    meta["CreationDate"] = datetime.datetime.now()
+    meta["CreationDate"] = dt.datetime.now()
     meta["ModDate"] = meta["CreationDate"]
 
     # Create PDF of images
