@@ -147,7 +147,7 @@ def plot_map(
     cbar_colormap: str| ColorMap, optional
         Colormap used to color the orbit
     latlon_size : int
-        Size of the latitude/longitude dots on th e map, optional, default is 10
+        Size of the latitude/longitude dots on the map, optional, default is 10
     map_labels : dict[str, tuple[float, float]], optional
         Dict of label and lat/lon positions
     map_colors : dict[str, int | str], optional

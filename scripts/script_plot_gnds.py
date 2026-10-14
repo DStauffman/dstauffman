@@ -104,6 +104,17 @@ kd2 = deepcopy(kf2)
 kd2.time = dcs.convert_date(kf2.time, "numpy", date_zero=date_zero)  # type: ignore[assignment]
 kd2.innov.time = dcs.convert_date(kf2.innov.time, "numpy", date_zero=date_zero)
 
+# %% Names
+elements = {
+    1: "Attitude X",
+    2: "Attitude Y",
+    3: "Attitude Z",
+    4: "Gyro Bias 1A",
+    8: "Gyro Bias 1B",
+    12: "Gyro Bias 1C",
+    16: "Gyro Bias 1D",
+}
+
 # %% Plots
 if plots["att"]:
     f1 = plot.plot_attitude(kf1, kf2, opts=opts1)  # type: ignore[call-overload]
@@ -136,7 +147,8 @@ if plots["his"]:
     f4 = plot.plot_innov_hist(kd1.innov, bins, opts=opts4, normalize_spacing=True, show_cdf=True)
 
 if plots["cov"]:
-    f1 = plot.plot_covariance(kf1, kf2, opts=opts1)  # type: ignore[call-overload]
+    groups = [(1, 2, 3), (4, 8, 12, 16)]
+    f1 = plot.plot_covariance(kf1, kf2, opts=opts1, groups=groups, elements=elements)  # type: ignore[call-overload]
     f2 = plot.plot_covariance(kd1, kd2, opts=opts2, second_units=("mrad", 1e3))  # type: ignore[call-overload]
     f3 = plot.plot_covariance(kf1, kf2, opts=opts3, leg_scale="milli")  # type: ignore[call-overload]
     f4 = plot.plot_covariance(kd1, kd2, opts=opts4, leg_scale="milli", second_units=("nrad", 1e9))  # type: ignore[call-overload]

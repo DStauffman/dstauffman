@@ -42,8 +42,8 @@ if __name__ == "__main__":
     line2 = "2 25544  51.6387 190.3157 0006984 301.4763 161.1609 15.50217009485000"
     oe = space.two_line_elements(line1, line2)
     t = np.datetime64("2024-12-05T00:20:59", dcs.NP_DATETIME_UNITS)
-    dt = 15 * dcs.NP_ONE_SECOND
-    time = t + np.arange(dcs.ZERO_NP_SECONDS, oe.T * dcs.NP_ONE_SECOND + dt, dt)  # type: ignore[arg-type]
+    delta_time = 15 * dcs.NP_ONE_SECOND
+    time = t + np.arange(dcs.ZERO_NP_SECONDS, oe.T * dcs.NP_ONE_SECOND + delta_time, delta_time)  # type: ignore[arg-type]
     mu = 3.9863e14
 
     delta_time_sec = (time - time[0]) / dcs.NP_ONE_SECOND  # TODO: should be oe.t?

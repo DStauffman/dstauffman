@@ -60,9 +60,7 @@ if __name__ == "__main__":
     data1 = copy.deepcopy(first)
     filename1 = folder / "test_file1.hdf5"
     meta = {"num_pts": num_pts}
-    exclusions = {
-        "ver",
-    }
+    exclusions = {"ver"}
     dcs.save_hdf5(data1, filename1, meta=meta, exclusions=exclusions)
 
     out1, meta1 = dcs.load_hdf5(None, filename1, return_meta=True)

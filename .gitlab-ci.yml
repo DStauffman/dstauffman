@@ -73,6 +73,17 @@ ruff:
   - ruff --version
   - ruff check .
 
+ruff_format:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+  - pwd
+  - ls -l
+  - source .cache/static/bin/activate
+  - python --version
+  - ruff --version
+  - ruff format .
+
 ty:
   stage: Static Analysis
   allow_failure: true
