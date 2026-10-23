@@ -1982,13 +1982,13 @@ def plot_classification(
     # other locations within the figure
     vert_align = "bottom"
     if location == "figure":
-        text_pos = (1.0, 0.005)
+        text_pos = (1.0, 0.012)
         horz_align = "right"
     elif location == "left":
-        text_pos = (0.0, 0.005)
+        text_pos = (0.0, 0.012)
         horz_align = "left"
     elif location == "top":
-        text_pos = (0.0, 0.995)
+        text_pos = (0.0, 0.985)
         horz_align = "left"
         vert_align = "top"
     else:
@@ -2005,7 +2005,7 @@ def plot_classification(
         verticalalignment=vert_align,
         linespacing=0,
         annotation_clip=False,
-        bbox={"boxstyle": "square", "facecolor": "none", "edgecolor": color, "linewidth": 2},
+        bbox={"boxstyle": "square,pad=0.8", "facecolor": "none", "edgecolor": color, "linewidth": 2},
     )
     # add border
     fig = ax.figure
