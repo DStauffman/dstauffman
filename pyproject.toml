@@ -231,6 +231,7 @@ allowed-unresolved-imports = ["numba.**"]
 include = ["dstauffman", "scripts"]
 
 [tool.ty.overrides.rules]
+import-not-found = "ignore"
 invalid-argument-type = "ignore"
 invalid-assignment = "ignore"
 invalid-key = "ignore"
@@ -244,7 +245,6 @@ not-subscriptable = "ignore"
 parameter-already-assigned = "ignore"
 unknown-argument = "ignore"
 unresolved-attribute = "ignore"
-unresolved-import = "ignore"
 
 # Relax rules for test files
 [[tool.ty.overrides]]
