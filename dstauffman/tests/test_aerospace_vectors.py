@@ -121,6 +121,7 @@ class Test_aerospace_vec_angle(unittest.TestCase):
     Tests the aerospace.vec_angle function with the following cases:
         Small angle
         Small angle without cross
+        90 angle with and without cross product
         Nominal
         Vectorized (x3)
     """
@@ -129,9 +130,8 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         self.vec1 = np.array([1.0, 0.0, 0.0])
         self.vec2 = space.rot(2, 1e-5) @ self.vec1
         self.vec3 = np.array([np.sqrt(2) / 2, np.sqrt(2) / 2, 0.0])
-        self.exp1 = 1e-5
-        self.exp2 = np.pi / 4
-        self.exp3 = 2 * np.pi / 3
+        self.exp1 = 1e-5  # between vec1 and vec2
+        self.exp2 = np.pi / 4  # between vec1 and vec3
 
     def test_small(self) -> None:
         angle = space.vec_angle(self.vec1, self.vec2)
@@ -140,6 +140,20 @@ class Test_aerospace_vec_angle(unittest.TestCase):
     def test_bad_small(self) -> None:
         angle = space.vec_angle(self.vec1, self.vec2, use_cross=False)
         self.assertTrue(np.abs(angle - self.exp1) > 1e-14)
+
+    def test_90_deg(self) -> None:
+        theta = np.pi / 2
+        vec1 = np.array([1.0, 1.0, 1.0]) / np.sqrt(3)
+        ref = np.array([0.0, 0.0, 1.0])
+        u = np.cross(vec1, ref)
+        w = np.cross(vec1, u)
+        phi = np.pi / 4
+        vec2 = np.cos(theta) * vec1 + np.sin(theta) * (np.cos(phi) * u + np.sin(phi) * w)
+        vec2[:] /= np.linalg.norm(vec2)
+        angle = space.vec_angle(vec1, vec2, use_cross=True)
+        self.assertAlmostEqual(angle, theta, 14)  # type: ignore[misc]
+        angle = space.vec_angle(vec1, vec2, use_cross=False)
+        self.assertAlmostEqual(angle, theta, 14)  # type: ignore[misc]
 
     def test_nominal(self) -> None:
         angle = space.vec_angle(self.vec1, self.vec3)
@@ -209,14 +223,18 @@ class Test_aerospace_vec_angle(unittest.TestCase):
             space.vec_angle(np.array([1.0, 0.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0, 0.0]), use_cross=True)
 
     def test_2d_vector(self) -> None:
-        angle = space.vec_angle(np.array([1.0, 0.0]), np.array([-0.5, np.sqrt(3) / 2]), use_cross=False)
-        self.assertAlmostEqual(angle, self.exp3, 14)  # type: ignore[misc]
-        angle = space.vec_angle(np.array([1.0, 0.0]), np.array([-0.5, -np.sqrt(3) / 2]), use_cross=False)
-        self.assertAlmostEqual(angle, self.exp3, 14)  # type: ignore[misc]
-        angle = space.vec_angle(np.array([1.0, 0.0]), np.array([-0.5, np.sqrt(3) / 2]), use_cross=True)
-        self.assertAlmostEqual(angle, self.exp3, 14)  # type: ignore[misc]
-        angle = space.vec_angle(np.array([1.0, 0.0]), np.array([-0.5, -np.sqrt(3) / 2]), use_cross=True)
-        self.assertAlmostEqual(angle, self.exp3, 14)  # type: ignore[misc]
+        vec1 = np.array([1.0, 0.0])
+        vec2a = np.array([-0.5, np.sqrt(3) / 2])
+        vec2b = np.array([-0.5, -np.sqrt(3) / 2])
+        exp = 2 * np.pi / 3  # between 2D vectors
+        angle = space.vec_angle(vec1, vec2a, use_cross=False)
+        self.assertAlmostEqual(angle, exp, 14)  # type: ignore[misc]
+        angle = space.vec_angle(vec1, vec2b, use_cross=False)
+        self.assertAlmostEqual(angle, exp, 14)  # type: ignore[misc]
+        angle = space.vec_angle(vec1, vec2a, use_cross=True)
+        self.assertAlmostEqual(angle, exp, 14)  # type: ignore[misc]
+        angle = space.vec_angle(vec1, vec2b, use_cross=True)
+        self.assertAlmostEqual(angle, exp, 14)  # type: ignore[misc]
 
 
 # %% aerospace.cart2sph

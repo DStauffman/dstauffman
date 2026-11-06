@@ -602,7 +602,7 @@ def quat_from_euler(angles: ArrayLike, seq: ArrayLike | None = None, **kwargs: U
         raise ValueError(f'Unexpected number of dimensions in angle: "{ndim}"')
     # get the number of quaternions to end up making
     assert isinstance(angles, np.ndarray)
-    num = angles.shape[1]  # ty: ignore[index-out-of-bounds]
+    num = angles.shape[1]
     # initialize output
     quat = np.zeros((QUAT_SIZE, num))
     # check that seq is iterable

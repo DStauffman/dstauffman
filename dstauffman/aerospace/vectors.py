@@ -253,17 +253,19 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     if not normalized:
         vec1 = unit(vec1)
         vec2 = unit(vec2)
+    # get a floating point tolerance
+    eps_3 = 3 * np.finfo(float).eps
     # calculate the result using dot products
     # Note: using sum and multiply instead of dot for 2D case
     dot_prod = np.multiply(vec1.T, np.conj(vec2).T).T
-    temp = np.sum(dot_prod, axis=0)
+    dot_temp = np.sum(dot_prod, axis=0)
     # handle small floating point errors (but let others still crash)
-    if temp.ndim == 0:
-        if temp > 1.0 and temp < 1 + 3 * np.finfo(float).eps:  # pylint: disable=chained-comparison
-            temp = 1.0  # type: ignore[assignment]
+    if dot_temp.ndim == 0:
+        if dot_temp > 1.0 and dot_temp < 1 + eps_3:  # pylint: disable=chained-comparison
+            dot_temp = 1.0  # type: ignore[assignment]
     else:
-        temp[(temp > 1.0) & (temp < 1 + 3 * np.finfo(float).eps)] = 1.0
-    dot_result = np.arccos(temp)  # np.arccos(temp, out=np.full(temp.shape, np.nan), where=temp <= 1.0)
+        dot_temp[(dot_temp > 1.0) & (dot_temp < 1 + eps_3)] = 1.0
+    dot_result = np.arccos(dot_temp)  # np.arccos(temp, out=np.full(temp.shape, np.nan), where=temp <= 1.0)
     if not use_cross:
         return dot_result
     # if desired, use cross product result, which is more accurate for small differences, but has
@@ -274,13 +276,13 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
         cross_prod = (vec1.T[..., 0] * vec2.T[..., 1] - vec1.T[..., 1] * vec2.T[..., 0]).T
     else:
         cross_prod = np.cross(vec1.T, vec2.T).T
-    temp = np.sqrt(np.sum(cross_prod**2, axis=0))
+    cross_temp = np.sqrt(np.sum(cross_prod**2, axis=0))
     # return dot product result for sums greater than 1 (due to small numerical inconsistencies near 180 deg separation)
-    if temp.ndim == 0:
+    if cross_temp.ndim == 0:
         # Note: this seems like a bug in numpy to have to have this branch
-        cross_result = np.arcsin(temp) if temp <= 1.0 else dot_result
+        cross_result = np.arcsin(cross_temp) if cross_temp <= 1.0 else dot_result
     else:
-        cross_result = np.arcsin(temp, out=dot_result.copy(), where=temp <= 1.0)
+        cross_result = np.arcsin(cross_temp, out=dot_result.copy(), where=cross_temp <= 1.0)
     return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)
 
 

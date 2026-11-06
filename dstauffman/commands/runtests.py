@@ -8,6 +8,8 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import argparse
 import doctest
 import os
@@ -15,11 +17,27 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
+from typing import TYPE_CHECKING
 import unittest
 
 from slog import list_python_files, ReturnCodes
 
 from dstauffman import get_root_dir, get_tests_dir, run_coverage, run_docstrings, run_pytests, run_unittests
+
+if TYPE_CHECKING:
+    from typing import Protocol
+
+    class _ArgsRunTests(Protocol):
+        docstrings: bool
+        unittest: bool
+        verbose: bool
+        library: str | None
+        coverage: bool
+        cov_file: str | None
+
+    class _ArgsCoverage(Protocol):
+        no_report: bool
+        cov_file: str | None
 
 
 # %% Functions - parse_tests
@@ -69,7 +87,7 @@ def parse_tests(input_args: list[str]) -> argparse.Namespace:
 
 
 # %% Functions - execute_tests
-def execute_tests(args: argparse.Namespace) -> int:
+def execute_tests(args: _ArgsRunTests) -> int:
     r"""
     Executes the tests commands.
 
@@ -99,7 +117,7 @@ def execute_tests(args: argparse.Namespace) -> int:
     # alias options
     # fmt: off
     coverage   = args.coverage
-    cov_file   = args.cov_file
+    cov_file   = Path(args.cov_file) if args.cov_file is not None else args.cov_file
     docstrings = args.docstrings
     library    = args.library
     verbose    = args.verbose
@@ -173,7 +191,7 @@ def parse_coverage(input_args: list[str]) -> argparse.Namespace:
 
 
 # %% Functions - execute_coverage
-def execute_coverage(args: argparse.Namespace) -> int:
+def execute_coverage(args: _ArgsCoverage) -> int:
     r"""
     Executes the coverage commands.
 
@@ -201,7 +219,7 @@ def execute_coverage(args: argparse.Namespace) -> int:
     """
     # alias options
     report = not args.no_report
-    cov_file = args.cov_file
+    cov_file = Path(args.cov_file) if args.cov_file is not None else args.cov_file
 
     # get test location information
     folder = get_root_dir()

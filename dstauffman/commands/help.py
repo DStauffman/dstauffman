@@ -8,14 +8,23 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import argparse
 import doctest
 from pathlib import Path
+from typing import TYPE_CHECKING
 import unittest
 
 from slog import ReturnCodes
 
 from dstauffman import get_root_dir, version_info
+
+if TYPE_CHECKING:
+    from typing import Protocol
+
+    class _EmptyArgs(Protocol):
+        """Empty Namespace."""
 
 
 # %% Functions - print_help
@@ -132,7 +141,7 @@ def parse_version(input_args: list[str]) -> argparse.Namespace:
 
 
 # %% Functions - execute_help
-def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument  # noqa: ARG001
+def execute_help(args: _EmptyArgs) -> int:  # pylint: disable=unused-argument  # noqa: ARG001
     r"""
     Executes the help command.
 
@@ -158,7 +167,7 @@ def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-arg
 
 
 # %% Functions - execute_version
-def execute_version(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument  # noqa: ARG001
+def execute_version(args: _EmptyArgs) -> int:  # pylint: disable=unused-argument  # noqa: ARG001
     r"""
     Executes the version command.
 
