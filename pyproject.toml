@@ -251,7 +251,7 @@ unresolved-attribute = "ignore"
 include = ["**/tests/test_*.py"]
 
 [tool.ty.overrides.rules]
-unresolved-import = "ignore"
+import-not-found = "ignore"
 
 [tool.uv.sources]
 nubs = { path = "../nubs" }
