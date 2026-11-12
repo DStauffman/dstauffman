@@ -8,6 +8,9 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import patch
 import warnings
@@ -18,8 +21,10 @@ from dstauffman import HAVE_MPL, HAVE_NUMPY
 from dstauffman.aerospace import Kf
 import dstauffman.plotting as plot
 
-if HAVE_MPL:
+if TYPE_CHECKING:
     from matplotlib.figure import Figure
+
+if HAVE_MPL:
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np

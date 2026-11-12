@@ -19,13 +19,14 @@ import unittest
 from nubs import ncjit
 
 from dstauffman import HAVE_NUMPY, mat_divide
-from dstauffman.aerospace import KfRecord
 
 if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+    from dstauffman.aerospace import KfRecord
 
     _N = NDArray[np.floating]
     _M = NDArray[np.floating]  # 2D

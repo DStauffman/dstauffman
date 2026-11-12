@@ -15,7 +15,6 @@ Notes
 from __future__ import annotations
 
 import doctest
-from pathlib import Path
 from typing import Any, Final, overload, TYPE_CHECKING
 import unittest
 
@@ -29,6 +28,8 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from numpy.typing import NDArray
 
     _B = NDArray[np.bool_]

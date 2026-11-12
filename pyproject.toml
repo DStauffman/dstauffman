@@ -153,13 +153,13 @@ target-version = "py314"
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+    "B028",  # no explicit stacklevel keyword argument
+    "B905",  # zip without an explicit strict parameter
     "D105",  # missing docstring in magic method
     "D107",  # missing docstring in __init__
     "D203",  # one blank line required before class docstring
     "D212",  # multiline docstring summary should start at the first line
     "D401",  # first line of docstring should be in imperative mood
-    "B028",  # no explicit stacklevel keyword argument
-    "B905",  # zip without an explicit strict parameter
     "E501",  # line too long, (use black/ruff format to manage this)
     "S101",  # Use of assert
     "T201",  # `print` found
@@ -183,13 +183,9 @@ ignore = [
     "PT009",  # Use assert instead of unittest assertEqual
     "PT027",  # Use raises instead of assertRaises
     "RET504",  # Unnecessary assignment before return
-    "TC001",  # Move application import into type checking block
-    "TC002",  # Move third party import into type checking block
-    "TC003",  # Move standard library import into type checking block
     "TD002",  # Missing author in TODO
     "TD003",  # Missing issue link in TODO
     "TRY003",  # Avoid specifying long messages outside exceptions
-    "UP015",  # Unnecessary mode argument
 ]
 
 [tool.ruff.lint.isort]

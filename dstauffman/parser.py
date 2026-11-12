@@ -10,15 +10,18 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import argparse
-from collections.abc import Callable
 from dataclasses import dataclass
 import doctest
 import logging
 import sys
+from typing import TYPE_CHECKING
 import unittest
 
 from slog import activate_logging, LogLevel, ReturnCodes
+
+if TYPE_CHECKING:
+    import argparse
+    from collections.abc import Callable
 
 # %% Globals
 logger = logging.getLogger(__name__)

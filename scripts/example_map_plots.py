@@ -2,14 +2,17 @@
 
 # %% Imports
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 import numpy as np
 
 import dstauffman as dcs
 import dstauffman.aerospace as space
 import dstauffman.plotting as plot
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
 
 
 # %% Functions - _extra_plotter_factory

@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import argparse
 import doctest
-from pathlib import Path
 from typing import TYPE_CHECKING
 import unittest
 
@@ -21,6 +20,7 @@ from slog import ReturnCodes
 from dstauffman import get_root_dir, version_info
 
 if TYPE_CHECKING:
+    from pathlib import Path
     from typing import Protocol
 
     class _EmptyArgs(Protocol):

@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import datetime as dt
 import os
-import pathlib
 import platform
 from typing import NotRequired, TYPE_CHECKING, TypedDict
 import unittest
@@ -33,9 +32,7 @@ import dstauffman.plotting as plot
 if HAVE_MPL:
     import matplotlib as mpl
     from matplotlib import colors
-    from matplotlib.axes import Axes
     import matplotlib.cm as cmx
-    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -53,6 +50,10 @@ _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
 _HAVE_QT_PLATFORM = "QT_QPA_PLATFORM" not in os.environ or os.environ["QT_QPA_PLATFORM"] != "offscreen"
 
 if TYPE_CHECKING:
+    import pathlib
+
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
     from numpy.typing import NDArray
 
     _N = NDArray[np.floating]

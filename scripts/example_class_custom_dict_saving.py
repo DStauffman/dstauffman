@@ -10,9 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
 import datetime as dt
-from pathlib import Path
 from typing import ClassVar, TYPE_CHECKING
 
 import numpy as np
@@ -20,6 +18,9 @@ import numpy as np
 from dstauffman import compare_two_classes, convert_datetime_to_np, Frozen, get_tests_dir, NP_NAT, NP_ONE_SECOND, SaveAndLoad
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
     from mypy_extensions import DefaultNamedArg
     from numpy.typing import NDArray
 

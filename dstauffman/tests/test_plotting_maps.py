@@ -10,12 +10,13 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY
 import dstauffman.plotting as plot
 
-if HAVE_MPL:
+if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
 

@@ -6,8 +6,6 @@ from __future__ import annotations
 import datetime as dt
 from typing import TYPE_CHECKING
 
-from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -15,6 +13,8 @@ from dstauffman import convert_datetime_to_np, NP_ONE_SECOND
 from dstauffman.plotting import COLOR_LISTS, ExtraPlotter, make_time_plot, plot_phases
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
     from numpy.typing import NDArray
 
     _D = NDArray[np.datetime64]

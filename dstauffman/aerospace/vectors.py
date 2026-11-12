@@ -10,7 +10,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
 import doctest
 from typing import Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
@@ -23,6 +22,8 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import NDArray
 
     _D = NDArray[np.datetime64]

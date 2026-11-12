@@ -12,9 +12,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
 import doctest
-from pathlib import Path
 import sys
 from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
@@ -41,6 +39,9 @@ if HAVE_PANDAS:
 
 # %% Constants
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
     import numpy as np
     from numpy.typing import NDArray
 

@@ -10,10 +10,8 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
 import datetime as dt
-from pathlib import Path
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TYPE_CHECKING
 
 import numpy as np
 
@@ -27,6 +25,10 @@ from dstauffman import (
     NP_ONE_SECOND,
     SaveAndLoad,
 )
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
 
 
 # %% Classes

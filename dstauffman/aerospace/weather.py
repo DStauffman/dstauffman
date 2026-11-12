@@ -12,10 +12,13 @@ from __future__ import annotations
 
 import datetime as dt
 import doctest
-from pathlib import Path
+from typing import TYPE_CHECKING
 import unittest
 
 from dstauffman import HAVE_NUMPY, HAVE_PANDAS, NP_NAT
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 if HAVE_NUMPY:
     import numpy as np
@@ -81,7 +84,7 @@ def read_kp_ap_etc_data(filename: Path) -> pd.DataFrame:
     # fmt: on
     df = pd.read_table(filename, names=names, sep=r"\s+", comment="#")
     # convert year-month-day to a GMT value
-    df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)  # noqa: PD002
+    df = df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"})
     df.insert(0, "GMT", pd.to_datetime(df[["year", "month", "day"]]))
     return df
 
@@ -92,7 +95,7 @@ def read_kp_ap_nowcast(filename: Path) -> pd.DataFrame:
     names = ["YYY", "MM", "DD", "hour_start", "hour_middle", "days", "days_m", "Kp", "ap", "D"]
     df = pd.read_table(filename, names=names, sep=r"\s+", comment="#")
     # convert year-moth-day to a GMT value (including hour)
-    df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)  # noqa: PD002
+    df = df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"})
     df.insert(0, "GMT", pd.to_datetime(df[["year", "month", "day"]]) + pd.to_timedelta(df.hour_start, "hour"))
     return df
 

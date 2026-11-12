@@ -10,10 +10,8 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-import datetime as dt
 import doctest
 import logging
-from pathlib import Path
 from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
@@ -39,16 +37,19 @@ from dstauffman.plotting.support import (
 )
 
 if HAVE_MPL:
-    from matplotlib.axes import Axes
     from matplotlib.colors import Colormap, ListedColormap
     from matplotlib.dates import date2num
-    from matplotlib.figure import Figure
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    import datetime as dt
+    from pathlib import Path
+
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
     from numpy.typing import NDArray
 
     _B = NDArray[np.bool_]

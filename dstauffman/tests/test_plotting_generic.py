@@ -8,7 +8,10 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import datetime as dt
+from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
 
@@ -18,8 +21,10 @@ from dstauffman import HAVE_DS, HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT6
 from dstauffman.aerospace import quat_norm
 import dstauffman.plotting as plot
 
-if HAVE_MPL:
+if TYPE_CHECKING:
     from matplotlib.figure import Figure
+
+if HAVE_MPL:
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np

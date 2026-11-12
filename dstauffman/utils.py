@@ -21,7 +21,6 @@ import doctest
 from functools import reduce
 import inspect
 import os
-from pathlib import Path
 import shlex
 import subprocess
 import sys
@@ -48,6 +47,8 @@ if HAVE_SCIPY:
     from scipy.signal import butter, sosfiltfilt
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from numpy.typing import ArrayLike, NDArray
 
     _B = NDArray[np.bool_]

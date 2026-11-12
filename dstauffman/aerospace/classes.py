@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import copy
 import doctest
-from pathlib import Path
 from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
@@ -23,6 +22,8 @@ if HAVE_H5PY:
 if HAVE_NUMPY:
     import numpy as np
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from numpy.typing import DTypeLike, NDArray
 
     _B = NDArray[np.bool_]

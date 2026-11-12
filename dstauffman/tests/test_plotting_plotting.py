@@ -21,7 +21,6 @@ from dstauffman import get_tests_dir, HAVE_MPL, HAVE_NUMPY, NP_DATETIME_FORM, NP
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
-    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -31,6 +30,7 @@ else:
     from math import inf
 
 if TYPE_CHECKING:
+    from matplotlib.figure import Figure
     from numpy.typing import NDArray
 
     _I = NDArray[np.int_]

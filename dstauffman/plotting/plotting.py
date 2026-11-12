@@ -13,7 +13,6 @@ from __future__ import annotations
 import datetime as dt
 import doctest
 import logging
-from pathlib import Path
 from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 import warnings
@@ -31,7 +30,6 @@ from dstauffman import (
     histcounts,
     np_digitize,
 )
-from dstauffman.aerospace import Kf, KfInnov
 from dstauffman.plotting.generic import make_bar_plot, make_difference_plot, make_time_plot
 from dstauffman.plotting.support import (
     ColorMap,
@@ -48,9 +46,7 @@ from dstauffman.plotting.support import (
 
 if HAVE_MPL:
     from matplotlib import colors, transforms
-    from matplotlib.axes import Axes
     from matplotlib.collections import PatchCollection
-    from matplotlib.figure import Figure
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
@@ -62,7 +58,13 @@ else:
     from math import inf, isfinite  # type: ignore[assignment]
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
     from numpy.typing import NDArray
+
+    from dstauffman.aerospace import Kf, KfInnov
 
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]

@@ -10,8 +10,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
-import datetime as dt
 import doctest
 import logging
 from typing import Any, Literal, NotRequired, overload, Protocol, TYPE_CHECKING, TypedDict
@@ -49,11 +47,7 @@ from dstauffman.plotting.support import (
 )
 
 if HAVE_MPL:
-    from matplotlib.axes import Axes
     from matplotlib.collections import LineCollection
-    from matplotlib.colors import Colormap, ListedColormap
-    from matplotlib.figure import Figure
-    from matplotlib.lines import Line2D
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -70,6 +64,13 @@ _LEG_FORMAT = "{:1.3f}"
 _TRUTH_COLOR = "k"
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+    import datetime as dt
+
+    from matplotlib.axes import Axes
+    from matplotlib.colors import Colormap, ListedColormap
+    from matplotlib.figure import Figure
+    from matplotlib.lines import Line2D
     from numpy.typing import NDArray
 
     _B = NDArray[np.bool_]

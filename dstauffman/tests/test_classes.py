@@ -10,8 +10,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
-import pathlib
 from typing import ClassVar, TYPE_CHECKING
 import unittest
 
@@ -29,6 +27,9 @@ if dcs.HAVE_PANDAS:
     from pandas import DataFrame
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    import pathlib
+
     from mypy_extensions import DefaultNamedArg
     from numpy.typing import NDArray
 

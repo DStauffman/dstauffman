@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import doctest
 import json
-from pathlib import Path
 from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
@@ -23,13 +22,15 @@ from dstauffman.plotting.plotting import ColorMap, ExtraPlotter, Opts, setup_plo
 
 if HAVE_MPL:
     from matplotlib.colors import ListedColormap
-    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
     from mpl_toolkits.mplot3d.art3d import Poly3DCollection  # type: ignore[import-untyped]
 if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
+    from matplotlib.figure import Figure
     from numpy.typing import NDArray
 
     _F = float | np.floating

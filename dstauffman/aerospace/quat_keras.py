@@ -15,7 +15,7 @@ import importlib.util
 from typing import TYPE_CHECKING
 import unittest
 
-from dstauffman import HAVE_KERAS, HAVE_NUMPY
+from dstauffman import HAVE_KERAS
 
 if HAVE_KERAS:
     import keras
@@ -28,10 +28,8 @@ if HAVE_KERAS:
 elif importlib.util.find_spec("jax") is not None:
     import jax.numpy as ops  # pylint: disable=ungrouped-imports
 
-if HAVE_NUMPY:
-    import numpy as np
-
 if TYPE_CHECKING:
+    import numpy as np
     from numpy.typing import NDArray
 
     _Q = NDArray[np.floating]  # shape (..., 4)

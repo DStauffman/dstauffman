@@ -19,12 +19,11 @@ from dstauffman import HAVE_MPL, HAVE_NUMPY
 from dstauffman.estimation import BpeResults
 import dstauffman.plotting as plot
 
-if HAVE_MPL:
-    from matplotlib.figure import Figure
 if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    from matplotlib.figure import Figure
     from numpy.typing import NDArray
 
     _N = NDArray[np.floating]

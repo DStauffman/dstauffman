@@ -12,7 +12,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
 import contextlib
 import datetime as dt
 import doctest
@@ -105,6 +104,8 @@ if importlib.util.find_spec("PIL") is not None:
     from PIL.PngImagePlugin import PngInfo
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import NDArray
 
     _B = NDArray[np.bool_]

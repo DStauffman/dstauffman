@@ -12,7 +12,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
 import doctest
 import logging
 from typing import Final, NotRequired, TYPE_CHECKING, TypedDict, Unpack
@@ -27,6 +26,8 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import ArrayLike, NDArray
 
     _D = NDArray[np.datetime64]

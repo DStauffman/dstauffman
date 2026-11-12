@@ -11,27 +11,30 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Sequence
-import datetime as dt
 import doctest
-from pathlib import Path
 from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY
-from dstauffman.estimation import BpeResults
 from dstauffman.plotting.plotting import ExtraPlotter, Opts, plot_correlation_matrix, plot_time_history, setup_plots
-from dstauffman.plotting.support import ColorMap
 
 if HAVE_MPL:
-    from matplotlib.axes import Axes
-    from matplotlib.colors import Colormap, ListedColormap
-    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+    import datetime as dt
+    from pathlib import Path
+
+    from matplotlib.axes import Axes
+    from matplotlib.colors import Colormap, ListedColormap
+    from matplotlib.figure import Figure
+
+    from dstauffman.estimation import BpeResults
+    from dstauffman.plotting.support import ColorMap
+
     _CM = str | Colormap | ListedColormap | ColorMap
     _Figs = list[Figure]
     _Time = int | float | np.floating | dt.datetime | dt.date | np.datetime64 | None

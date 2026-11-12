@@ -10,7 +10,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable, Iterable
 import doctest
 import importlib.util
 import logging
@@ -24,6 +23,7 @@ import warnings
 from slog import LogLevel
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
     from types import TracebackType  # make lazy in v3.15+
 
 # %% Activate exception support for parallel code

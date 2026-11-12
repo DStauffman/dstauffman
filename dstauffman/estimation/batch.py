@@ -16,7 +16,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from collections.abc import Callable
 from copy import deepcopy
 import doctest
 from itertools import repeat
@@ -51,6 +50,8 @@ else:
     from math import inf, isnan, nan  # type: ignore[assignment]
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from numpy.typing import ArrayLike, NDArray
 
     _I = NDArray[np.int_]
