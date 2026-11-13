@@ -1380,15 +1380,15 @@ def is_datetime(time: dt.datetime | ArrayLike | None) -> bool:
 
 # %% Functions - intersect
 @overload
-def intersect(  # ty: ignore[invalid-overload]
+def intersect(  # ty: ignore[inconsistent-overload-implementation]
     a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[False] = ...
 ) -> _I | _N | _D: ...
 @overload
-def intersect(  # ty: ignore[invalid-overload]
+def intersect(  # ty: ignore[inconsistent-overload-implementation]
     a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[True]
 ) -> tuple[_I | _N | _D, _I, _I]: ...
 @overload
-def intersect(  # ty: ignore[invalid-overload]
+def intersect(  # ty: ignore[inconsistent-overload-implementation]
     a: ArrayLike,
     b: ArrayLike,
     /,
@@ -1398,7 +1398,7 @@ def intersect(  # ty: ignore[invalid-overload]
     return_index: Literal[False] = ...,
 ) -> _I | _N | _D: ...
 @overload
-def intersect(  # ty: ignore[invalid-overload]
+def intersect(  # ty: ignore[inconsistent-overload-implementation]
     a: ArrayLike,
     b: ArrayLike,
     /,

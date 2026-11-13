@@ -252,7 +252,7 @@ def load_hdf5[T](  # type: ignore[misc]
 
     """
 
-    def _load_dataset(out: Any, group: h5py.Group, prefix: str, limit_fields: bool) -> h5py.Dataset:
+    def _load_dataset(out: Any, group: h5py.Group, prefix: str, limit_fields: bool) -> h5py.Dataset:  # ty: ignore[invalid-implicit-return]  # fmt: skip
         for field in group:
             if limit_fields and not hasattr(out, field):
                 continue
@@ -695,7 +695,9 @@ class Frozen:
     @overload
     def pprint(self: Any, return_text: Literal[False], **kwargs: Unpack[_PPrintKwArgs]) -> None: ...
     @overload
-    def pprint(self: Any, **kwargs: Unpack[_PPrintKwArgs]) -> str | None: ...  # ty: ignore[invalid-overload]
+    def pprint(  # ty: ignore[inconsistent-overload-implementation]
+        self: Any, **kwargs: Unpack[_PPrintKwArgs]
+    ) -> str | None: ...
     def pprint(self: Any, return_text: bool = False, **kwargs: Unpack[_PPrintKwArgs]) -> str | None:
         r"""Displays a pretty print version of the class."""
         name = kwargs.pop("name") if "name" in kwargs else self.__class__.__name__

@@ -1025,14 +1025,14 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
     def test_nominal(self) -> None:
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap, xmin=self.xmin, xmax=self.xmax)
         for key in ix:
-            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]  # ty: ignore[non-literal-typed-dict-key]
 
     def test_only_time_one(self) -> None:
         self.exp["two"] = np.array([], dtype=bool)
         self.exp["overlap"] = np.array([], dtype=bool)
         ix = plot.get_rms_indices(self.time_one, None, None, xmin=self.xmin, xmax=self.xmax)
         for key in ix:
-            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]  # ty: ignore[non-literal-typed-dict-key]
 
     def test_no_bounds(self) -> None:
         self.exp["one"].fill(True)
@@ -1041,7 +1041,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         self.exp["pts"] = [0, 12]
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap)
         for key in ix:
-            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]  # ty: ignore[non-literal-typed-dict-key]
 
     def test_datetime64(self) -> None:
         date_zero = np.datetime64("2026-01-15T08:00:00", NP_DATETIME_UNITS)
@@ -1053,7 +1053,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         ix = plot.get_rms_indices(time_one, time_two, time_overlap, xmin=xmin, xmax=xmax)
         self.exp["pts"] = [date_zero + x * NP_ONE_SECOND for x in self.exp["pts"]]  # type: ignore[misc]
         for key in ix:
-            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]  # ty: ignore[non-literal-typed-dict-key]
 
     def test_datetime(self) -> None:
         date_zero = dt.datetime(2026, 1, 15, 9, 0, 0)
@@ -1066,7 +1066,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         ix = plot.get_rms_indices(time_one, time_two, time_overlap, xmin=xmin, xmax=xmax)
         self.exp["pts"] = [date_zero + x * ONE_SECOND for x in self.exp["pts"]]  # type: ignore[misc]
         for key in ix:
-            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]  # ty: ignore[non-literal-typed-dict-key]
 
 
 # %% plotting.plot_vert_lines
